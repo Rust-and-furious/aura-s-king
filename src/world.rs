@@ -1,13 +1,12 @@
 use crate::entities::Interactable;
 
 pub struct WorldManager {
-    // Type utilisé dans les paramètres des méthodes executer, 
-    // non détaillé dans le diagramme
+    // Parser le json + update le json celon les interactions
 }
 
 pub struct Zone {
     pub description: String,
-    pub connected_zones: Vec<usize>,
+    pub connected_zones: Vec<usize>, // id des zones
     pub interest_points: Vec<InterestPoint>,
 }
 

@@ -1,42 +1,82 @@
-use crate::actions::{Dialogue, Fouiller, Ramasser};
+use crate::player::Player;
+use crate::world::WorldManager;
 
 pub trait Interactable {
     fn description(&self) -> String;
+    fn name(&self) -> String;
 }
 
 pub struct Npc {
-    pub name: String,
     pub is_hostile: bool,
-    pub dialogues: Vec<Dialogue>,
+}
+
+impl Npc {
+    pub fn dialoguer(&self) {
+        println!("Engages in dialogue.");
+    }
 }
 
 impl Interactable for Npc {
     fn description(&self) -> String {
-        self.name.clone()
+        if self.is_hostile {
+            "A hostile NPC".to_string()
+        } else {
+            "A friendly NPC".to_string()
+        }
+    }
+
+    fn name(&self) -> String {
+        "NPC".to_string()
+    }
+}
+
+impl Npc {
+    pub fn dialoguer(&self, player: &mut Player, world_manager: WorldManager) {
+        println!("{} engages in dialogue.", self.name());
     }
 }
 
 pub struct Furniture {
-    pub name: String,
     pub durability: i32,
-    pub fouiller_actions: Vec<Fouiller>,
 }
 
 impl Interactable for Furniture {
     fn description(&self) -> String {
-        self.name.clone()
+            "A piece of furniture".to_string()
+    }
+
+    fn name(&self) -> String {
+        "Furniture".to_string()
+    }
+}
+
+impl Furniture {
+    pub fn fouiller(&self, player: &mut Player, world_manager: WorldManager) {
+        println!("{} is being searched.", self.name());
+    }
+
+    pub fn observer(&self) {
+        println!("{} is being observed.", self.name());
     }
 }
 
 pub struct Objet {
-    pub name: String,
     pub weight: i32,
     pub durability: i32,
-    pub ramasser_actions: Vec<Ramasser>,
 }
 
 impl Interactable for Objet {
     fn description(&self) -> String {
-        self.name.clone()
+        "An object that can be picked up".to_string()
+    }
+
+    fn name(&self) -> String {
+        "An object".to_string()
+    }
+}
+
+impl Objet {
+    pub fn ramasser(&self, player: &mut Player, world_manager: WorldManager) {
+        println!("{} is being picked up.", self.name());
     }
 }
