@@ -29,7 +29,7 @@ impl Interactable for Npc {
 
 impl Npc {
     pub fn dialoguer(&self, player: &mut Player, world: &mut WorldManager) {
-        println!("{} engages in dialogue.", self.name());
+        println!("{} engage la conversation.", self.name());
     }
 }
 
@@ -55,7 +55,7 @@ impl Interactable for Furniture {
 
 impl Furniture {
     pub fn fouiller(&self, player: &mut Player, world: &mut WorldManager) {
-        println!("{} is being searched.", self.name());
+        println!("{} est en train d'être fouillé.", self.name());
     }
 
     pub fn observer(&self) -> String {
@@ -86,6 +86,6 @@ impl Interactable for Objet {
 
 impl Objet {
     pub fn ramasser(&self, player: &mut Player, world: &mut WorldManager) {
-        println!("{} is being picked up.", self.name());
+        println!("{} est ramassé.", self.name());
     }
 }
