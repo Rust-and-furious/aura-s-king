@@ -132,6 +132,17 @@ classDiagram
 - Interaction system: NPCs (`dialoguer`), Furniture (`fouiller`, `observer`), Objects (`ramasser`)
 - Simulation: the world must be able to evolve autonomously (physics/logic rules)
 
+## Implementation Notes
+
+Relations from the ER diagram are materialized in Rust via `usize` IDs indexing collections owned by `WorldManager`. This avoids cross-references / `Rc<RefCell<…>>` and will make later serialization from external data files straightforward.
+
+- `Player.zone: usize` → relation `Player --> Zone`
+- `Player.inventory: Vec<usize>` → relation `Player --> 0..* Objet`
+- `Zone.connected_zones: Vec<usize>` → relation `Zone --> 0..* Zone` (reliée par)
+- `Zone.interactables: Vec<usize>` → relation `Zone o--> 0..* Interactable`
+
+`InterestPoint` currently owns its interactables via `Vec<Box<dyn Interactable>>` — this may be revisited to align with the `Vec<usize>` pattern once `WorldManager` storage is defined.
+
 ## Toolchain
 
 - Language: Rust (Cargo)
