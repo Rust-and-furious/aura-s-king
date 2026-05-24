@@ -1,5 +1,3 @@
-use crate::entities::Interactable;
-
 pub struct WorldManager {
     // Parser le json + update le json celon les interactions
     pub zones: Vec<usize>,

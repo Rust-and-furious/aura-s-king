@@ -28,7 +28,7 @@ impl Interactable for Npc {
 }
 
 impl Npc {
-    pub fn dialoguer(&mut self, player: &mut Player, world: &mut WorldManager) {
+    pub fn dialoguer(&mut self, _player: &mut Player, _world: &mut WorldManager) {
         println!("{} engage la conversation.", self.name());
     }
 }
@@ -54,7 +54,7 @@ impl Interactable for Furniture {
 }
 
 impl Furniture {
-    pub fn fouiller(&mut self, player: &mut Player, world: &mut WorldManager) {
+    pub fn fouiller(&mut self, _player: &mut Player, _world: &mut WorldManager) {
         println!("{} est en train d'être fouillé.", self.name());
     }
 
@@ -85,7 +85,7 @@ impl Interactable for Objet {
 }
 
 impl Objet {
-    pub fn ramasser(&mut self, player: &mut Player, world: &mut WorldManager) {
+    pub fn ramasser(&mut self, _player: &mut Player, _world: &mut WorldManager) {
         println!("{} est ramassé.", self.name());
     }
 }
