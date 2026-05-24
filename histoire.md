@@ -1,4 +1,4 @@
-🏰 Jeu de Rôle Textuel — "Aura Farming Simulator"
+# 🏰 Jeu de Rôle Textuel — "Aura Farming Simulator"
 
 Vous êtes **[Nom du Joueur]**, un paysan dont la lignée est connue depuis sept générations pour une seule chose : la culture intensive de légumes oubliés. Votre famille a fourni au royaume assez de navets pour nourrir une armée, mais n'a jamais reçu en retour qu'une dette fiscale et des ampoules aux mains.
 
