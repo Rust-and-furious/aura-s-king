@@ -195,7 +195,7 @@ Ramasser => Ajoute Balai à l'inventaire.
 
 ---
 
-### 🪦 LE CIMETIÈRE DES CHEVALIERS RATÉS
+### LE CIMETIÈRE DES CHEVALIERS RATÉS
 
 "Vous arrivez dans un lieu brumeux et sinistre. Ici reposent ceux qui, comme vous, ont cru qu'un peu d'aura et une épée rouillée suffisaient pour impressionner le roi. L'herbe est morte, et votre moral s'apprête à faire de même."
 
