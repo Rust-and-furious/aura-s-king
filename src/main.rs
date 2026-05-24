@@ -9,26 +9,29 @@ use world::WorldManager;
 fn main() {
     println!("Essaie d'obtenir assez d'aura pour vaincre le roi Antony ! :D");
 
-    let mut world = WorldManager {};
+    let mut world = WorldManager {
+        zones: vec![],
+        entities: vec![],
+    };
     let mut player = Player {
         aura: 100.0,
         zone: 0,
         inventory: vec![],
     };
 
-    let king = Npc {
+    let mut king = Npc {
         name: "Antony".to_string(),
         description: "Le roi en personne.".to_string(),
         is_hostile: true,
     };
 
-    let chest = Furniture {
+    let mut chest = Furniture {
         name: "Coffre".to_string(),
         description: "Un vieux coffre en bois couvert de poussière.".to_string(),
         durability: 10,
     };
 
-    let sword = Objet {
+    let mut sword = Objet {
         name: "Épée en fer".to_string(),
         description: "Une simple épée en fer.".to_string(),
         weight: 5,
@@ -42,7 +45,7 @@ fn main() {
     sword.ramasser(&mut player, &mut world);
 
     println!("\n--- Appel polymorphe via Interactable ---");
-    let interactables: Vec<Box<dyn Interactable>> = vec![
+    let mut interactables: Vec<Box<dyn Interactable>> = vec![
         Box::new(Npc {
             name: "Garde".to_string(),
             description: "Un garde au regard sévère.".to_string(),
@@ -61,7 +64,7 @@ fn main() {
         }),
     ];
 
-    for it in &interactables {
+    for it in &mut interactables {
         println!("- {} : {}", it.name(), it.description());
         it.interagir(&mut player, &mut world);
     }

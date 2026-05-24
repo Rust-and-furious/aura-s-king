@@ -2,9 +2,9 @@ use crate::player::Player;
 use crate::world::WorldManager;
 
 pub trait Interactable {
-    fn description(&self) -> String;
-    fn name(&self) -> String;
-    fn interagir(&self, player: &mut Player, world: &mut WorldManager);
+    fn description(&self) -> &str;
+    fn name(&self) -> &str;
+    fn interagir(&mut self, player: &mut Player, world: &mut WorldManager);
 }
 
 pub struct Npc {
@@ -14,21 +14,21 @@ pub struct Npc {
 }
 
 impl Interactable for Npc {
-    fn description(&self) -> String {
-        self.description.clone()
+    fn description(&self) -> &str {
+        &self.description
     }
 
-    fn name(&self) -> String {
-        self.name.clone()
+    fn name(&self) -> &str {
+        &self.name
     }
 
-    fn interagir(&self, player: &mut Player, world: &mut WorldManager) {
+    fn interagir(&mut self, player: &mut Player, world: &mut WorldManager) {
         self.dialoguer(player, world);
     }
 }
 
 impl Npc {
-    pub fn dialoguer(&self, player: &mut Player, world: &mut WorldManager) {
+    pub fn dialoguer(&mut self, _player: &mut Player, _world: &mut WorldManager) {
         println!("{} engage la conversation.", self.name());
     }
 }
@@ -40,26 +40,26 @@ pub struct Furniture {
 }
 
 impl Interactable for Furniture {
-    fn description(&self) -> String {
-        self.description.clone()
+    fn description(&self) -> &str {
+        &self.description
     }
 
-    fn name(&self) -> String {
-        self.name.clone()
+    fn name(&self) -> &str {
+        &self.name
     }
 
-    fn interagir(&self, player: &mut Player, world: &mut WorldManager) {
+    fn interagir(&mut self, player: &mut Player, world: &mut WorldManager) {
         self.fouiller(player, world);
     }
 }
 
 impl Furniture {
-    pub fn fouiller(&self, player: &mut Player, world: &mut WorldManager) {
+    pub fn fouiller(&mut self, _player: &mut Player, _world: &mut WorldManager) {
         println!("{} est en train d'être fouillé.", self.name());
     }
 
-    pub fn observer(&self) -> String {
-        self.description.clone()
+    pub fn observer(&self) -> &str {
+        &self.description
     }
 }
 
@@ -71,21 +71,21 @@ pub struct Objet {
 }
 
 impl Interactable for Objet {
-    fn description(&self) -> String {
-        self.description.clone()
+    fn description(&self) -> &str {
+        &self.description
     }
 
-    fn name(&self) -> String {
-        self.name.clone()
+    fn name(&self) -> &str {
+        &self.name
     }
 
-    fn interagir(&self, player: &mut Player, world: &mut WorldManager) {
+    fn interagir(&mut self, player: &mut Player, world: &mut WorldManager) {
         self.ramasser(player, world);
     }
 }
 
 impl Objet {
-    pub fn ramasser(&self, player: &mut Player, world: &mut WorldManager) {
+    pub fn ramasser(&mut self, _player: &mut Player, _world: &mut WorldManager) {
         println!("{} est ramassé.", self.name());
     }
 }

@@ -24,4 +24,3 @@ Le projet est divisé en plusieurs modules logiques :
 - `src/world.rs` : Contient tout ce qui a trait au monde (`WorldManager`, `Zone`, `InterestPoint`).
 - `src/player.rs` : Représente le joueur et ses attributs.
 - `src/entities.rs` : Définit le trait `Interactable` ainsi que les entités physiques avec lesquelles on peut interagir (`Npc`, `Furniture`, `Objet`).
-- `src/actions.rs` : Regroupe les différentes actions possibles en interagissant avec l'environnement (`Dialogue`, `Fouiller`, `Ramasser`).

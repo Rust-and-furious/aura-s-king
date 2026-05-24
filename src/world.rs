@@ -1,7 +1,7 @@
-use crate::entities::Interactable;
-
 pub struct WorldManager {
     // Parser le json + update le json celon les interactions
+    pub zones: Vec<usize>,
+    pub entities: Vec<usize>,
 }
 
 pub struct Zone {
@@ -13,5 +13,5 @@ pub struct Zone {
 
 pub struct InterestPoint {
     pub description: String,
-    pub interactables: Vec<Box<dyn Interactable>>,
+    pub interactables: Vec<usize>,
 }
