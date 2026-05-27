@@ -1,17 +1,26 @@
+// world.rs — Le WorldManager : source unique de vérité du jeu.
+
+use crate::entities::Interactable;
+use crate::player::Player;
+
 pub struct WorldManager {
-    // Parser le json + update le json celon les interactions
-    pub zones: Vec<usize>,
-    pub entities: Vec<usize>,
+    pub current_tick: usize,
+    pub max_ticks: usize,
+    pub player: Player,
+    pub zones: Vec<Zone>,
+    pub entities: Vec<Box<dyn Interactable>>, // stockage central de toutes les entités
 }
 
 pub struct Zone {
+    pub id: usize,
     pub description: String,
-    pub connected_zones: Vec<usize>, // id des zones
     pub interest_points: Vec<InterestPoint>,
-    pub interactables: Vec<usize>, // ids dans la collection du WorldManager
+    pub interactables: Vec<usize>,   // IDs dans WorldManager.entities
+    pub connected_zones: Vec<usize>, // IDs d'autres zones
 }
 
 pub struct InterestPoint {
+    pub id: usize,
     pub description: String,
-    pub interactables: Vec<usize>,
+    pub interactables: Vec<usize>, // IDs dans WorldManager.entities
 }
