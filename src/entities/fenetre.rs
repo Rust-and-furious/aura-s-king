@@ -14,27 +14,39 @@ pub struct Fenetre {
 
 impl Openable for Fenetre {
     fn ouvrir(&mut self) -> Result<(), &'static str> {
-        if self.est_cassee { return Err("Impossible, la fenêtre est cassée !"); }
-        if self.est_ouverte { return Err("C'est déjà ouvert."); }
+        if self.est_cassee {
+            return Err("Impossible, la fenêtre est cassée !");
+        }
+        if self.est_ouverte {
+            return Err("C'est déjà ouvert.");
+        }
         self.est_ouverte = true;
         Ok(())
     }
 
     fn fermer(&mut self) -> Result<(), &'static str> {
-        if !self.est_ouverte { return Err("C'est déjà fermé."); }
+        if !self.est_ouverte {
+            return Err("C'est déjà fermé.");
+        }
         self.est_ouverte = false;
         Ok(())
     }
 }
 
 impl Interactable for Fenetre {
-    fn name(&self) -> &str { &self.name }
-    fn description(&self) -> &str { &self.description }
+    fn name(&self) -> &str {
+        &self.name
+    }
+    fn description(&self) -> &str {
+        &self.description
+    }
 
     fn get_actions(&self, _player: &Player, _world: &WorldManager) -> Vec<Action> {
         let mut actions = vec![
             Action::Observer,
-            Action::Deplacer { target_zone: self.target_zone },
+            Action::Deplacer {
+                target_zone: self.target_zone,
+            },
         ];
         if !self.est_cassee {
             if self.est_ouverte {
@@ -76,13 +88,19 @@ impl Interactable for Fenetre {
 
                 if self.est_ouverte {
                     player.aura += 15000.0;
-                    println!("\n[+15 000 Aura] Sortie audacieuse ! Vous enjambez le rebord et atterrissez gracieusement dans l'herbe.");
+                    println!(
+                        "\n[+15 000 Aura] Sortie audacieuse ! Vous enjambez le rebord et atterrissez gracieusement dans l'herbe."
+                    );
                 } else {
                     self.est_cassee = true;
                     self.est_ouverte = true;
                     player.aura -= 100000.0;
-                    println!("\n[-100 000 Aura] BAM ! Vous traversez la vitre fermée tête la première.");
-                    println!("Votre dignité ne s'en remet pas, votre peau non plus. Des éclats de verre s'enfoncent à chacun de vos pas.");
+                    println!(
+                        "\n[-100 000 Aura] BAM ! Vous traversez la vitre fermée tête la première."
+                    );
+                    println!(
+                        "Votre dignité ne s'en remet pas, votre peau non plus. Des éclats de verre s'enfoncent à chacun de vos pas."
+                    );
                 }
             }
             _ => println!("Action impossible sur la fenêtre."),

@@ -9,8 +9,12 @@ pub struct CleMaison {
 }
 
 impl Interactable for CleMaison {
-    fn name(&self) -> &str { &self.name }
-    fn description(&self) -> &str { &self.description }
+    fn name(&self) -> &str {
+        &self.name
+    }
+    fn description(&self) -> &str {
+        &self.description
+    }
 
     fn get_actions(&self, _player: &Player, _world: &WorldManager) -> Vec<Action> {
         vec![Action::Observer, Action::Ramasser]
@@ -26,7 +30,9 @@ impl Interactable for CleMaison {
                     let current_zone = player.zone;
                     world.zones[current_zone].interactables.retain(|&x| x != id);
                     player.inventory.push(id);
-                    println!("Vous mettez la clé dans votre poche. Elle est ajoutée à votre inventaire.");
+                    println!(
+                        "Vous mettez la clé dans votre poche. Elle est ajoutée à votre inventaire."
+                    );
                 }
             }
             _ => println!("Action impossible sur la clé."),

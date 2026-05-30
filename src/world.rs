@@ -42,49 +42,42 @@ pub fn load_first_zone() -> WorldManager {
         inventory: Vec::new(),
     };
 
-    let mut entities: Vec<Box<dyn Interactable>> = Vec::new();
-
-    entities.push(Box::new(Lit {
-        name: "Lit".to_string(),
-        description: "Une paillasse qui gratte sur laquelle vous passez vos nuits à regretter vos choix de vie.".to_string(),
-    }));
-
-    entities.push(Box::new(Marmite {
-        name: "Marmite".to_string(),
-        description:
-            "Une marmite en fonte contenant un reste de soupe tiède à l'odeur suspecte de chou."
-                .to_string(),
-        has_key: true,
-        key_revealed: false,
-        key_entity_id: 2,
-    }));
-
-    entities.push(Box::new(CleMaison {
-        name: "Clé de la maison".to_string(),
-        description: "Une clé en fer un peu rouillée, trouvée au fond de la marmite.".to_string(),
-    }));
-
-    entities.push(Box::new(Balai {
-        name: "Balai".to_string(),
-        description: "Un vieux balai usé. Très bon pour faire semblant de travailler.".to_string(),
-    }));
-
-    entities.push(Box::new(Fenetre {
-        name: "Fenêtre".to_string(),
-        description: "Une fenêtre donnant sur la plaine verdoyante (et miteuse).".to_string(),
-        est_ouverte: false,
-        est_cassee: false,
-        target_zone: 1,
-    }));
-
-    entities.push(Box::new(Porte {
-        name: "Porte".to_string(),
-        description: "La lourde porte en chêne fermant votre modeste demeure.".to_string(),
-        est_ouverte: false,
-        is_locked: true,
-        key_entity_id: 2,
-        target_zone: 1,
-    }));
+    let entities: Vec<Box<dyn Interactable>> = vec![
+        Box::new(Lit {
+            name: "Lit".to_string(),
+            description: "Une paillasse qui gratte sur laquelle vous passez vos nuits à regretter vos choix de vie.".to_string(),
+        }),
+        Box::new(Marmite {
+            name: "Marmite".to_string(),
+            description: "Une marmite en fonte contenant un reste de soupe tiède à l'odeur suspecte de chou.".to_string(),
+            has_key: true,
+            key_revealed: false,
+            key_entity_id: 2,
+        }),
+        Box::new(CleMaison {
+            name: "Clé de la maison".to_string(),
+            description: "Une clé en fer un peu rouillée, trouvée au fond de la marmite.".to_string(),
+        }),
+        Box::new(Balai {
+            name: "Balai".to_string(),
+            description: "Un vieux balai usé. Très bon pour faire semblant de travailler.".to_string(),
+        }),
+        Box::new(Fenetre {
+            name: "Fenêtre".to_string(),
+            description: "Une fenêtre donnant sur la plaine verdoyante (et miteuse).".to_string(),
+            est_ouverte: false,
+            est_cassee: false,
+            target_zone: 1,
+        }),
+        Box::new(Porte {
+            name: "Porte".to_string(),
+            description: "La lourde porte en chêne fermant votre modeste demeure.".to_string(),
+            est_ouverte: false,
+            is_locked: true,
+            key_entity_id: 2,
+            target_zone: 1,
+        }),
+    ];
 
     let zone_maison = Zone {
         id: 0,

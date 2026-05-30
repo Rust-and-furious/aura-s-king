@@ -18,5 +18,9 @@ pub trait Fightable {
 
 /// Une entité consommable / utilisable (pomme, potion...).
 pub trait Useable {
-    fn utiliser(&mut self, player: &mut Player, world: &mut WorldManager) -> Result<(), &'static str>;
+    fn utiliser(
+        &mut self,
+        player: &mut Player,
+        world: &mut WorldManager,
+    ) -> Result<(), &'static str>;
 }
