@@ -5,22 +5,38 @@ pub mod player;
 pub mod traits;
 pub mod world;
 
-use std::io::{self, Write};
 use actions::Action;
 use player::Player;
-use world::{load_first_zone, WorldManager};
+use std::io::{self, Write};
+use world::{WorldManager, load_first_zone};
 
 struct DummyEntity;
 impl entities::Interactable for DummyEntity {
-    fn name(&self) -> &str { "" }
-    fn description(&self) -> &str { "" }
-    fn get_actions(&self, _player: &Player, _world: &WorldManager) -> Vec<Action> { vec![] }
-    fn execute_action(&mut self, _action: &Action, _player: &mut Player, _world: &mut WorldManager) {}
+    fn name(&self) -> &str {
+        ""
+    }
+    fn description(&self) -> &str {
+        ""
+    }
+    fn get_actions(&self, _player: &Player, _world: &WorldManager) -> Vec<Action> {
+        vec![]
+    }
+    fn execute_action(
+        &mut self,
+        _action: &Action,
+        _player: &mut Player,
+        _world: &mut WorldManager,
+    ) {
+    }
 }
 
 fn clear_screen() {
     if cfg!(target_os = "windows") {
-        if std::process::Command::new("cmd").args(["/C", "cls"]).status().is_err() {
+        if std::process::Command::new("cmd")
+            .args(["/C", "cls"])
+            .status()
+            .is_err()
+        {
             print!("\x1B[2J\x1B[1;1H");
         }
     } else if std::process::Command::new("clear").status().is_err() {
@@ -41,26 +57,39 @@ fn main() {
     println!("\x1B[1;33m=== Aura Farming Simulator ===\x1B[0m");
     print!("\x1B[36mEntrez votre nom (par défaut: Jean-Michel) : \x1B[0m");
     io::stdout().flush().unwrap();
-    
+
     let mut player_name = String::new();
     io::stdin().read_line(&mut player_name).unwrap();
     let player_name = player_name.trim();
-    let player_name = if player_name.is_empty() { "Jean-Michel" } else { player_name };
+    let player_name = if player_name.is_empty() {
+        "Jean-Michel"
+    } else {
+        player_name
+    };
 
     clear_screen();
-    // TODO: Ce texte d'introduction et de contexte narratif devrait être extrait et chargé 
+    // TODO: Ce texte d'introduction et de contexte narratif devrait être extrait et chargé
     // depuis un fichier de données JSON lors de l'implémentation de la séralisation par l'équipe.
-    println!("\x1B[1;35m================================================================================\x1B[0m");
-    println!("Vous êtes {}, un paysan dont la lignée est connue depuis sept générations pour", player_name);
+    println!(
+        "\x1B[1;35m================================================================================\x1B[0m"
+    );
+    println!(
+        "Vous êtes {}, un paysan dont la lignée est connue depuis sept générations pour",
+        player_name
+    );
     println!("une seule chose : la culture intensive de légumes oubliés. Votre famille a fourni");
     println!("au royaume assez de navets pour nourrir une armée, mais n'a jamais reçu en retour");
     println!("qu'une dette fiscale et des ampoules aux mains.");
     println!("\nLe Royaume est dirigé par le Roi Anthony, un souverain dont la bonté n'a d'égale");
     println!("que son besoin viscéral d'être impressionné. Pour sortir de votre condition et");
-    println!("devenir enfin 'Chevalier', il ne suffit pas d'être courageux. Il faut être légendaire.");
+    println!(
+        "devenir enfin 'Chevalier', il ne suffit pas d'être courageux. Il faut être légendaire."
+    );
     println!("\nVotre unique monnaie d'échange est l'Aura. Attention, le Grand Bal d'adoubement");
     println!("aura lieu ce soir à 20h00 précises. Ne soyez pas en retard !");
-    println!("\x1B[1;35m================================================================================\x1B[0m\n");
+    println!(
+        "\x1B[1;35m================================================================================\x1B[0m\n"
+    );
     wait_for_enter();
 
     let mut world = load_first_zone();
@@ -70,17 +99,23 @@ fn main() {
             clear_screen();
             println!("\n\x1B[1;31m20h00 - L'HEURE DE LA DÉFAITE !\x1B[0m");
             println!("Les portes du château se ferment. Le bal commence sans vous.");
-            println!("Vous entendez les trompettes au loin alors que vous êtes encore dans la boue.");
+            println!(
+                "Vous entendez les trompettes au loin alors que vous êtes encore dans la boue."
+            );
             println!("Vous passerez le reste de votre vie à sarcler des navets sous la pluie.");
             println!("\n\x1B[1;31m=== GAME OVER ===\x1B[0m");
             break;
         }
 
+        // pour le moment, fin du jeu = sortie zone 1, mais aprés, la fin sera la présence dans la salle du roi pour l'adoubemment
         if world.player.zone != 0 {
             clear_screen();
             println!("\n\x1B[1;32m==================================================\x1B[0m");
             println!("{}", world.zones[world.player.zone].description);
-            println!("Votre Aura finale : \x1B[33m{:.1}\x1B[0m", world.player.aura);
+            println!(
+                "Votre Aura finale : \x1B[33m{:.1}\x1B[0m",
+                world.player.aura
+            );
             println!("Heure de fin : \x1B[36m{}\x1B[0m", world.format_time());
             println!("Félicitations, vous avez réussi à sortir de chez vous !");
             println!("(Fin du prototype de la première zone en mémoire)");
@@ -90,11 +125,21 @@ fn main() {
 
         clear_screen();
         println!("\x1B[35m--------------------------------------------------\x1B[0m");
-        println!("\x1B[36m[Heure : {}]\x1B[0m | \x1B[33m[Aura : {:.1}]\x1B[0m", world.format_time(), world.player.aura);
-        println!("Lieu : \x1B[1;36m{}\x1B[0m", world.zones[world.player.zone].description);
-        
+        println!(
+            "\x1B[36m[Heure : {}]\x1B[0m | \x1B[33m[Aura : {:.1}]\x1B[0m",
+            world.format_time(),
+            world.player.aura
+        );
+        println!(
+            "Lieu : \x1B[1;36m{}\x1B[0m",
+            world.zones[world.player.zone].description
+        );
+
         if !world.player.inventory.is_empty() {
-            let inv_names: Vec<String> = world.player.inventory.iter()
+            let inv_names: Vec<String> = world
+                .player
+                .inventory
+                .iter()
                 .map(|&id| world.entities[id].name().to_string())
                 .collect();
             println!("Inventaire : \x1B[35m{}\x1B[0m", inv_names.join(", "));
@@ -111,13 +156,17 @@ fn main() {
 
         println!("Que voulez-vous observer ou manipuler ?");
         for (i, &entity_idx) in zone_interactables.iter().enumerate() {
-            println!("  \x1B[32m[{}]\x1B[0m {}", i + 1, world.entities[entity_idx].name());
+            println!(
+                "  \x1B[32m[{}]\x1B[0m {}",
+                i + 1,
+                world.entities[entity_idx].name()
+            );
         }
         println!("  \x1B[33m[0]\x1B[0m Attendre (consomme 15 minutes)");
 
         print!("\x1B[36mVotre choix : \x1B[0m");
         io::stdout().flush().unwrap();
-        
+
         let mut choix_input = String::new();
         io::stdin().read_line(&mut choix_input).unwrap();
         let choix_idx = match choix_input.trim().parse::<usize>() {
@@ -147,10 +196,17 @@ fn main() {
 
         clear_screen();
         println!("\x1B[35m--------------------------------------------------\x1B[0m");
-        println!("\x1B[36m[Heure : {}]\x1B[0m | \x1B[33m[Aura : {:.1}]\x1B[0m", world.format_time(), world.player.aura);
-        println!("Interaction avec : \x1B[1;36m{}\x1B[0m", world.entities[chosen_entity_idx].name());
+        println!(
+            "\x1B[36m[Heure : {}]\x1B[0m | \x1B[33m[Aura : {:.1}]\x1B[0m",
+            world.format_time(),
+            world.player.aura
+        );
+        println!(
+            "Interaction avec : \x1B[1;36m{}\x1B[0m",
+            world.entities[chosen_entity_idx].name()
+        );
         println!("\x1B[35m--------------------------------------------------\x1B[0m");
-        
+
         println!("\nActions disponibles :");
         for (i, action) in actions.iter().enumerate() {
             let label = match action {
@@ -159,7 +215,9 @@ fn main() {
                 Action::Ramasser => "Ramasser (Prendre)".to_string(),
                 Action::Ouvrir => "Ouvrir".to_string(),
                 Action::Fermer => "Fermer".to_string(),
-                Action::Attaquer { degats } => format!("Attaquer (Enfoncer / Casser, dégâts: {})", degats),
+                Action::Attaquer { degats } => {
+                    format!("Attaquer (Enfoncer / Casser, dégâts: {})", degats)
+                }
                 Action::Deplacer { target_zone: _ } => "Passer / Traverser / Sauter".to_string(),
                 _ => format!("{:?}", action),
             };
@@ -169,7 +227,7 @@ fn main() {
 
         print!("\x1B[36mVotre action : \x1B[0m");
         io::stdout().flush().unwrap();
-        
+
         let mut action_input = String::new();
         io::stdin().read_line(&mut action_input).unwrap();
         let action_idx = match action_input.trim().parse::<usize>() {
@@ -193,12 +251,22 @@ fn main() {
 
         let chosen_action = &actions[action_idx - 1];
 
-        let mut entity = std::mem::replace(&mut world.entities[chosen_entity_idx], Box::new(DummyEntity));
-        let mut temp_player = std::mem::replace(&mut world.player, Player { aura: 0.0, zone: 0, inventory: vec![] });
+        let mut entity = std::mem::replace(
+            &mut world.entities[chosen_entity_idx],
+            Box::new(DummyEntity),
+        );
+        let mut temp_player = std::mem::replace(
+            &mut world.player,
+            Player {
+                aura: 0.0,
+                zone: 0,
+                inventory: vec![],
+            },
+        );
         entity.execute_action(chosen_action, &mut temp_player, &mut world);
         let _ = std::mem::replace(&mut world.player, temp_player);
         let _ = std::mem::replace(&mut world.entities[chosen_entity_idx], entity);
-        
+
         wait_for_enter();
     }
 }
@@ -220,11 +288,18 @@ mod tests {
     #[test]
     fn test_lit_sleep_advances_time_and_changes_aura() {
         let mut world = load_first_zone();
-        let mut temp_player = std::mem::replace(&mut world.player, Player { aura: 0.0, zone: 0, inventory: vec![] });
+        let mut temp_player = std::mem::replace(
+            &mut world.player,
+            Player {
+                aura: 0.0,
+                zone: 0,
+                inventory: vec![],
+            },
+        );
         let mut lit = std::mem::replace(&mut world.entities[0], Box::new(DummyEntity));
-        
+
         lit.execute_action(&Action::Utiliser, &mut temp_player, &mut world);
-        
+
         assert!(world.current_tick >= 60 && world.current_tick <= 120);
         assert!(temp_player.aura == 10000.0 || temp_player.aura == -30000.0);
     }
