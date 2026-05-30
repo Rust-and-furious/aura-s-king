@@ -1,0 +1,55 @@
+{
+  "start_zone": "zone_maison",
+  "max_ticks": 720,
+  "start_aura": 0.0,
+  
+  "zones": [
+    {
+      "id": "zone_maison",
+      "description": "Votre modeste demeure. Il y fait sombre et l'air est lourd de regrets et d'odeur de chou.",
+      "connected_zones": ["zone_plaine"],
+      "interactables": ["lit_joueur", "marmite_cuisine", "porte_maison"]
+    },
+    {
+      "id": "zone_plaine",
+      "description": "La Plaine. L'air frais vous frappe le visage. Vous y êtes enfin !",
+      "connected_zones": ["zone_maison"],
+      "interactables": []
+    }
+  ],
+  
+  "entities": [
+    {
+      "id": "lit_joueur",
+      "type": "Lit",
+      "name": "Lit",
+      "description": "Une paillasse qui gratte sur laquelle vous passez vos nuits à regretter vos choix de vie."
+    },
+    {
+      "id": "marmite_cuisine",
+      "type": "Marmite",
+      "name": "Marmite",
+      "description": "Une marmite en fonte contenant un reste de soupe tiède à l'odeur suspecte de chou.",
+      "has_key": true,
+      "key_revealed": false,
+      "key_entity_id": "cle_maison"
+    },
+    {
+      "id": "cle_maison",
+      "type": "CleMaison",
+      "name": "Clé de la maison",
+      "description": "Une clé en fer un peu rouillée, trouvée au fond de la marmite."
+    },
+    {
+      "id": "porte_maison",
+      "type": "Porte",
+      "name": "Porte",
+      "description": "La lourde porte en chêne fermant votre modeste demeure.",
+      "est_ouverte": false,
+      "is_locked": true,
+      "key_entity_id": "cle_maison",
+      "target_zone": "zone_plaine",
+      "success_rate_locked": 50
+    }
+  ]
+}
