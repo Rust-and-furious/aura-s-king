@@ -1,482 +1,434 @@
 # 🏰 Jeu de Rôle Textuel — "Aura Farming Simulator"
 
-Vous êtes **[Nom du Joueur]**, un paysan dont la lignée est connue depuis sept générations pour une seule chose : la culture intensive de légumes oubliés. Votre famille a fourni au royaume assez de navets pour nourrir une armée, mais n'a jamais reçu en retour qu'une dette fiscale et des ampoules aux mains.
+Vous êtes le protagoniste de cette histoire, un paysan dont la lignée est connue depuis sept générations pour une seule chose : la culture intensive de légumes oubliés. Saisi au début du jeu (ou appelé **Jean-Michel** par défaut si vous manquez d'inspiration), votre famille a fourni au royaume assez de navets pour nourrir une armée, mais n'a jamais reçu en retour qu'une dette fiscale et des ampoules aux mains.
 
 Le Royaume est dirigé par le Roi Anthony, un souverain dont la bonté n'a d'égale que son besoin viscéral d'être impressionné. Le pays est saturé de héros en armure étincelante, de bardes célèbres et de magiciens excentriques. Pour sortir de votre condition et devenir enfin "Chevalier", il ne suffit pas d'être courageux. Il faut être légendaire.
 
-Votre unique monnaie d'échange est l'Aura : une mesure abstraite de votre prestance, de votre renommée et de votre capacité à ne pas avoir l'air d'un paysan quand vous entrez dans une pièce.
+Votre unique monnaie d'échange est l'Aura : une mesure abstraite de votre prestance, de votre renommée et de votre capacité à ne pas avoir l'air d'un paysan quand vous entrez dans une pièce. Vos points d'Aura peuvent grimper ou s'effondrer de manière totalement démesurée à la moindre action.
 
-⏱️ Les Contraintes du Destin
-La Chronologie : Le Grand Bal du Roi Anthony aura lieu dans précisément X ticks (tours de jeu). Si vous n'êtes pas devant le trône avant la fin du décompte, vous finirez vos jours à sarcler des mauvaises herbes sous la pluie.
-L'Aura est volatile : Un exploit héroïque peut vous apporter une aura immense, mais une humiliation publique (tomber dans la boue devant des poules, parler à un épouvantail) peut effacer des jours d'efforts.
-
-## 🏠 MAISON DU PAYSAN (Zone de départ)
-
-"Vous vous réveillez sur une paillasse qui gratte, dans une pièce où ça sent le chou et les regrets. Les regrets d'une vie passée le dos cambré a planter des navets"
---ajoute des details sur sa vie miserable
-Aujourd'hui, c'est décidé : vous allez devenir chevalier. Pour retrouver votre honneur et enfin pouvoir redresser le dos. (trouver meilleurs tournure de phrase)
-Reste à trouver comment sortir de chez vous."\*
-
-**Interactables :**
-
-**Lit**
-
-- S'endormir => Skip des ticks de jeu, +/- aura _(parfois on rêve qu'on est chevalier, parfois on rêve qu'on est un chou cultivé par soi meme )_
-
-**Marmite**
-
-- Regarder dedans => _"Au fond de la soupe tiède, quelque chose brille... C'est la clé de votre propre porte. Oui vous êtes ce genre de personne a cacher ces biens precieux dans des lieux insolites que vous meme oublié au bout de 2 heures."_ => Donne la clé de la porte
-- Prendre avec nous => Ajoute marmite à l'inventaire, la supprime de la zone
-
-**Le Balai**
-
-Ramasser => Ajoute Balai à l'inventaire.
-**Fenêtre**
-
-- Ouvrir => Décrit l'environnement extérieur miteux*(la plaine, le village au loin)*
-- Sauter par la fenêtre =>
-  - Si ouverte : +aura _(sortie audacieuse)_ => zone Plaine
-  - Si fermée : -aura _(vous traversez la vitre, votre dignité ne s'en remet pas, votre peau non plus a chaque pas les bout de verre s'enfoncent de plus en plus )_ => zone Plaine
-
-**Porte**
-
-- Ouvrir =>
-  - Si verrouillée et pas la clé : -aura _(vous poussez. Rien. Vous repoussez. Toujours rien. Humiliant.Meme un ane mourant aurai fait mieux)_
-  - Si ouvrable : ouvre la porte, change état interne
-    - Sortir _(si porte ouverte)_ => zone Plaine
-- Enfoncer la porte =>
-  - Succès + porte verrouillée : +aura _(héroïque !)_
-  - Succès + porte pas verrouillée : -aura _(vous enfoncez une porte ouverte. Littéralement.)_
-  - Échec + porte verrouillée : -aura _(l'épaule dit non)_
-  - Échec + porte pas verrouillée : --aura _(vous ratez une porte ouverte. Impressionnant.)_
-    - Sortir _(si porte ouverte)_ => zone Plaine
+⏱️ **La Chronologie et la Gestion du Temps**
+*   **La Journée de l'Aventurier** : Votre quête commence à **08h00** le matin et le Grand Bal d'adoubement du Roi Anthony se termine à précisément **20h00** le soir. 
+*   **Les Ticks (Minutes)** : Pour modéliser cela dans le moteur Rust, les ticks représentent des **minutes écoulées** depuis 08h00 :
+    *   **Heure de départ (08h00)** : `current_tick = 0`
+    *   **Heure limite (20h00)** : `max_ticks = 720` (12 heures $\times$ 60 minutes).
+    *   **Calcul de l'heure en jeu** : `Heure = 08:00 + (current_tick / 60)h : (current_tick % 60)m`.
+*   **Échec Temporel** : Si `current_tick >= 720` avant d'être devant le trône, vous subissez un **GAME OVER CHRONOLOGIQUE** : *"Les portes du château se ferment. Le bal commence sans vous. Vous entendez les trompettes au loin alors que vous êtes encore dans la boue. Vous passerez le reste de votre vie à sarcler des navets sous la pluie."*
 
 ---
 
-## 🌾 PLAINE
+## 🛠️ Note Technique : Alignement Architecture (Moteur Rust)
 
-> _"L'air frais vous frappe le visage. Devant vous, une plaine s'étend, parsemée de trucs plus ou moins intéressants. Au loin, un moulin tourne. Ou pas. Difficile à dire d'ici."_
-
-**Directions :** Nord => Forêt | Est => Le Lac | Sud => Village | Ouest => Maison du Paysan
-
-### Interactables directs de la plaine :
-
-**Puits**
-
-- Regarder dedans => _"C'est profond et sombre. Comme votre avenir si vous ne bougez pas."_
-- Crier dedans => +aura _(l'écho vous répond "CHEVALIEEEEER", vous êtes galvanisé)_
-- Descendre => Jet de réussite
-  - Succès : Trouve une corde au fond => ajout inventaire, +aura
-  - Échec : -aura, _"Vous glissez, remontez trempé. Un crapaud vous juge."_
-- Jeter un objet dedans _(si inventaire non vide)_ => Supprime l'objet, -aura _(pourquoi avez-vous fait ça ? serieusement ? le peuple taupe n'a pas besoin de ça!)_
-
-**Épouvantail**
-
-- Examiner => _"Un épouvantail. Il a l'air plus chevaleresque que vous. C'est vexant."_
-- Voler son chapeau => Ajoute chapeau à l'inventaire, +aura _(premier butin, premier pas)_
-- Le défier en duel => +aura _(les corbeaux sont impressionnés, vous avez gagné contre un bâton habillé)_
-- Lui parler => -aura _(il ne répond pas. Évidemment. Vous avez parlé à un épouvantail.)_
+Pour correspondre à l'architecture définie dans `AGENTS.md` :
+1.  **Identifiants uniques (IDs JSON)** : Tous les interactables et les zones possèdent un identifiant symbolique sous forme de chaîne de caractères (ex: `"marmite_cuisine"`). Le moteur résout ces chaînes en indices physiques (`usize`) lors du chargement.
+2.  **Mapping des Actions** : Toutes les interactions textuelles sont converties par le moteur en variantes de l'énumération technique `Action` (`Observer`, `Fouiller`, `Ramasser`, `Ouvrir`, `Fermer`, `Utiliser`, `Attaquer`, `Dialoguer`, `Deplacer`).
+3.  **Gestion de l'Inventaire** : "Prendre" ou "Ramasser" un objet se traduit techniquement par le transfert de l'ID de l'entité de la liste `Zone.interactables` vers la liste `Player.inventory`.
 
 ---
 
-### Points d'intérêt de la plaine :
-
-### 🌾 Moulin
-
-> _"Le moulin tourne paresseusement. Le meunier est un homme large, couvert de farine, qui vous regarde approcher avec la méfiance de quelqu'un qui a déjà été volé par un paysan.Peut etre meme vous"_
-
-**Interactables :**
-
-**Le Meunier (PNJ)**
-
-- Parler => _"Encore un va-nu-pieds qui veut devenir chevalier ? Reviens quand t'auras de quoi payer."_
-- Demander du travail => _"Porte ces sacs de farine au village. Je te donnerai quelque chose."_ => +aura (aider les autres, bravo tres chevalier de votre part)
-- Offrir un objet =>
-  - Marmite : +aura, _"Ah, une marmite ! Parfait pour ma soupe. Tiens, prends cette farine enchantée."_ => Ajoute farine enchantée à l'inventaire, supprime marmite
-  - Autre objet : _"Qu'est-ce que tu veux que je fasse de ça ?"_
-
-**Meule de pierre**
-
-- Examiner => _"Une grande meule. Elle tourne. C'est son truc, c'est une meule"_
-- Mettre la main dedans => -aura _(mauvaise idée, très mauvaise idée)_
-- Essayer de la soulever => Jet de réussite
-  - Succès : ++aura _(le meunier est bouche bée, exploit légendaire)_
-  - Échec : -aura _(votre dos s'en souviendra)_
-- Essayer de croquer dedans => --aura _"C'est une meule de pierre pas de fromage, idiot. Vous avez encore plus l'air d'un paysans maintenant sans dents"_
-
-**Sacs de farine**
-
-- Examiner => _"Des dizaines de sacs empilés. Ça sent le pain et le labeur."_
-- Fouiller => _"Vous trouvez une pièce cachée entre deux sacs !"_ => Ajoute pièce à l'inventaire -chance de se faire prendre par le meunier (-aura)
-- Éventrer un sac => -aura _(le meunier hurle, vous êtes couvert de farine, pas très chevaleresque)_
+## 📊 Configuration Initiale du Joueur
+*   **Nom par défaut** : `"Jean-Michel"` (si non spécifié)
+*   **Zone de départ** : `zone_maison`
+*   **Aura de départ** : `0.0`
+*   **Inventaire initial** : Vide `[]`
+*   **Objectif d'Aura pour adoubement garanti** : `1 000 000.0 Aura` !
 
 ---
 
-### 🏡 Maison de Michu
+## 🏠 MAISON DU PAYSAN (Zone ID : `zone_maison`)
+> *"Vous vous réveillez sur une paillasse qui gratte, dans une pièce où ça sent le chou et les regrets. Les regrets d'une vie passée le dos cambré à planter des navets. Aujourd'hui, c'est décidé : vous allez devenir chevalier. Pour retrouver votre honneur et enfin pouvoir redresser le dos. Reste à trouver comment sortir de chez vous."*
 
-> _"La maison de votre voisine Michu. Elle a 847 ans, est la plus grande comere et connaît tous les ragots du royaume, et fait les meilleurs biscuits de la région."_
+### Interactables :
 
-**Interactables :**
+#### **Lit** (ID JSON : `lit_joueur`)
+*   **Action `Utiliser` (S'endormir)** : Consomme **60 à 120 minutes** (1h à 2h aléatoire).
+    *   *50% de chance* : Rêve héroïque (**+10 000.0 Aura**).
+    *   *50% de chance* : Cauchemar de paysan : vous rêvez que vous êtes un chou cultivé par vous-même (**-30 000.0 Aura**).
 
-**Porte de Michu**
+#### **Marmite** (ID JSON : `marmite_cuisine`)
+*   **Action `Observer` (Regarder dedans)** : *"Au fond de la soupe tiède, quelque chose brille... C'est la clé de votre propre porte. Oui, vous êtes ce genre de personne à cacher ses biens précieux dans des lieux insolites que vous-même oubliez au bout de 2 heures."* -> Débloque et fait apparaître l'entité `cle_maison` dans la zone (consomme **2 minutes**).
+*   **Action `Ramasser` (Prendre avec soi)** : Transfère l'ID `marmite_cuisine` dans l'inventaire du joueur (consomme **2 minutes**).
 
-- Frapper => Michu ouvre, _"Oh, c'est toi gamin ! Entre donc !"_ => ouvre l'accès intérieur
-- Enfoncer => -aura _(Michu vous assomme avec une poêle. Elle a de bons réflexes pour 847 ans.)_
+#### **Clé de la maison** (ID JSON : `cle_maison` - *Infiltrée ou masquée initialement*)
+*   **Action `Ramasser`** : Transfère l'ID `cle_maison` dans l'inventaire du joueur (consomme **1 minute**).
 
-**Michu (PNJ)** _(accessible si porte ouverte)_
+#### **Le Balai** (ID JSON : `balai_depart`)
+*   **Action `Ramasser`** : Transfère l'ID `balai_depart` dans l'inventaire du joueur (consomme **1 minute**).
 
-- Parler => _"Le roi ? Ah oui, il adoube les mardis et jeudis. Faut prendre rendez-vous. Et surtout, faut pas sentir le chou."_
-- Demander conseil => _"Tu veux de l'aura ? Va voir la forêt, y'a un vieux chêne qui impressionne les gens. Et fais gaffe au lac, y'a un truc louche dedans."_ => Révèle des indices sur les zones
-- Demander un biscuit => +aura _(les biscuits de Michu donnent du courage)_
-  - Deuxième fois : _"C'est pas un buffet ici !"_ => pas d'effet
-- Offrir un objet =>
-  - Chapeau de l'épouvantail : +aura, _"Oh ! Je cherchais ce chapeau depuis des années ! Tiens, prends cette broche."_ => Ajoute broche à l'inventaire
-  - Autre : _"C'est gentil mais non merci. Je suis pas emaus"_
+#### **Fenêtre** (ID JSON : `fenetre_maison`)
+*(Implémente le trait `Openable`)*
+*   **Action `Ouvrir`** : Rend la fenêtre ouverte (consomme **1 minute**). Décrit l'environnement extérieur miteux (la plaine, le village au loin).
+*   **Action `Fermer`** : Rend la fenêtre fermée (consomme **1 minute**).
+*   **Action `Deplacer { target_zone: "zone_plaine" }` (Sauter par la fenêtre)** : Consomme **10 minutes** (temps de chute et de récupération).
+    *   *Si la fenêtre est ouverte (100% de chance de succès)* : Déplace le joueur vers la Plaine (**+15 000.0 Aura** pour cette sortie audacieuse).
+    *   *Si la fenêtre est fermée (100% de chance d'échec)* : Déplace le joueur vers la Plaine (**-100 000.0 Aura** : *"Vous traversez la vitre. Votre dignité ne s'en remet pas, votre peau non plus. À chaque pas, les bouts de verre s'enfoncent un peu plus"*).
 
-**Chat de Michu**
-
-- Caresser
-  Réussite => +aura _(le chat ronronne, vous vous sentez validé)_
-  Echec => -aura _(trouver un nom drole pour le chat de Mme Michu) n'est pas content et vous griffe_
-- Soulever => -aura _(le chat vous griffe. Michu vous gronde. Double peine.)_
-- Parler au chat => _"Miaou."_ _(pas d'effet, mais c'était un moment agréable)_
-
----
-
-## 🌲 FORÊT
-
-> _"Les arbres se referment autour de vous comme les bras d'une belle-mère insistante et son menton qui pique . Il fait sombre, ça craque partout, et vous êtes à peu près sûr que quelque chose vous observe. C'est un écureuil."_
-
-**Directions :** Sud => Plaine | Est => Le Lac
-
-### Interactables directs de la forêt :
-
-**Panneau en bois**
-
-- Lire => _"Bienvenue en Forêt de Brâme. Interdiction de crier, chanter, ou devenir chevalier sans permis."_
-- Arracher => +aura _(rebelle !)_ => Ajoute planche à l'inventaire
-- Suivre la direction indiquée => Vers le Vieux Chêne
-
-**Champignon suspect**
-
-- Examiner => _"Il est violet, brillant et vibre légèrement. Tout va bien."_
-- Manger => Jet aléatoire
-  - Effet 1 : +aura _(vision mystique, vous voyez votre avenir de chevalier !)_
-  - Effet 2 : -aura _(vous parlez aux arbres pendant 3 ticks. Les arbres ne répondent pas. Vomissez et repartez de la ou vous etes venu, bravo)_
-- Cueillir => Ajoute champignon suspect à l'inventaire
+#### **Porte** (ID JSON : `porte_maison`)
+*(Implémente les traits `Openable` et `Fightable`)*
+*   **Action `Ouvrir`** :
+    *   *Si verrouillée et que le joueur n'a pas `cle_maison`* : Échec (consomme **2 minutes**, **-5 000.0 Aura** : *"Vous poussez. Rien. Vous repoussez. Toujours rien. Humiliant. Même un âne mourant aurait fait mieux"*).
+    *   *Si déverrouillée ou avec la clé* : Ouvre la porte (consomme **1 minute**).
+*   **Action `Deplacer { target_zone: "zone_plaine" }` (Sortir)** : Consomme **10 minutes** (trajet vers la plaine).
+    *   *Si ouverte* : Déplace le joueur vers la Plaine.
+*   **Action `Attaquer { degats: 10 }` (Enfoncer la porte)** : (consomme **5 minutes**).
+    *   *Si porte verrouillée* : Jet de réussite (50% de chance).
+        *   *Succès* : Casse la porte, la rend ouverte (**+25 000.0 Aura** : *"Héroïque ! La porte cède sous votre force de taureau !"*).
+        *   *Échec* : La porte résiste (**-15 000.0 Aura** : *"Votre épaule dit non et se déboîte légèrement"*).
+    *   *Si porte déverrouillée* : Jet de réussite (100% de chance).
+        *   *Succès* : La porte s'ouvre bruyamment (**-20 000.0 Aura** : *"Vous enfoncez une porte ouverte. Littéralement. Tout le monde vous regarde bizarrement"*).
 
 ---
 
-### Points d'intérêt de la forêt :
+## 🌾 PLAINE (Zone ID : `zone_plaine`)
+> *"L'air frais vous frappe le visage. Devant vous, une plaine s'étend, parsemée de trucs plus ou moins intéressants. Au loin, un moulin tourne. Ou pas. Difficile à dire d'ici."*
+> **Directions connectées** : Nord => Forêt (`zone_foret`) | Est => Le Lac (`zone_lac`) | Sud => Village (`zone_village`) | Ouest => Maison (`zone_maison`) (Déplacements = **15 minutes** de marche par trajet).
 
-### 🌳 Vieux Chêne
+### Interactables :
 
-> _"Un chêne titanesque se dresse devant vous. Il est si vieux qu'il a probablement vu le premier roi du royaume se prendre les pieds dans sa cape."_
+#### **Puits** (ID JSON : `puits_plaine`)
+*   **Action `Observer`** : *"C'est profond et sombre. Comme votre avenir si vous ne bougez pas."* (consomme **1 minute**).
+*   **Action `Dialoguer` (Crier dans le puits)** : **+5 000.0 Aura** (*"L'écho vous répond 'CHEVALIEEEEER', vous êtes galvanisé"*, consomme **2 minutes**).
+*   **Action `Utiliser` (Descendre dans le puits)** : Jet de réussite (50% de chance). Consomme **30 minutes** (remontée pénible et humide).
+    *   *Succès* : Trouve l'objet `corde_puits` et l'ajoute à l'inventaire du joueur (**+20 000.0 Aura**).
+    *   *Échec* : **-15 000.0 Aura** (*"Vous glissez et remontez trempé. Un crapaud vous juge en coassant"*).
+*   **Action `Utiliser` (Jeter un objet dedans)** : Supprime l'objet sélectionné de l'inventaire du joueur (**-8 000.0 Aura** : *"Pourquoi avez-vous fait ça ? Sérieusement ? Le peuple taupe n'a pas besoin de ça !"*, consomme **3 minutes**).
 
-**Interactables :**
-
-**Le Chêne lui-même**
-
-- Examiner => _"Le tronc fait dix fois votre tour de taille. Ce qui n'est pas un exploit vu ce que vous mangez."_
-- Grimper => Jet de réussite
-  - Succès : ++aura _(vous voyez tout le royaume d'en haut ! Moment épique !)_ + Trouve un nid avec un œuf doré => ajout inventaire
-  - Échec : -aura _(vous tombez dans un buisson. Un écureuil vient casser sa noisette sur votre front.)_
-- Enlacer l'arbre => +aura _(c'est étrange mais réconfortant)_
-- Graver son nom => +aura _(votre légende commence ici)_
-
-**Ermite dans le tronc (PNJ)**
-
-- Parler => _"Mmh ? Un paysan ? Je suis un ancien chevalier. J'ai tout quitté pour vivre dans cet arbre. Meilleure décision de ma vie."_
-- Demander des conseils de chevalerie => _"Règle numéro un : aie toujours l'air sûr de toi, même quand tu ne sais pas ce que tu fais. Surtout quand tu ne sais pas."_ => +aura
-- Offrir un objet =>
-  - Champignon suspect : ++aura, _"AH ! Mon champignon ! Ça fait 12 ans que j'en cherche ! Tiens, prends cette médaille."_ => Ajoute médaille de l'ermite à l'inventaire
-  - Marmite : +aura, _"Je peux en faire une armure... non, une casserole. Tiens, un talisman en échange."_ => Ajoute talisman à l'inventaire
-  - Autre : _"Non merci, j'ai tout ce qu'il me faut dans mon arbre."_
+#### **Épouvantail** (ID JSON : `epouvantail_plaine`)
+*   **Action `Observer`** : *"Un épouvantail. Il a l'air plus chevaleresque que vous. C'est vexant."* (consomme **1 minute**).
+*   **Action `Ramasser` (Voler son chapeau)** : Transfère l'ID `chapeau_epouvantail` de l'épouvantail à l'inventaire du joueur (**+15 000.0 Aura**, consomme **3 minutes**).
+*   **Action `Attaquer { degats: 5 }` (Le défier en duel)** : **+25 000.0 Aura** (*"Les corbeaux sont impressionnés, vous avez gagné contre un bâton habillé"*, consomme **10 minutes**).
+*   **Action `Dialoguer` (Lui parler)** : **-50 000.0 Aura** (*"Il ne répond pas. Évidemment. Vous venez de parler à un tas de paille devant un corbeau moqueur"*, consomme **5 minutes**).
 
 ---
 
-### LE CIMETIÈRE DES CHEVALIERS RATÉS
+### Points d'intérêt de la Plaine :
 
-"Vous arrivez dans un lieu brumeux et sinistre. Ici reposent ceux qui, comme vous, ont cru qu'un peu d'aura et une épée rouillée suffisaient pour impressionner le roi. L'herbe est morte, et votre moral s'apprête à faire de même."
+### 🌾 Moulin (InterestPoint ID : `moulin_plaine`)
+> *"Le moulin tourne paresseusement. Le meunier est un homme large, couvert de farine, qui vous regarde approcher avec la méfiance de quelqu'un qui a déjà été volé par un paysan. Peut-être même vous."*
 
-Directions : Nord => Le Village | Est => Les Marais (Bloqué)
+#### **Le Meunier** (ID JSON : `meunier_pnj`)
+*   **Action `Dialoguer` (Parler)** : *"Encore un va-nu-pieds qui veut devenir chevalier ? Reviens quand t'auras de quoi payer."* (consomme **3 minutes**).
+*   **Action `Dialoguer` (Demander du travail)** : Débloque une quête de livraison de sacs de farine au village (**+5 000.0 Aura** pour votre dévouement, consomme **5 minutes**).
+*   **Action `Dialoguer` (Offrir un objet)** : (consomme **5 minutes**).
+    *   *Si Marmite (`marmite_cuisine`)* : Échange la marmite contre l'objet `farine_enchantee` (**+30 000.0 Aura** : *"Ah, une marmite ! Parfaite pour ma soupe. Tiens, prends cette farine enchantée !"*).
+    *   *Si autre objet* : *"Qu'est-ce que tu veux que je fasse de ça ?"* (Pas d'effet).
 
-Interactables directs du cimetière :
--Tombe fraîchement creusée
+#### **Meule de pierre** (ID JSON : `meule_moulin`)
+*   **Action `Observer`** : *"Une grande meule. Elle tourne. C'est son truc, c'est une meule."*
+*   **Action `Utiliser` (Mettre la main dedans)** : **-500 000.0 Aura** et consomme **60 minutes** (*"Mauvaise idée, très mauvaise idée. Le meunier doit appeler le guérisseur pour recoudre votre dignité"*).
+*   **Action `Utiliser` (Essayer de la soulever)** : Jet de réussite (10% de chance). Consomme **15 minutes** d'effort surhumain.
+    *   *Succès* : **+750 000.0 Aura** (*"Le meunier est bouche bée, exploit légendaire !"*).
+    *   *Échec* : **-20 000.0 Aura** (*"Votre dos fait un bruit de branche sèche et s'en souviendra longtemps"*).
+*   **Action `Utiliser` (Essayer de croquer dedans)** : **-80 000.0 Aura** (*"C'est une meule de pierre, pas de fromage, idiot. Vous avez encore plus l'air d'un paysan sans dents désormais"*, consomme **5 minutes**).
 
-Examiner => "Il n'y a pas de nom. Mais les dimensions correspondent curieusement à votre taille et à votre carrure. C'est sûrement une coïncidence."
-
-S'allonger dedans => -aura, + skip 2 ticks (vous testez le confort. C'est ferme. Vous perdez un temps précieux à déprimer.)
-
-Fouiller le tas de terre => Jet de réussite
-
-Succès : Trouve un Ver de terre charnu => ajout inventaire
-
-Échec : "Vous vous mettez de la terre dans l'œil. Félicitations." -aura
-
--Fossoyeur dépressif (PNJ)
-
-Parler => "Encore un futur client... Prends un ticket, j'suis débordé."
-
-Demander une pelle => "Une pelle, ça se mérite. Ou ça s'achète. T'as l'air d'avoir ni l'un ni l'autre."
-
-Points d'intérêt du cimetière :
-👻 Le Mausolée de Sire Godefroy le Prétentieux
-"Un grand bâtiment en pierre, couvert de statues qui ont l'air de vous juger. La porte est entrouverte, laissant échapper un courant d'air glacial."
-
-Interactables :
-
-Statue de Gargouille
-
-Examiner => "Elle est très laide. Elle vous rappelle vaguement votre oncle Maurice."
-
-Insulter la statue => +aura (ça fait du bien de se défouler, et puis de toute façon elle ne va pas répondre. N'est-ce pas ?, N'est-ce pas ?)
-
-Essayer de la casser (Nécessite un outils) =>
-
-Interaction (successRate faible) :
-
-Succès : La gargouille se brise, révélant un Rubis rutilant => ajout inventaire, +aura.
-
-Échec : L'arme rebondit. Durabilité de l'arme -1. -aura (vos poignets pleurent).
-
-Esprit de Sire Godefroy (PNJ/Interactable)
-
-Parler => "QUI OSE TROUBLER MON REPOS ? Oh, un bouseux. Pars, avant que je ne te maudisse avec une haleine d'ail éternelle."
-
-Demander comment il est mort => "J'ai glissé sur une poule pendant mon adoubement. Mon crâne a rencontré le trône. Un complot, j'en suis sûr." => Indice sur le roi (le roi déteste les maladroits).
-
-Provoquer en duel d'Aura => Interaction (Requiert un minimum d'Aura de base)
-
-Succès (si votre aura est haute) : ++aura (Le fantôme bégaie, impressionné par votre prestance, et s'évapore en vous laissant son Manuel du Parfait Petit Chevalier). => Ajout Manuel.
-
-Échec : --aura (Il se moque de vous avec un rire d'outre-tombe. Votre ego est pulvérisé).
-
-### 🦊 Clairière
-
-> _"Un cercle d'herbe parfaitement tondu au milieu de la forêt. C'est suspect. Au centre, une souche avec quelque chose dessus."_
-
-**Interactables :**
-
-**Souche mystérieuse**
-
-- Examiner => _"Sur la souche, une épée est plantée. Elle est rouillée, tordue, et franchement pas terrible. Mais c'est une ÉPÉE."_
-- Tirer l'épée => Jet de réussite
-  - Succès : ++aura _(VOUS AVEZ TIRÉ L'ÉPÉE DE LA SOUCHE ! Bon, c'est pas Excalibur, mais quand même. Peut etre prevoir un vaccin contre le tetanose)_ => Ajoute épée rouillée à l'inventaire
-  - Échec : -aura _(elle ne bouge pas. Vous non plus d'ailleurs, vous vous êtes fait un tour de rein. aïe)_
-- S'asseoir sur la souche => _"Vous méditez un instant. Un papillon se pose sur votre nez."_ +aura
-
-**Renard**
-
-- Observer => _"Un renard roux vous fixe avec une intelligence dérangeante."_
-- Approcher doucement => _"Le renard s'approche, renifle votre main, et dépose une baie à vos pieds."_ => Ajoute baie mystérieuse à l'inventaire, +aura
-- Courir après => -aura _(il est plus rapide, plus malin, et il le sait)_
-- Parler au renard => _"Il penche la tête. Vous avez l'impression qu'il comprend. Il ne comprend pas."_
+#### **Sacs de farine** (ID JSON : `sacs_farine`)
+*   **Action `Observer`** : *"Des dizaines de sacs empilés. Ça sent le pain et le labeur."* (consomme **1 minute**).
+*   **Action `Fouiller`** : Jet de détection (40% de chance de se faire surprendre par le meunier). Consomme **10 minutes**.
+    *   *Non surpris (60%)* : Trouve `piece_monnaie` et l'ajoute à l'inventaire.
+    *   *Surpris (40%)* : Le meunier vous attrape. **-30 000.0 Aura** et aucun butin.
+*   **Action `Attaquer { degats: 1 }` (Éventrer un sac)** : **-50 000.0 Aura** (*"Le meunier hurle, vous êtes couvert de farine. Pas très chevaleresque"*, consomme **5 minutes**).
 
 ---
 
-## 🌊 LE LAC
+### 🏡 Maison de Michu (InterestPoint ID : `maison_michu_plaine`)
+> *"La maison de votre voisine Michu. Elle a 847 ans, est la plus grande commère et connaît tous les ragots du royaume, et fait les meilleurs biscuits de la région."*
 
-> _"Un lac d'un bleu étrangement parfait s'étale devant vous. La surface est lisse comme un miroir. Vous vous y voyez. Vous détournez le regard."_
+#### **Porte de Michu** (ID JSON : `porte_michu`)
+*(Implémente le trait `Openable`)*
+*   **Action `Ouvrir` (Frapper)** : Michu ouvre la porte (*"Oh, c'est toi gamin ! Entre donc !"*, consomme **2 minutes**). Permet d'accéder aux interactables intérieurs.
+*   **Action `Attaquer { degats: 10 }` (Enfoncer)** : Échec automatique (100% de chance). **-150 000.0 Aura** et consomme **120 minutes** d'évanouissement (*"Michu vous assomme d'un coup de poêle. Elle a de sacrés réflexes pour 847 ans. Vous vous réveillez deux heures plus tard..."*).
 
-**Directions :** Ouest => Plaine | Ouest-Nord => Forêt | Sud => Village
+#### **Michu** (ID JSON : `michu_pnj` - *Disponible si porte ouverte*)
+*   **Action `Dialoguer` (Parler)** : *"Le roi ? Ah oui, il adoube les mardis et jeudis. Faut prendre rendez-vous. Et surtout, faut pas sentir le chou."* (consomme **5 minutes**).
+*   **Action `Dialoguer` (Demander conseil)** : Révèle des indices narratifs sur la forêt et le lac (consomme **5 minutes**).
+*   **Action `Dialoguer` (Demander un biscuit)** : (consomme **3 minutes**).
+    *   *Première fois* : Donne `biscuit_michu` à l'inventaire (**+10 000.0 Aura** : *"Les biscuits de Michu donnent du courage"*).
+    *   *Deuxième fois et plus* : *"C'est pas un buffet ici !"* (Aucun effet).
+*   **Action `Dialoguer` (Offrir un objet)** : (consomme **5 minutes**).
+    *   *Si Chapeau de l'épouvantail (`chapeau_epouvantail`)* : Échange contre `broche_michu` (**+50 000.0 Aura** : *"Oh ! Je cherchais ce chapeau pour mes poules depuis des années ! Tiens, prends cette broche"*).
+    *   *Si autre objet* : *"C'est gentil mais non merci. Je ne suis pas Emmaüs."*
 
-### Interactables directs du lac :
-
-**Le Lac lui-même**
-
-- Regarder son reflet => _"Vous voyez un paysan. Mais si vous plissez les yeux... non, c'est toujours un paysan."_
-- Se baigner => +aura _(bain rafraîchissant, vous sentez moins le chou)_ + skip ticks
-- Boire l'eau => _"L'eau est fraîche et pure. Vous vous sentez revigoré."_ +aura
-- Jeter un objet dans le lac =>
-  - Pièce : ++aura _(l'eau brille, une voix dit "Merci, ça faisait longtemps")_
-  - Autre : -aura _(plouf. L'objet coule. Bravo.)_
-
-**Vieille barque**
-
-- Examiner => _"Une barque avec un trou. Classique."_
-- Monter dedans _(sans réparation)_ => -aura _(vous coulez lentement en gardant votre dignité. Lentement.)_
-- Réparer _(si planche dans inventaire)_ => Barque réparée, _"C'est pas joli, mais ça flotte."_ => Permet d'accéder à l'Île
-- Monter dedans _(réparée)_ => Accès au point d'intérêt Île
-
----
-
-### Points d'intérêt du lac :
-
-### 🏝️ Île au milieu du lac _(accessible si barque réparée)_
-
-> _"Une minuscule île avec un unique arbre tordu et un coffre recouvert de mousse. On dirait la planque d'un pirate qui avait un très petit budget."_
-
-**Interactables :**
-
-**Coffre moussu**
-
-- Examiner => _"Un coffre en bois. Le cadenas est rouillé. Y'a un trou de serrure et aussi un bon gros cadenas."_
-- Forcer le cadenas => Jet de réussite
-  - Succès : +aura => ouvre le coffre
-  - Échec : -aura _(vos doigts pleurent)_
-- Frapper avec un objet =>
-  - Épée rouillée : Ouvre le coffre, _"L'épée se brise mais le cadenas aussi. Fair trade."_ => Supprime épée
-  - Marmite : Ouvre le coffre, _"BONG. Le bruit résonne sur tout le lac."_ +aura => Supprime marmite
-  - Autre : _"Ça fait 'toc'. Le coffre s'en fiche."_
-- Contenu du coffre _(si ouvert)_ : Cape brodée => ajout inventaire, ++aura _(une vraie cape ! Vous ressemblez presque à quelqu'un d'important !)_
-
-**Arbre tordu**
-
-- Examiner => _"Cet arbre pousse en spirale. La nature est bizarre."_
-- Grimper => +aura _(la vue est magnifique, vous voyez le château du village !)_
-- Secouer => _"Une noix de coco tombe. Vous n'êtes même pas sous les tropiques. Ne cherchez pas."_ => Ajoute noix de coco à l'inventaire
-
-### 🎣 Ponton de pêche
-
-> _"Un ponton branlant avance sur le lac. Un seau vide, une canne à pêche cassée, et une odeur de poisson qui date d'un autre siècle."_
-
-**Interactables :**
-
-**Canne à pêche cassée**
-
-- Examiner => _"Cassée en deux. Comme vos rêves. Mais les rêves, ça se répare."_
-- Réparer _(si corde dans inventaire)_ => Canne réparée, +aura => Permet de pêcher
-- Pêcher _(si canne réparée)_ => Jet aléatoire
-  - Poisson : +aura, _"Un poisson ! Pas gros, mais c'est le vôtre."_ => Ajoute poisson à l'inventaire
-  - Botte : _"Une botte. Taille 47. Inutile mais amusant."_ => Ajoute vieille botte à l'inventaire
-  - Rien : _"Ça ne mord pas. Les poissons sont au courant de votre situation sociale."_
-
-**Seau**
-
-- Examiner => _"Un seau vide. Symbole de votre vie actuelle."_
-- Prendre => Ajoute seau à l'inventaire
-- Mettre sur la tête => -aura _(vous ne voyez plus rien et trébuchez du ponton)_
+#### **Chat de Michu (nommé Pataud)** (ID JSON : `chat_michu` - *Disponible si porte ouverte*)
+*   **Action `Utiliser` (Caresser)** : Jet de réussite (70% de chance, consomme **5 minutes**).
+    *   *Succès* : **+8 000.0 Aura** (*"Pataud ronronne bruyamment, vous vous sentez validé"*).
+    *   *Échec* : **-15 000.0 Aura** (*"Pataud n'est pas d'humeur et vous griffe méchamment le nez"*).
+*   **Action `Utiliser` (Soulever)** : **-40 000.0 Aura** (*"Le chat se transforme en tornade de griffes. Michu vous gronde. Double peine."*, consomme **5 minutes**).
+*   **Action `Dialoguer` (Parler au chat)** : *"Miaou."* (Pas d'effet, consomme **2 minutes**).
 
 ---
 
-## 🏘️ LE VILLAGE
+## 🌲 FORÊT (Zone ID : `zone_foret`)
+> *"Les arbres se referment autour de vous comme les bras d'une belle-mère insistante. Il fait sombre, ça craque de partout, et vous êtes à peu près sûr que quelque chose vous observe. C'est un écureuil."*
+> **Directions connectées** : Sud => Plaine (`zone_plaine`) | Est => Le Lac (`zone_lac`) | Nord => Cimetière (`zone_cimetiere`) (Déplacements = **20 minutes** de marche par trajet).
 
-> _"Le village de Bourg-les-Navets s'anime devant vous. Trois maisons, une taverne, une forge, et un château qui essaie très fort d'être impressionnant. Des poules se promènent avec plus d'assurance que vous."_
+### Interactables :
 
-**Directions :** Nord => Plaine | Nord-Est => Le Lac
+#### **Panneau en bois** (ID JSON : `panneau_foret`)
+*   **Action `Observer` (Lire)** : *"Bienvenue en Forêt de Brâme. Interdiction de crier, chanter, ou de de devenir chevalier sans permis."* (consomme **1 minute**).
+*   **Action `Ramasser` (Arracher)** : Ajoute l'objet `planche_bois` à l'inventaire (**+15 000.0 Aura** : *"Rebelle dans l'âme !"*, consomme **5 minutes**). Supprime le panneau de la zone.
 
-### Interactables directs du village :
-
-**Poules**
-
-- Caresser => _"La poule accepte. C'est doux. Vous repensez à vos choix de vie."_
-- Courir après => -aura _(tout le village vous regarde. Les poules sont plus rapides.)_
-- Parler aux poules => _"Cot. Cot cot. Cot."_ _(pas d'effet, mais vous avez essayé)_
-
-**Fontaine du village**
-
-- Boire => _"L'eau est tiède et a un goût de calcaire. C'est la meilleure eau que vous ayez bue."_
-- Jeter une pièce _(si pièce dans inventaire)_ => +aura _(vous faites un vœu. Le vœu c'est d'avoir de l'aura. Meta.)_
-- Se laver => +aura _(vous sentez moins le chou, les villageois vous regardent avec moins de dégoût)_
-  Le Marchand (PNJ)
-
-Acheter le "Philtre de Charisme Absolu" => Coûte la Pièce.
-
-Si bu : -aura, -1 tick (C'était de l'eau du lac mélangée à du jus de chou. Vous êtes malade et perdez du temps).
-
-Échanger des objets =>
-
-## Rubis rutilant (du cimetière) => Échange contre une Armure rutilante (Donne un énorme boost d'Aura).
-
-### Points d'intérêt du village :
-
-### 🍺 Taverne "Au CochonPendu Pendu"
-
-> _"La taverne sent la bière renversée et les décisions regrettables. Un barde chante faux dans un coin. Le tavernier essuie un verre qui n'a jamais été propre."_
-
-**Interactables :**
-
-**Le Tavernier (PNJ)**
-
-- Parler => _"Bienvenue au Cochon Pendu ! On sert de la bière, des rumeurs, et des mauvais conseils."_
-- Demander des nouvelles du roi => _"Le roi ? Il est de mauvaise humeur depuis que son bouffon a démissionné. Paraît qu'il cherche quelqu'un pour le remplacer..."_ => Indice pour le château
-- Offrir un objet =>
-  - Poisson : +aura, _"Un poisson frais ! Ça change du ragoût éternel. Tiens, bois un coup."_ => +aura bonus
-  - Noix de coco : +aura, _"C'est quoi ce truc ? ...On va en faire un cocktail."_
-
-**Le Barde (PNJ)**
-
-- Écouter chanter => -aura _(c'est vraiment très mauvais)_
-- Demander une chanson sur vous => Jet de réussite
-  - Succès : ++aura _(la chanson est atroce mais tout le monde la retient, vous devenez célèbre !)_
-  - Échec : -aura _("Le paysan qui pue le chou..." non merci.)_
-- Offrir un objet =>
-  - Œuf doré : ++aura, _"PAR LES DIEUX ! Un œuf de phoenix ! Je compose un OPÉRA en votre honneur !"_ => Renommée au village
-  - Vieille botte : +aura, _"...je peux en faire un instrument. Ne demandez pas."_
-
-**Tonneau dans le coin**
-
-- Examiner => _"Un tonneau entrouvert. Ça sent fort."_
-- Boire dedans => Jet aléatoire
-  - Bon : +aura _(breuvage vigoureux !)_
-  - Mauvais : -aura _(vinaigre. Ancien vinaigre.)_ + skip ticks
-- Se cacher dedans => _"Vous vous cachez. Personne ne vous cherchait même pas (inserer blague)."_
+#### **Champignon suspect** (ID JSON : `champignon_foret`)
+*   **Action `Observer`** : *"Il est violet, brillant et vibre légèrement. Tout va bien."* (consomme **1 minute**).
+*   **Action `Utiliser` (Manger)** : Jet aléatoire (50/50).
+    *   *Effet 1 (50%)* : Vision mystique (**+100 000.0 Aura**, consomme **10 minutes**).
+    *   *Effet 2 (50%)* : Intoxication (**-50 000.0 Aura**, consomme **90 minutes** (1h30) de jeu : *"Vous parlez aux arbres. Ils ne répondent pas. Vous vomissez votre chou et reprenez vos esprits dans une mare"*).
+*   **Action `Ramasser` (Cueillir)** : Ajoute `champignon_suspect` à l'inventaire (consomme **3 minutes**).
 
 ---
 
-### ⚒️ La Forge
+### Points d'intérêt de la Forêt :
 
-> _"La chaleur vous frappe comme une gifle. Le forgeron, un colosse tatoué, tape sur une enclume avec la passion de quelqu'un qui règle des comptes avec le métal."_
+### 🌳 Vieux Chêne (InterestPoint ID : `vieux_chene_foret`)
+> *"Un chêne titanesque se dresse devant vous. Il est si vieux qu'il a probablement vu le premier roi du royaume se prendre les pieds dans sa cape."*
 
-**Interactables :**
+#### **Le Chêne** (ID JSON : `vieux_chene`)
+*   **Action `Observer`** : *"Le tronc fait dix fois votre tour de taille. Ce qui n'est pas un exploit vu ce que vous mangez."* (consomme **1 minute**).
+*   **Action `Utiliser` (Grimper)** : Jet de réussite (60% de chance). Consomme **30 minutes** (effort pénible).
+    *   *Succès* : **+150 000.0 Aura** et ajoute `oeuf_dore` à l'inventaire (*"La vue sur le royaume est magnifique ! Un moment digne des chansons de geste ! Et vous trouvez un œuf doré dans un nid !"*).
+    *   *Échec* : **-25 000.0 Aura** (*"Vous tombez dans un buisson de ronces. Un écureuil vient casser sa noisette sur votre front"*).
+*   **Action `Utiliser` (Enlacer l'arbre)** : **+5 000.0 Aura** (*"C'est étrange mais étonnamment réconfortant"*, consomme **5 minutes**).
+*   **Action `Utiliser` (Graver son nom)** : **+15 000.0 Aura** (*"Votre légende commence à s'inscrire dans l'écorce"*, consomme **10 minutes**).
 
-**Le Forgeron (PNJ)**
-
-- Parler => _"J'forge. Tu veux quoi ?"_
-- Demander une armure => _"T'as de quoi payer ? Non ? Alors dégage. ...Ou ramène-moi quelque chose d'utile."_
-- Offrir un objet =>
-  - Épée rouillée : ++aura, _"Oh ! Du bon acier sous la rouille !"_ => Reforge en épée correcte (échange), ++aura
-  - Médaille de l'ermite : +aura, _"Hmm, du bon métal. Tiens, je t'ai fait un bouclier."_ => Ajoute bouclier à l'inventaire
-  - Farine enchantée : _"...c'est de la farine. J'suis forgeron."_ => Pas d'effet
-- Demander à utiliser la forge => Jet de réussite
-  - Succès : +aura _(vous forgez un truc. Pas sûr de ce que c'est mais c'est en métal.)_ => Ajoute bidule en métal à l'inventaire
-  - Échec : -aura _(vous vous brûlez. Le forgeron soupire.)_
-
-**Enclume**
-
-- Examiner => _"Lourde. Très lourde. Inamovible."_
-- Essayer de soulever => Jet de réussite
-  - Succès : ++aura _(LE VILLAGE ENTIER VOUS ACCLAME)_ => Renommée
-  - Échec : _"Non, votre dos refuse."_ -aura
-- Taper dessus avec un objet =>
-  - Marmite : _"BONG. Le forgeron est furieux. La marmite est cabossée."_ -aura
+#### **L'Ermite** (ID JSON : `ermite_pnj`)
+*   **Action `Dialoguer` (Parler)** : *"Mmh ? Un paysan ? Je suis un ancien chevalier. J'ai tout quitté pour vivre dans cet arbre. Meilleure décision de ma vie."* (consomme **5 minutes**).
+*   **Action `Dialoguer` (Demander conseil)** : Révèle : *"Règle numéro un : aie toujours l'air sûr de toi, même quand tu ne sais pas ce que tu fais. Surtout quand tu ne sais pas."* (**+10 000.0 Aura**, consomme **5 minutes**).
+*   **Action `Dialoguer` (Offrir un objet)** : (consomme **5 minutes**).
+    *   *Si Champignon suspect (`champignon_foret`)* : Échange contre `medaille_ermite` (**+80 000.0 Aura** : *"AH ! Mon champignon ! Ça fait 12 ans que j'en cherche ! Tiens, prends cette médaille"*).
+    *   *Si Marmite (`marmite_cuisine`)* : Échange contre `talisman_ermite` (**+40 000.0 Aura** : *"Je peux en faire une casserole. Tiens, un talisman protecteur en échange"*).
+    *   *Si autre objet* : *"Non merci, la nature me fournit le nécessaire."*
 
 ---
 
-### 🏰 Le Château du Roi _(Zone finale)_
+### 💀 LE CIMETIÈRE DES CHEVALIERS RATÉS (Zone ID : `zone_cimetiere`)
+> *"Vous arrivez dans un lieu brumeux et sinistre. Ici reposent ceux qui, comme vous, ont cru qu'un peu d'aura et une épée rouillée suffisaient pour impressionner le roi. L'herbe est morte, et votre moral s'apprête à faire de même."*
+> **Directions connectées** : Sud => Forêt (`zone_foret`) (Déplacement = **20 minutes** de marche).
 
-> _"Le château se dresse devant vous, majestueux et... légèrement de travers ? Le pont-levis grince. Les gardes ont l'air de s'ennuyer profondément."_
+### Interactables :
 
-**Interactables :**
+#### **Tombe fraîchement creusée** (ID JSON : `tombe_fraiche`)
+*   **Action `Observer`** : *"Il n'y a pas de nom. Mais les dimensions correspondent curieusement à votre taille et à votre carrure. C'est sûrement une coïncidence."* (consomme **1 minute**).
+*   **Action `Utiliser` (S'allonger dedans)** : **-30 000.0 Aura** et consomme **60 minutes** (1h de sieste macabre : *"Vous testez le confort. C'est ferme. Vous perdez un temps précieux à déprimer au fond d'un trou"*).
+*   **Action `Fouiller` (Fouiller la terre)** : Jet de réussite (50% de chance). Consomme **15 minutes**.
+    *   *Succès* : Ajoute `ver_de_terre` à l'inventaire (**+10 000.0 Aura**).
+    *   *Échec* : **-15 000.0 Aura** (*"Vous vous mettez de la terre dans l'œil. Félicitations."*).
 
-**Gardes (PNJ)**
-
-- Parler => _"Halte. Qui va là. On dit ça parce qu'on doit, on sait très bien que c'est un paysan."_
-- Demander à voir le roi => _"Le roi ne reçoit que les gens importants. T'es important ? ...T'as une cape au moins ?"_
-  - Si cape brodée : _"Oh, jolie cape. Bon, entre."_ => Accès salle du trône
-  - Si pas de cape : _"Reviens quand t'auras l'air de quelqu'un."_
-- Corrompre _(si pièce ou objet de valeur)_ => +/- aura selon objet, ouvre l'accès
-- Forcer le passage => -aura _(les gardes vous maîtrisent en 0.3 secondes sauf si epée)_
-
-**Pont-levis**
-
-- Examiner => _"Il a connu des jours meilleurs. Et des chevaliers meilleurs."_
-- Traverser _(si accès autorisé)_ => Salle du trône
-
-**Le Roi (PNJ)** _(salle du trône)_
-
-- Se présenter => **ÉVALUATION FINALE DE L'AURA**
-  - Aura suffisante : 🎉 _"Le roi vous regarde... sourit... et vous adoube ! SIR [JOUEUR] ! La foule applaudit ! Les poules applaudissent ! Même l'épouvantail applaudit probablement !"_ => **VICTOIRE**
-  - Aura insuffisante : Jet de chance
-    - Succès : _"Le roi hésite... mais votre culot lui plaît."_ => Adoubement de justesse => **VICTOIRE**
-    - Échec : _"Le roi vous regarde, éclate de rire, et vous fait escorter dehors. Les poules se moquent."_ => **GAME OVER**
-- Raconter ses aventures => Bonus d'aura basé sur objets et actions accomplis _(la broche, la cape, l'épée, les exploits mémorables ajoutent de l'aura narrative)_
-- Offrir un objet au roi =>
-  - Œuf doré : ++aura _(le roi ADORE)_
-  - Talisman : +aura
-  - Bidule en métal : _"C'est... quoi ? ...J'adore !"_ +aura
-  - Marmite : _"...Gardes ?"_ -aura
-  - Seau : --aura
+#### **Le Fossoyeur** (ID JSON : `fossoyeur_pnj`)
+*   **Action `Dialoguer` (Parler)** : *"Encore un futur client... Prends un ticket, j'suis débordé."* (consomme **3 minutes**).
+*   **Action `Dialoguer` (Demander une pelle)** : *"Une pelle, ça se mérite. Ou ça s'achète. T'as l'air d'avoir ni l'un ni l'autre."* (consomme **3 minutes**).
 
 ---
+
+### Points d'intérêt du Cimetière :
+
+### 👻 Le Mausolée de Sire Godefroy (InterestPoint ID : `mausolee_godefroy`)
+> *"Un grand bâtiment en pierre, couvert de statues qui ont l'air de vous juger. La porte est entrouverte, laissant échapper un courant d'air glacial."*
+
+#### **Statue de Gargouille** (ID JSON : `gargouille_statue`)
+*(Implémente le trait `Fightable`)*
+*   **Action `Observer`** : *"Elle est très laide. Elle vous rappelle vaguement votre oncle Maurice."* (consomme **1 minute**).
+*   **Action `Dialoguer` (Insulter la gargouille)** : **+5 000.0 Aura** (*"Ça fait du bien de se défouler, et puis elle ne va pas répondre... N'est-ce pas ?"*, consomme **3 minutes**).
+*   **Action `Attaquer { degats: 10 }` (Essayer de la casser)** : Consomme **10 minutes**.
+    *   *Si le joueur a `bidule_metal` ou `balai_depart` dans son inventaire* : Jet de réussite (30% de chance).
+        *   *Succès* : La gargouille se brise, révélant un `rubis_rutilant` ajouté à l'inventaire (**+100 000.0 Aura**).
+        *   *Échec* : L'outil rebondit. **-25 000.0 Aura** et l'objet utilisé se brise (supprimé de l'inventaire).
+    *   *Si aucun outil* : Échec automatique (0% de chance). **-10 000.0 Aura** (*"Frapper de la pierre à mains nues... Vos poignets pleurent"*).
+
+#### **Esprit de Sire Godefroy** (ID JSON : `esprit_godefroy`)
+*   **Action `Dialoguer` (Parler)** : *"QUI OSE TROUBLER MON REPOS ? Oh, un bouseux. Pars, avant que je ne te maudisse avec une haleine d'ail éternelle."* (consomme **5 minutes**).
+*   **Action `Dialoguer` (Demander sa mort)** : *"J'ai glissé sur une poule pendant mon adoubement. Mon crâne a rencontré le trône. Un complot, j'en suis sûr."* (Indice : le roi déteste les maladroits, consomme **5 minutes**).
+*   **Action `Dialoguer` (Provoquer en duel d'Aura)** : (consomme **10 minutes**).
+    *   *Si Aura du Joueur >= 150 000.0 (100% de chance)* : **+300 000.0 Aura** et donne le `manuel_chevalier` à l'inventaire (*"Le fantôme bégaie, impressionné par votre prestance, et s'évapore en vous laissant son manuel du Parfait Petit Chevalier !"*).
+    *   *Si Aura du Joueur < 150 000.0 (0% de chance)* : **-100 000.0 Aura** (*"Il se moque de vous avec un rire d'outre-tombe. Votre ego est pulvérisé"*).
+
+---
+
+### 🦊 Clairière (InterestPoint ID : `clairiere_foret`)
+> *"Un cercle d'herbe parfaitement tondu au milieu de la forêt. C'est suspect. Au centre, une souche avec quelque chose dessus."*
+
+#### **Souche mystérieuse** (ID JSON : `souche_epee`)
+*   **Action `Observer`** : *"Sur la souche, une épée est plantée. Elle est rouillée, tordue et franchement pas terrible. Mais c'est une ÉPÉE."* (consomme **1 minute**).
+*   **Action `Utiliser` (Tirer l'épée)** : Jet de réussite (20% de chance). Consomme **15 minutes** d'effort dorsal.
+    *   *Succès* : Ajoute `epee_rouillee` à l'inventaire (**+120 000.0 Aura** : *"VOUS AVEZ TIRÉ L'ÉPÉE DE LA SOUCHE ! Bon, ce n'est pas Excalibur, et prévoyez peut-être un vaccin contre le tétanos"*).
+    *   *Échec* : **-20 000.0 Aura** (*"L'épée ne bouge pas. Vous vous êtes fait un tour de rein. Aïe"*).
+*   **Action `Utiliser` (S'asseoir sur la souche)** : **+8 000.0 Aura** (*"Vous méditez un instant. Un papillon se pose sur votre nez. Très poétique."*, consomme **10 minutes**).
+
+#### **Le Renard** (ID JSON : `renard_clairiere`)
+*   **Action `Observer`** : *"Un renard roux vous fixe avec une intelligence dérangeante."* (consomme **1 minute**).
+*   **Action `Utiliser` (Approcher doucement)** : Ajoute `baie_mysterieuse` à l'inventaire (**+15 000.0 Aura** : *"Le renard s'approche, renifle votre main et dépose une baie à vos pieds"*, consomme **5 minutes**).
+*   **Action `Deplacer { target_zone: "zone_foret" }` (Courir après)** : **-10 000.0 Aura** (Consomme **20 minutes** car vous quittez la clairière pour courir dans les bois : *"Il court bien plus vite que vous et se retourne pour vous regarder avec mépris"*).
+*   **Action `Dialoguer` (Parler au renard)** : *"Le renard penche la tête. Vous croyez qu'il comprend. Il ne comprend pas."* (Pas d'effet, consomme **3 minutes**).
+
+---
+
+## 🌊 LE LAC (Zone ID : `zone_lac`)
+> *"Un lac d'un bleu étrangement parfait s'étale devant vous. La surface est lisse comme un miroir. Vous vous y voyez. Vous détournez le regard."*
+> **Directions connectées** : Ouest => Plaine (`zone_plaine`) | Nord => Forêt (`zone_foret`) | Sud => Village (`zone_village`) (Déplacements = **15 minutes** de marche par trajet).
+
+### Interactables :
+
+#### **Le Lac** (ID JSON : `eau_lac`)
+*   **Action `Observer` (Regarder son reflet)** : *"Vous voyez un paysan. Mais si vous plissez les yeux... non, c'est toujours un paysan."* (consomme **1 minute**).
+*   **Action `Utiliser` (Se baigner)** : **+15 000.0 Aura** et consomme **30 minutes** (*"Bain rafraîchissant, vous sentez moins le chou pour l'instant"*).
+*   **Action `Utiliser` (Boire l'eau)** : **+5 000.0 Aura** (*"L'eau est fraîche et pure. Vous vous sentez revigoré"*, consomme **3 minutes**).
+*   **Action `Utiliser` (Jeter un objet)** : (consomme **3 minutes**).
+    *   *Si Pièce de monnaie (`piece_monnaie`)* : Échange la pièce contre **+80 000.0 Aura** (*"L'eau brille, une voix murmure : 'Merci, ça faisait longtemps'"*).
+    *   *Si autre objet* : L'objet est supprimé de l'inventaire. **-25 000.0 Aura** (*"Plouf. Ça coule. Bravo, vous polluez la nature"*).
+
+#### **Vieille barque** (ID JSON : `barque_lac`)
+*   **Action `Observer`** : *"Une barque avec un trou béant dans la coque. Classique."* (consomme **1 minute**).
+*   **Action `Utiliser` (Monter dedans sans réparer)** : **-40 000.0 Aura** (*"Vous coulez lentement en essayant de garder votre dignité. L'eau est froide"*, consomme **10 minutes**).
+*   **Action `Utiliser` (Réparer la barque)** : Consomme **30 minutes** de bricolage.
+    *   *Si le joueur a `planche_bois` et `corde_puits`* : Répare la barque (**+30 000.0 Aura** : *"C'est pas joli, mais ça flotte !"*). Débloque l'accès à l'île.
+*   **Action `Deplacer { target_zone: "zone_ile" }` (Prendre la barque)** : Consomme **10 minutes** (traversée à la rame).
+    *   *Si réparée* : Déplace le joueur vers l'Île.
+
+---
+
+### Points d'intérêt du Lac :
+
+### 🏝️ Île au milieu du lac (InterestPoint ID : `ile_lac` - *Requiert barque réparée*)
+> *"Une minuscule île avec un unique arbre tordu et un coffre recouvert de mousse. On dirait la planque d'un pirate qui avait un très petit budget."*
+
+#### **Coffre moussu** (ID JSON : `coffre_ile`)
+*(Implémente le trait `Openable`)*
+*   **Action `Observer`** : *"Un coffre en bois solide. Le cadenas est rouillé."* (consomme **1 minute**).
+*   **Action `Ouvrir` (Forcer le cadenas)** : Jet de réussite (40% de chance, consomme **10 minutes**).
+    *   *Succès* : Ouvre le coffre. Révèle la `cape_brodee` ajoutée à l'inventaire (**+150 000.0 Aura**).
+    *   *Échec* : **-40 000.0 Aura** (*"Vos doigts saignent sur la rouille"*).
+*   **Action `Attaquer { degats: 10 }` (Frapper avec un objet)** : (consomme **5 minutes**).
+    *   *Si Épée rouillée (`epee_rouillee`)* : Ouvre le coffre, détruit l'épée de l'inventaire (*"L'épée se brise mais le cadenas aussi. Marché conclu."*). Donne la `cape_brodee` (**+150 000.0 Aura**).
+    *   *Si Marmite (`marmite_cuisine`)* : Ouvre le coffre, détruit la marmite (*"BONG ! Le bruit résonne sur tout le lac. Le coffre cède"*). Donne la `cape_brodee` (**+100 000.0 Aura**).
+    *   *Si autre objet* : *"Ça fait 'toc'. Le coffre s'en fiche."* (Pas d'effet).
+
+#### **Arbre tordu** (ID JSON : `arbre_tordu_ile`)
+*   **Action `Utiliser` (Grimper)** : **+20 000.0 Aura** (*"La vue sur le château au loin est superbe. Vous vous y croyez déjà"*, consomme **15 minutes**).
+*   **Action `Utiliser` (Secouer)** : Ajoute `noix_de_coco` à l'inventaire (**+5 000.0 Aura** : *"Une noix de coco tombe. Vous n'êtes même pas sous les tropiques. Ne cherchez pas"*, consomme **3 minutes**).
+
+---
+
+### 🎣 Ponton de pêche (InterestPoint ID : `ponton_lac`)
+> *"Un ponton branlant avance sur le lac. Un seau vide, une canne à pêche cassée, et une odeur de poisson qui date d'un autre siècle."*
+
+#### **Canne à pêche** (ID JSON : `canne_peche`)
+*   **Action `Observer`** : *"Cassée en deux. Comme vos rêves. Mais les rêves, ça se répare."* (consomme **1 minute**).
+*   **Action `Utiliser` (Réparer la canne)** :
+    *   *Si le joueur a `corde_puits`* : Répare la canne (**+20 000.0 Aura**, consomme **10 minutes**). Débloque l'action Pêcher.
+*   **Action `Utiliser` (Pêcher)** : Jet aléatoire (uniquement si réparée). Consomme **30 minutes** de pêche silencieuse.
+    *   *40% chance (Poisson)* : Ajoute `poisson_frais` à l'inventaire (**+30 000.0 Aura**).
+    *   *30% chance (Botte)* : Ajoute `vieille_botte` à l'inventaire (**+2 000.0 Aura** : *"Une botte taille 47. Inutile mais amusant"*).
+    *   *30% chance (Rien)* : Aucun effet (*"Les poissons sont au courant de votre condition sociale et ignorent l'appât"*).
+
+#### **Seau** (ID JSON : `seau_ponton`)
+*   **Action `Ramasser`** : Ajoute `seau_vide` à l'inventaire (consomme **2 minutes**).
+*   **Action `Utiliser` (Mettre sur la tête)** : **-50 000.0 Aura** (*"Vous ne voyez plus rien, trébuchez et tombez dans le lac. Bravo"*, consomme **5 minutes**).
+
+---
+
+## 🏘️ LE VILLAGE (Zone ID : `zone_village`)
+> *"Le village de Bourg-les-Navets s'anime devant vous. Trois maisons, une taverne, une forge et un château qui essaie très fort d'être impressionnant. Des poules se promènent avec plus d'assurance que vous."*
+> **Directions connectées** : Nord => Plaine (`zone_plaine`) | Est => Le Lac (`zone_lac`) (Déplacements = **15 minutes** de marche par trajet).
+
+### Interactables :
+
+#### **Poules** (ID JSON : `poules_village`)
+*   **Action `Utiliser` (Caresser)** : **+5 000.0 Aura** (*"La poule accepte. C'est doux. Vous repensez brièvement à vos choix de vie"*, consomme **2 minutes**).
+*   **Action `Deplacer { target_zone: "zone_village" }` (Courir après)** : **-30 000.0 Aura** (Consomme **15 minutes** de course fatigante : *"Tout le village vous regarde. Les poules sont bien plus rapides. Vous avez l'air ridicule"*).
+*   **Action `Dialoguer` (Parler aux poules)** : *"Cot. Cot cot. Cot."* (Pas d'effet, consomme **2 minutes**).
+
+#### **Fontaine** (ID JSON : `fontaine_village`)
+*   **Action `Utiliser` (Boire)** : **+5 000.0 Aura** (*"L'eau est tiède et a un goût de calcaire. C'est la meilleure eau que vous ayez bue."*, consomme **2 minutes**).
+*   **Action `Utiliser` (Jeter une pièce)** : (consomme **2 minutes**).
+    *   *Si le joueur a `piece_monnaie`* : Supprime la pièce de l'inventaire. **+40 000.0 Aura** (*"Vous faites le vœu d'avoir de l'aura. Méta."*).
+*   **Action `Utiliser` (Se laver)** : **+15 000.0 Aura** (*"Vous sentez moins le chou. Les villageois vous regardent avec un dégoût modéré"*, consomme **15 minutes**).
+
+#### **Le Marchand** (ID JSON : `marchand_pnj`)
+*   **Action `Dialoguer` (Parler / Acheter)** : (consomme **5 minutes**).
+    *   *Acheter le Philtre de Charisme Absolu* : Coûte `piece_monnaie`. Si acheté, donne `philtre_charisme` à l'inventaire.
+        *   *(Note de gameplay sur le philtre)* : Si le joueur utilise `philtre_charisme` via `Utiliser` -> **-100 000.0 Aura** et consomme **60 minutes** (1h) de colique carabinée (*"C'était de l'eau du lac et du jus de chou. Vous êtes malade"*).
+    *   *Échanger le Rubis Rutilant* : Si le joueur donne `rubis_rutilant`, le marchand l'échange contre `armure_rutilante` (Une fois dans l'inventaire, donne **+500 000.0 Aura** immédiats !).
+
+---
+
+### Points d'intérêt du Village :
+
+### 🍺 Taverne "Au Cochon Pendu" (InterestPoint ID : `taverne_village`)
+> *"La taverne sent la bière renversée et les décisions regrettables. Un barde chante faux dans un coin. Le tavernier essuie un verre qui n'a jamais été propre de sa vie."*
+
+#### **Le Tavernier** (ID JSON : `tavernier_pnj`)
+*   **Action `Dialoguer` (Parler)** : *"Bienvenue au Cochon Pendu ! On sert de la bière, des rumeurs et des mauvais conseils."* Indique que le roi cherche un remplaçant pour son bouffon démissionnaire. (consomme **3 minutes**).
+*   **Action `Dialoguer` (Offrir un objet)** : (consomme **3 minutes**).
+    *   *Si Poisson (`poisson_frais`)* : Échange contre **+50 000.0 Aura** (*"Un poisson frais ! Ça change du ragoût éternel. Tiens, bois un coup à ma santé"*).
+    *   *Si Noix de coco (`noix_de_coco`)* : Échange contre **+30 000.0 Aura** (*"C'est quoi ce truc ? ...On va en faire un cocktail."*).
+
+#### **Le Barde** (ID JSON : `barde_pnj`)
+*   **Action `Dialoguer` (Écouter chanter)** : **-15 000.0 Aura** (*"C'est vraiment très mauvais. Vos oreilles saignent"*, consomme **10 minutes**).
+*   **Action `Dialoguer` (Demander une chanson sur vous)** : Jet de réussite (40% de chance, consomme **15 minutes**).
+    *   *Succès* : **+200 000.0 Aura** (*"La chanson est atroce mais entraînante, les gens scandent votre nom !"*).
+    *   *Échec* : **-80 000.0 Aura** (*"Le barde improvise sur 'Le paysan qui pue le chou'. Humiliation publique."*).
+*   **Action `Dialoguer` (Offrir un objet)** : (consomme **5 minutes**).
+    *   *Si Œuf doré (`oeuf_dore`)* : Échange l'œuf contre **+400 000.0 Aura** (*"PAR LES DIEUX ! Un œuf de phénix ! Je compose un OPÉRA entier en votre honneur !"*).
+    *   *Si Vieille botte (`vieille_botte`)* : Échange contre **+15 000.0 Aura** (*"Je peux en faire un instrument percussif bizarre. Merci !"*).
+
+#### **Tonneau de la taverne** (ID JSON : `tonneau_taverne`)
+*   **Action `Observer`** : *"Un tonneau entrouvert. Ça sent fort le fermenté."* (consomme **1 minute**).
+*   **Action `Utiliser` (Boire dedans)** : Jet de chance (50% Bon / 50% Mauvais). Consomme **10 minutes**.
+    *   *Bon (50%)* : **+30 000.0 Aura** (*"Un cidre vigoureux !"*).
+    *   *Mauvais (50%)* : **-40 000.0 Aura** et consomme **60 minutes** d'évanouissement gastrique (*"Du vinaigre. De l'ancien vinaigre très acide"*).
+*   **Action `Utiliser` (Se cacher dedans)** : **+5 000.0 Aura** (*"Vous vous y cachez. Personne ne vous cherchait de toute façon"*, consomme **15 minutes**).
+
+---
+
+### ⚒️ La Forge (InterestPoint ID : `forge_village`)
+> *"La chaleur vous frappe comme une gifle. Le forgeron, un colosse tatoué, tape sur une enclume avec la passion de quelqu'un qui règle des comptes personnels avec le métal."*
+
+#### **Le Forgeron** (ID JSON : `forgeron_pnj`)
+*   **Action `Dialoguer` (Parler)** : *"J'forge. Tu veux quoi ?"* (consomme **3 minutes**).
+*   **Action `Dialoguer` (Demander une armure)** : *"T'as de quoi payer ? Non ? Alors dégage... Ou ramène-moi du bon métal."* (consomme **3 minutes**).
+*   **Action `Dialoguer` (Offrir un objet)** : (consomme **5 minutes**).
+    *   *Si Épée rouillée (`epee_rouillee`)* : Échange contre `epee_reforgee` (**+150 000.0 Aura** : *"Oh ! Du bon acier sous la rouille ! Tiens, je l'ai reforgee"*).
+    *   *Si Médaille de l'ermite (`medaille_ermite`)* : Échange contre `bouclier_fer` (**+100 000.0 Aura** : *"Un bon métal ancien. Tiens, je t'ai fait un bouclier en échange"*).
+
+#### **Enclume** (ID JSON : `enclume_forge`)
+*   **Action `Observer`** : *"Lourde. Très lourde. Parfaitement enclume."* (consomme **1 minute**).
+*   **Action `Utiliser` (Demander à utiliser la forge)** : Jet de réussite (30% de chance). Consomme **30 minutes** de travail du métal.
+    *   *Succès* : Ajoute `bidule_metal` à l'inventaire (**+30 000.0 Aura**).
+    *   *Échec* : **-15 000.0 Aura** (*"Vous vous brûlez au second degré. Le forgeron soupire"*).
+*   **Action `Utiliser` (Essayer de soulever)** : Jet de réussite (5% de chance, consomme **5 minutes**).
+    *   *Succès* : **+900 000.0 Aura** (*"L'EXPLOIT ! Le village entier vous acclame en héros !"*).
+    *   *Échec* : **-30 000.0 Aura** (*"Non, votre colonne vertébrale refuse catégoriquement"*).
+*   **Action `Attaquer { degats: 1 }` (Frapper dessus avec la Marmite)** : **-15 000.0 Aura** (*"BONG ! La marmite est cabossée. Le forgeron vous jette un regard noir"*, consomme **3 minutes**).
+
+---
+
+### 🏰 Le Château du Roi (Zone ID : `zone_chateau`)
+> *"Le château se dresse devant vous, majestueux et... légèrement de travers ? Le pont-levis grince. Les gardes ont l'air de s'ennuyer profondément."*
+
+#### **Gardes** (ID JSON : `gardes_chateau`)
+*(Implémentent le trait `Fightable`)*
+*   **Action `Dialoguer` (Parler / Demander à entrer)** : (consomme **5 minutes**).
+    *   *Si le joueur a `cape_brodee` ou `armure_rutilante` dans son inventaire* : Accès autorisé à la salle du trône (`zone_salle_trone`).
+    *   *Sinon* : Accès refusé (*"Reviens quand t'auras l'air de quelqu'un d'important"*).
+*   **Action `Dialoguer` (Corrompre)** : (consomme **5 minutes**).
+    *   *Si le joueur donne `piece_monnaie` ou `rubis_rutilant`* : Accès autorisé (**+20 000.0 Aura**).
+*   **Action `Attaquer { degats: 10 }` (Forcer le passage)** : Jet de réussite (10% de chance). Consomme **15 minutes**.
+    *   *Succès* : Vous passez en force (**+150 000.0 Aura**). Débloque la zone `zone_salle_trone`.
+    *   *Échec* : **-100 000.0 Aura** et consomme **60 minutes** (1h) (*"Les gardes vous plaquent au sol en 0.3 secondes. Votre visage goûte la poussière pendant votre garde à vue"*).
+
+#### **Pont-levis** (ID JSON : `pont_levis`)
+*   **Action `Deplacer { target_zone: "zone_salle_trone" }` (Traverser)** : Déplace le joueur vers la Salle du trône (uniquement si l'accès est déverrouillé). Consomme **5 minutes**.
+
+---
+
+### 👑 Salle du Trône (Zone ID : `zone_salle_trone` - *Zone Finale*)
+
+#### **Le Roi Anthony** (ID JSON : `roi_anthony`)
+*   **Action `Dialoguer` (Se présenter - ÉVALUATION FINALE)** :
+    *   *Si Aura du Joueur >= 1 000 000.0* : **VICTOIRE ABSOLUE** (*"Le roi sourit et vous adoube ! SIR [JOUEUR] ! La foule applaudit, les poules et l'épouvantail aussi !"*).
+    *   *Si Aura du Joueur < 1 000 000.0* : Jet de chance.
+        *   *Succès (Chance = 20%)* : **VICTOIRE DE JUSTESSE** (*"Le roi hésite... mais votre culot légendaire lui plaît. Il vous adoube sur un coup de tête !"*).
+        *   *Échec (Chance = 80%)* : **GAME OVER** (*"Le roi éclate de rire et vous fait jeter dehors. Retournez sarcler vos navets"*).
+*   **Action `Dialoguer` (Offrir un objet)** : (consomme **5 minutes**).
+    *   *Si Œuf doré (`oeuf_dore`)* : **+250 000.0 Aura** (*"Le roi adore ! Il l'installe sur son trône"*).
+    *   *Si Talisman (`talisman_ermite`)* : **+100 000.0 Aura**.
+    *   *Si Bidule en métal (`bidule_metal`)* : **+50 000.0 Aura** (*"C'est moche... J'adore ! Dit le roi"*).
+    *   *Si Marmite (`marmite_cuisine`)* : **-80 000.0 Aura** (*"Des gardes pour ce récipient ?"*).
+    *   *Si Seau (`seau_vide`)* : **-200 000.0 Aura** (*"Le roi prend cela pour une insulte royale"*).
