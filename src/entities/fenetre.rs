@@ -76,11 +76,13 @@ impl Interactable for Fenetre {
 
                 if self.est_ouverte {
                     player.aura += 15000.0;
+                    crate::audio::play_sound("assets/victory.wav");
                     println!("\n\x1B[32m[+15 000 Aura]\x1B[0m Sortie audacieuse ! Vous enjambez le rebord et atterrissez gracieusement dans l'herbe.");
                 } else {
                     self.est_cassee = true;
                     self.est_ouverte = true;
                     player.aura -= 100000.0;
+                    crate::audio::play_sound("assets/defeat.wav");
                     println!("\n\x1B[31m[-100 000 Aura]\x1B[0m BAM ! Vous traversez la vitre fermée tête la première.");
                     println!("Votre dignité ne s'en remet pas, votre peau non plus. Des éclats de verre s'enfoncent à chacun de vos pas.");
                 }

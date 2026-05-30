@@ -73,9 +73,11 @@ impl Interactable for Porte {
                         self.is_locked = false;
                         self.est_ouverte = true;
                         world.current_tick += 1;
+                        crate::audio::play_sound("assets/victory.wav");
                         println!("Vous insérez la clé de la maison dans la serrure. Le loquet cède avec un clic satisfaisant. La porte s'ouvre !");
                     } else {
                         player.aura -= 5000.0;
+                        crate::audio::play_sound("assets/defeat.wav");
                         println!("\n\x1B[31m[-5 000 Aura]\x1B[0m Vous poussez. Rien. Vous repoussez. Toujours rien. Humiliant. Même un âne mourant aurait fait mieux.");
                     }
                 } else {
@@ -105,14 +107,17 @@ impl Interactable for Porte {
                         self.is_locked = false;
                         self.est_ouverte = true;
                         player.aura += 25000.0;
+                        crate::audio::play_sound("assets/victory.wav");
                         println!("\n\x1B[32m[+25 000 Aura]\x1B[0m HÉROÏQUE ! D'un coup d'épaule phénoménal, vous enfoncez la porte ! Le chambranle vole en éclats !");
                     } else {
                         player.aura -= 15000.0;
+                        crate::audio::play_sound("assets/defeat.wav");
                         println!("\n\x1B[31m[-15 000 Aura]\x1B[0m AÏE ! Vous vous jetez sur la porte en bois massif. La porte ne bouge pas d'un millimètre, votre épaule si. Elle est légèrement démise.");
                     }
                 } else {
                     self.est_ouverte = true;
                     player.aura -= 20000.0;
+                    crate::audio::play_sound("assets/defeat.wav");
                     println!("\n\x1B[31m[-20 000 Aura]\x1B[0m Vous enfoncez une porte ouverte. Littéralement. Vous trébuchez et tombez à plat ventre dans la poussière. Tout le monde vous regarde bizarrement.");
                 }
             }

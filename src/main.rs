@@ -1,4 +1,5 @@
 pub mod actions;
+pub mod audio;
 pub mod entities;
 pub mod player;
 pub mod traits;
@@ -36,6 +37,7 @@ fn wait_for_enter() {
 
 fn main() {
     clear_screen();
+    audio::play_music_loop("assets/music.wav");
     println!("\x1B[1;33m=== Aura Farming Simulator ===\x1B[0m");
     print!("\x1B[36mEntrez votre nom (par défaut: Jean-Michel) : \x1B[0m");
     io::stdout().flush().unwrap();

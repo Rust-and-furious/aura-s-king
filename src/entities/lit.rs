@@ -20,9 +20,11 @@ impl Useable for Lit {
         let chance = pseudo_rand(seed + 1) % 100;
         if chance < 50 {
             player.aura += 10000.0;
+            crate::audio::play_sound("assets/victory.wav");
             println!("\x1B[32m[+10 000 Aura]\x1B[0m Rêve héroïque : vous vous voyez en armure étincelante sur un blanc destrier.");
         } else {
             player.aura -= 30000.0;
+            crate::audio::play_sound("assets/defeat.wav");
             println!("\x1B[31m[-30 000 Aura]\x1B[0m Cauchemar de paysan : vous rêvez que vous êtes un chou cultivé et récolté par vous-même.");
         }
         Ok(())
