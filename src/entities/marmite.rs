@@ -12,12 +12,8 @@ pub struct Marmite {
 }
 
 impl Interactable for Marmite {
-    fn name(&self) -> &str {
-        &self.name
-    }
-    fn description(&self) -> &str {
-        &self.description
-    }
+    fn name(&self) -> &str { &self.name }
+    fn description(&self) -> &str { &self.description }
 
     fn get_actions(&self, _player: &Player, _world: &WorldManager) -> Vec<Action> {
         vec![Action::Observer, Action::Ramasser]
@@ -30,13 +26,9 @@ impl Interactable for Marmite {
                 if self.has_key && !self.key_revealed {
                     self.key_revealed = true;
                     let current_zone = player.zone;
-                    world.zones[current_zone]
-                        .interactables
-                        .push(self.key_entity_id);
-                    println!(
-                        "\nAu fond de la soupe tiède, quelque chose brille... C'est la clé de votre propre porte !"
-                    );
-                    println!("La 'Clé de la maison' est maintenant visible dans la pièce.");
+                    world.zones[current_zone].interactables.push(self.key_entity_id);
+                    println!("\nAu fond de la soupe tiède, quelque chose brille... C'est la clé de votre propre porte !");
+                    println!("La \x1B[36m'Clé de la maison'\x1B[0m est maintenant visible dans la pièce.");
                 } else if self.has_key {
                     println!("\nLa soupe est toujours tiède, mais la clé a déjà été retirée.");
                 }
