@@ -107,7 +107,7 @@ fn main() {
             break;
         }
 
-        // pour le moment, fin du jeu = sortie zone 1, mais aprés, la fin sera la présence dans la salle du roi pour l'adoubemment
+        // pour le moment, fin du jeu = sortie zone 0, mais aprés, la fin sera la présence dans la salle du roi pour l'adoubemment
         if world.player.zone != 0 {
             clear_screen();
             println!("\n\x1B[1;32m==================================================\x1B[0m");
