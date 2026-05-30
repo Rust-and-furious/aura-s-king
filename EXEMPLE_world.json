@@ -3,6 +3,8 @@
   "max_ticks": 720,
   "start_aura": 0.0,
   
+  "intro_text": "Vous êtes {player_name}, un paysan dont la lignée est connue depuis sept générations pour une seule chose : la culture intensive de légumes oubliés. Votre famille a fourni au royaume assez de navets pour nourrir une armée, mais n'a jamais reçu en retour qu'une dette fiscale et des ampoules aux mains.\n\nLe Royaume est dirigé par le Roi Anthony, un souverain dont la bonté n'a d'égale que son besoin viscéral d'être impressionné. Pour sortir de votre condition et devenir enfin 'Chevalier', il ne suffit pas d'être courageux. Il faut être légendaire.\n\nVotre unique monnaie d'échange est l'Aura. Attention, le Grand Bal d'adoubement aura lieu ce soir à 20h00 précises. Ne soyez pas en retard !",
+  
   "zones": [
     {
       "id": "zone_maison",
