@@ -1,0 +1,57 @@
+{
+  "start_zone": "zone_maison",
+  "max_ticks": 720,
+  "start_aura": 0.0,
+  
+  "intro_text": "Vous êtes {player_name}, un paysan dont la lignée est connue depuis sept générations pour une seule chose : la culture intensive de légumes oubliés. Votre famille a fourni au royaume assez de navets pour nourrir une armée, mais n'a jamais reçu en retour qu'une dette fiscale et des ampoules aux mains.\n\nLe Royaume est dirigé par le Roi Anthony, un souverain dont la bonté n'a d'égale que son besoin viscéral d'être impressionné. Pour sortir de votre condition et devenir enfin 'Chevalier', il ne suffit pas d'être courageux. Il faut être légendaire.\n\nVotre unique monnaie d'échange est l'Aura. Attention, le Grand Bal d'adoubement aura lieu ce soir à 20h00 précises. Ne soyez pas en retard !",
+  
+  "zones": [
+    {
+      "id": "zone_maison",
+      "description": "Votre modeste demeure. Il y fait sombre et l'air est lourd de regrets et d'odeur de chou.",
+      "connected_zones": ["zone_plaine"],
+      "interactables": ["lit_joueur", "marmite_cuisine", "porte_maison"]
+    },
+    {
+      "id": "zone_plaine",
+      "description": "La Plaine. L'air frais vous frappe le visage. Vous y êtes enfin !",
+      "connected_zones": ["zone_maison"],
+      "interactables": []
+    }
+  ],
+  
+  "entities": [
+    {
+      "id": "lit_joueur",
+      "type": "Lit",
+      "name": "Lit",
+      "description": "Une paillasse qui gratte sur laquelle vous passez vos nuits à regretter vos choix de vie."
+    },
+    {
+      "id": "marmite_cuisine",
+      "type": "Marmite",
+      "name": "Marmite",
+      "description": "Une marmite en fonte contenant un reste de soupe tiède à l'odeur suspecte de chou.",
+      "has_key": true,
+      "key_revealed": false,
+      "key_entity_id": "cle_maison"
+    },
+    {
+      "id": "cle_maison",
+      "type": "CleMaison",
+      "name": "Clé de la maison",
+      "description": "Une clé en fer un peu rouillée, trouvée au fond de la marmite."
+    },
+    {
+      "id": "porte_maison",
+      "type": "Porte",
+      "name": "Porte",
+      "description": "La lourde porte en chêne fermant votre modeste demeure.",
+      "est_ouverte": false,
+      "is_locked": true,
+      "key_entity_id": "cle_maison",
+      "target_zone": "zone_plaine",
+      "success_rate_locked": 50
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 ## Status
 
-Early-stage Rust project. No source code exists yet (`Cargo.toml` and `src/` are absent).
+Project in active development. Core architecture is implemented and compiles cleanly (`cargo build` passes with 0 errors, 0 warnings).
 
 ## Project
 
@@ -12,136 +12,186 @@ Text-based RPG simulation game for a university algorithms course (S-E06-3027). 
 
 The game engine (Rust code) **must be strictly separated** from game data (descriptions, dialogues, maps, world content).
 
-- All game content **must live in external files** (XML, JSON, or YAML) loaded at startup.
+- All game content **must live in external files** (JSON, XML, or YAML) loaded at startup via a dedicated loading function.
+- The loading function reads a `"type"` field in each JSON entry to instantiate the correct concrete type.
 - **No hardcoded constants or static variables** for game content inside Rust source. This is an explicit grading criterion — violating it is a significant penalty.
 
 ## CRITICAL: Diagram Conformance Rule
 
-> **At every code-writing pass**, check the written code against the class diagram and ER diagram below.
-> If the implementation diverges significantly (renamed entities, added/removed fields, changed relationships, new types not in the diagrams), **stop and warn the user explicitly** before continuing:
+> **At every code-writing pass**, check the written code against the class diagram below.
+> If the implementation diverges significantly (renamed entities, added/removed fields, changed relationships, new types not in the diagram), **stop and warn the user explicitly** before continuing:
 >
 > - Describe what diverges and why.
-> - Ask whether to: (a) adjust the code to match the diagrams, or (b) update the diagrams to reflect the new design.
-> - If the user chooses (b), update the diagrams in this file immediately and commit the change.
+> - Ask whether to: (a) adjust the code to match the diagram, or (b) update the diagram to reflect the new design.
+> - If the user chooses (b), update the diagram in this file **and** in `rapport_architecture.md` immediately.
 >
 > Never silently drift from the diagrams. They are the contract between team members.
 
-## Class Diagram
+## Source Layout
 
-```mermaid
-classDiagram
-    class Interactable {
-        <<Interface>>
-        +nom: String
-        +description: String
-        +interagir(player: Player) void
-    }
-
-    class Npc {
-        +name: String
-        +is_hostile: Boolean
-        +dialoguer(source: Player, world: WorldManager)
-    }
-
-    class Furniture {
-        +name: String
-        +durability: Integer
-        +fouiller(source: Player, world: WorldManager) void
-        +observer() string
-    }
-
-    class Objet {
-        +name: String
-        +weight: Integer
-        +durability: Integer
-        +ramasser(source: Player, world: WorldManager) void
-    }
-
-    Interactable <|.. Npc
-    Interactable <|.. Furniture
-    Interactable <|.. Objet
+```
+src/
+  main.rs       # Entry point, demonstrates the Command Pattern
+  actions.rs    # enum Action — all verbs the player can perform
+  traits.rs     # Capability traits: Openable, Fightable, Useable
+  entities.rs   # trait Interactable + concrete entity examples (Garde, Fenetre, Pomme)
+  player.rs     # struct Player
+  world.rs      # struct WorldManager, Zone, InterestPoint
 ```
 
-## ER Diagram
+## Class Diagram
+
+> **Note:** The concrete entities shown (`Fenetre`, `Garde`, `Pomme`) and the capability traits (`Openable`, `Fightable`, `Useable`) are **illustrative examples only**. They demonstrate the architectural pattern and do not represent the exhaustive list of in-game entities.
 
 ```mermaid
 classDiagram
+
     class Player {
-        +aura: Number
+        +aura: f64
+        +zone: usize
+        +inventory: array~usize~
+    }
+
+    class WorldManager {
+        +current_tick: usize
+        +max_ticks: usize
+        +player: Player
+        +zones: array~Zone~
+        +entities: array~Interactable~
     }
 
     class Zone {
+        +id: usize
         +description: String
+        +interest_points: array~InterestPoint~
+        +interactables: array~usize~
+        +connected_zones: array~usize~
     }
 
     class InterestPoint {
+        +id: usize
         +description: String
+        +interactables: array~usize~
     }
 
     class Interactable {
-        <<Interface>>
-        +description: String
+        <<Trait>>
+        +name() String
+        +description() String
+        +get_actions(player: Player, world: WorldManager) array~Action~
+        +execute_action(action: ref Action, player: Player, world: WorldManager) void
     }
 
-    class Npc {
-        +name: String
+    class Action {
+        <<Enumeration>>
+        Observer
+        Fouiller
+        Ramasser
+        Ouvrir
+        Fermer
+        Utiliser
+        Attaquer(degats: Integer)
+        Dialoguer
+        Deplacer(target_zone: usize)
+    }
+
+    %% ── Capability traits ──────────────────────────────────────
+    class Openable {
+        <<Trait>>
+        +ouvrir() Result
+        +fermer() Result
+    }
+
+    class Fightable {
+        <<Trait>>
+        +recevoir_degats(degats: Integer) void
+        +est_vivant() Boolean
+    }
+
+    class Useable {
+        <<Trait>>
+        +utiliser(player: Player, world: WorldManager) Result
+    }
+
+    %% ── Concrete entities (examples) ───────────────────────────
+    class Fenetre {
+        +est_ouverte: Boolean
+        +est_cassee: Boolean
+    }
+
+    class Garde {
+        +hp: Integer
         +is_hostile: Boolean
-        +dialoguer(source: Player, world: WorldManager)
     }
 
-    class Furniture {
-        +name: String
-        +durability: Integer
-        +fouiller(source: Player, world: WorldManager) void
-        +observer() string
+    class Pomme {
+        +aura_rendue: f64
     }
 
-    class Objet {
-        +name: String
-        +weight: Integer
-        +durability: Integer
-        +ramasser(source: Player, world: WorldManager) void
-    }
+    %% Interactable implementations
+    Interactable <|.. Fenetre
+    Interactable <|.. Garde
+    Interactable <|.. Pomme
 
-    Player "1" --> "1" Zone : se trouve dans
-    Player "1" --> "0..*" Objet : possède (inventaire)
+    %% Capability trait implementations
+    Openable <|.. Fenetre
+    Fightable <|.. Garde
+    Useable <|.. Pomme
 
-    Zone "1" *--> "0..*" InterestPoint
-    Zone "1" o--> "0..*" Interactable
-    Zone "1" --> "0..*" Zone : reliée par
+    %% Action flow
+    Interactable ..> Action : génère & consomme
 
-    InterestPoint "1" --> "0..*" Interactable : regroupe
+    %% Storage model (physical ownership)
+    WorldManager *-- Zone : possède
+    Zone *-- InterestPoint : possède
+    WorldManager "1" o-- "0..*" Interactable : stocke
 
-    Interactable <|.. Npc
-    Interactable <|.. Furniture
-    Interactable <|.. Objet
+    %% Logical links (via usize IDs)
+    Player ..> WorldManager : zone (ID)
+    Player ..> WorldManager : inventaire (IDs)
+    Zone "1" o-- "0..*" Interactable : contient (IDs)
+    InterestPoint "1" o-- "0..*" Interactable : regroupe (IDs)
 ```
+
+## Key Architecture Decisions
+
+### 1. Central storage via `WorldManager`
+`WorldManager` is the sole owner of all entity instances (`Vec<Box<dyn Interactable>>`). Everything else (Player, Zone, InterestPoint) holds `usize` IDs that index into this collection. This eliminates borrow-checker cross-reference issues and `Rc<RefCell<…>>`.
+
+### 2. Command Pattern via `enum Action`
+Entities never touch I/O directly. The interaction loop works as follows:
+1. Call `entity.get_actions(&player, &world)` → gets the list of available actions for the current state.
+2. Display the list to the player and read their input.
+3. Call `entity.execute_action(&chosen_action, &mut player, &mut world)` → the entity handles the logic.
+
+### 3. Capability traits (Composition over Inheritance)
+Specific behaviours are isolated into focused traits:
+- `Openable` → `ouvrir()`, `fermer()` (doors, chests, windows…)
+- `Fightable` → `recevoir_degats()`, `est_vivant()` (enemies, bosses…)
+- `Useable` → `utiliser()` (consumables: food, potions…)
+
+An entity implements `Interactable` for the game engine interface **and** any capability traits relevant to its behaviour. `execute_action` delegates to the capability trait internally (e.g. `Action::Ouvrir` → `self.ouvrir()`).
+
+### 4. JSON loading
+A dedicated loader function (to be implemented) reads world data from external JSON files. Each entity entry contains a `"type"` discriminant field that tells the loader which concrete struct to instantiate. The result is pushed into `WorldManager.entities` as a `Box<dyn Interactable>`.
+
+## Implementation Mapping (IDs)
+
+| Field | Rust type | Relation represented |
+|---|---|---|
+| `Player.zone` | `usize` | Player → Zone |
+| `Player.inventory` | `Vec<usize>` | Player → 0..* entities |
+| `Zone.connected_zones` | `Vec<usize>` | Zone → 0..* Zone |
+| `Zone.interactables` | `Vec<usize>` | Zone → 0..* Interactable |
+| `InterestPoint.interactables` | `Vec<usize>` | InterestPoint → 0..* Interactable |
 
 ## Required Rust Features (graded)
 
-- `struct` for characters, enemies, items, zones
-- `trait` for shared/polymorphic behaviour across entities — `Interactable` is the core trait
+- `struct` for Player, Zone, InterestPoint, and all concrete entities
+- `trait` for shared/polymorphic behaviour — `Interactable` is the core trait; `Openable`, `Fightable`, `Useable` for capabilities
+- `enum` for `Action` (Command Pattern)
 - Ownership, borrowing, and lifetimes used deliberately (not worked around)
 - Unit tests **and** functional tests — both are mandatory
-
-## Game Mechanics to Implement
-
-- Character creation with configurable attributes (Player has `aura` stat)
-- World exploration across distinct `Zone`s linked to each other
-- `InterestPoint`s within zones group `Interactable` entities
-- Interaction system: NPCs (`dialoguer`), Furniture (`fouiller`, `observer`), Objects (`ramasser`)
-- Simulation: the world must be able to evolve autonomously (physics/logic rules)
-
-## Implementation Notes
-
-Relations from the ER diagram are materialized in Rust via `usize` IDs indexing collections owned by `WorldManager`. This avoids cross-references / `Rc<RefCell<…>>` and will make later serialization from external data files straightforward.
-
-- `Player.zone: usize` → relation `Player --> Zone`
-- `Player.inventory: Vec<usize>` → relation `Player --> 0..* Objet`
-- `Zone.connected_zones: Vec<usize>` → relation `Zone --> 0..* Zone` (reliée par)
-- `Zone.interactables: Vec<usize>` → relation `Zone o--> 0..* Interactable`
-
-`InterestPoint` currently owns its interactables via `Vec<Box<dyn Interactable>>` — this may be revisited to align with the `Vec<usize>` pattern once `WorldManager` storage is defined.
 
 ## Toolchain
 
@@ -149,17 +199,12 @@ Relations from the ER diagram are materialized in Rust via `usize` IDs indexing 
 - IDE: RustRover (`.idea/`)
 - `.gitignore` includes `cargo mutants` output (`**/mutants.out*/`) — mutation testing may be used
 
-## Commands (once `Cargo.toml` exists)
+## Commands
 
 ```
 cargo build          # compile
+cargo run            # run the game
 cargo test           # run all tests
 cargo clippy         # lint
 cargo fmt            # format
-cargo mutants        # mutation testing (if used)
 ```
-
-## Notes
-
-- Update this file once crate layout is decided (binary vs library, workspace vs single crate).
-- If diagrams are updated, keep both the Class Diagram and ER Diagram sections in sync — they share the same entity set.
