@@ -29,6 +29,7 @@ impl Openable for Fenetre {
 }
 
 impl Interactable for Fenetre {
+    fn id(&self) -> usize { self.id }
     fn name(&self) -> &str { &self.name }
     fn description(&self) -> &str { &self.description }
 

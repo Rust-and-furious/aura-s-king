@@ -46,6 +46,9 @@ impl Fightable for Porte {
 }
 
 impl Interactable for Porte {
+    fn id(&self) -> usize {
+        self.id
+    }
     fn name(&self) -> &str {
         &self.name
     }

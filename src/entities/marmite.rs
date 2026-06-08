@@ -13,8 +13,15 @@ pub struct Marmite {
 }
 
 impl Interactable for Marmite {
-    fn name(&self) -> &str { &self.name }
-    fn description(&self) -> &str { &self.description }
+    fn id(&self) -> usize {
+        self.id
+    }
+    fn name(&self) -> &str {
+        &self.name
+    }
+    fn description(&self) -> &str {
+        &self.description
+    }
 
     fn get_actions(&self, _player: &Player, _world: &WorldManager) -> Vec<Action> {
         vec![Action::Observer, Action::Ramasser]

@@ -10,6 +10,9 @@ pub struct CleMaison {
 }
 
 impl Interactable for CleMaison {
+    fn id(&self) -> usize {
+        self.id
+    }
     fn name(&self) -> &str {
         &self.name
     }

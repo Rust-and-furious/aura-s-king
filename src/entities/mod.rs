@@ -9,6 +9,7 @@ use crate::world::WorldManager;
 // ============================================================
 
 pub trait Interactable {
+    fn id(&self) -> usize;
     fn name(&self) -> &str;
     fn description(&self) -> &str;
 

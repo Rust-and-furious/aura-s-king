@@ -10,6 +10,9 @@ pub struct Balai {
 }
 
 impl Interactable for Balai {
+    fn id(&self) -> usize {
+        self.id
+    }
     fn name(&self) -> &str {
         &self.name
     }
@@ -31,7 +34,6 @@ impl Interactable for Balai {
             }
             Action::Ramasser => {
                 let current_zone = player.zone;
-                // On enlève le balai de la zone
                 world.zones[current_zone].interactables.retain(|&x| x != self.id);
                 player.inventory.push(self.id);
                 println!("Vous ramassez le balai. Il est ajouté à votre inventaire.");
