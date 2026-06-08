@@ -14,6 +14,9 @@ use world::{WorldManager, load_first_zone};
 
 struct DummyEntity;
 impl entities::Interactable for DummyEntity {
+    fn id(&self) -> usize {
+        usize::MAX
+    }
     fn name(&self) -> &str {
         ""
     }

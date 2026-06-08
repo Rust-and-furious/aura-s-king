@@ -1,9 +1,10 @@
 use crate::actions::Action;
-use crate::entities::{Interactable, find_entity_id};
+use crate::entities::Interactable;
 use crate::player::Player;
 use crate::world::WorldManager;
 
 pub struct Marmite {
+    pub id: usize,
     pub name: String,
     pub description: String,
     pub has_key: bool,
@@ -12,8 +13,15 @@ pub struct Marmite {
 }
 
 impl Interactable for Marmite {
-    fn name(&self) -> &str { &self.name }
-    fn description(&self) -> &str { &self.description }
+    fn id(&self) -> usize {
+        self.id
+    }
+    fn name(&self) -> &str {
+        &self.name
+    }
+    fn description(&self) -> &str {
+        &self.description
+    }
 
     fn get_actions(&self, _player: &Player, _world: &WorldManager) -> Vec<Action> {
         vec![Action::Observer, Action::Ramasser]
@@ -34,12 +42,10 @@ impl Interactable for Marmite {
                 }
             }
             Action::Ramasser => {
-                if let Some(id) = find_entity_id(self, world) {
-                    let current_zone = player.zone;
-                    world.zones[current_zone].interactables.retain(|&x| x != id);
-                    player.inventory.push(id);
-                    println!("Vous ramassez la marmite. Elle est ajoutée à votre inventaire.");
-                }
+                let current_zone = player.zone;
+                world.zones[current_zone].interactables.retain(|&x| x != self.id);
+                player.inventory.push(self.id);
+                println!("Vous ramassez la marmite. Elle est ajoutée à votre inventaire.");
             }
             _ => println!("Action impossible sur la marmite."),
         }

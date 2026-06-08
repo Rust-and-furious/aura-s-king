@@ -79,6 +79,7 @@ classDiagram
 
     class Interactable {
         <<Trait>>
+        +id() usize
         +name() String
         +description() String
         +get_actions(player: Player, world: WorldManager) array~Action~

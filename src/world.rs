@@ -44,10 +44,12 @@ pub fn load_first_zone() -> WorldManager {
 
     let entities: Vec<Box<dyn Interactable>> = vec![
         Box::new(Lit {
+            id: 0,
             name: "Lit".to_string(),
             description: "Une paillasse qui gratte sur laquelle vous passez vos nuits à regretter vos choix de vie.".to_string(),
         }),
         Box::new(Marmite {
+            id: 1,
             name: "Marmite".to_string(),
             description: "Une marmite en fonte contenant un reste de soupe tiède à l'odeur suspecte de chou.".to_string(),
             has_key: true,
@@ -55,14 +57,17 @@ pub fn load_first_zone() -> WorldManager {
             key_entity_id: 2,
         }),
         Box::new(CleMaison {
+            id: 2,
             name: "Clé de la maison".to_string(),
             description: "Une clé en fer un peu rouillée, trouvée au fond de la marmite.".to_string(),
         }),
         Box::new(Balai {
+            id: 3,
             name: "Balai".to_string(),
             description: "Un vieux balai usé. Très bon pour faire semblant de travailler.".to_string(),
         }),
         Box::new(Fenetre {
+            id: 4,
             name: "Fenêtre".to_string(),
             description: "Une fenêtre donnant sur la plaine verdoyante (et miteuse).".to_string(),
             est_ouverte: false,
@@ -70,6 +75,7 @@ pub fn load_first_zone() -> WorldManager {
             target_zone: 1,
         }),
         Box::new(Porte {
+            id: 5,
             name: "Porte".to_string(),
             description: "La lourde porte en chêne fermant votre modeste demeure.".to_string(),
             est_ouverte: false,
