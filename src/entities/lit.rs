@@ -5,6 +5,7 @@ use crate::traits::Useable;
 use crate::world::WorldManager;
 
 pub struct Lit {
+    pub id: usize,
     pub name: String,
     pub description: String,
 }

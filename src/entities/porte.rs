@@ -5,6 +5,7 @@ use crate::traits::{Fightable, Openable};
 use crate::world::WorldManager;
 
 pub struct Porte {
+    pub id: usize,
     pub name: String,
     pub description: String,
     pub est_ouverte: bool,

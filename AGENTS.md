@@ -115,16 +115,19 @@ classDiagram
 
     %% ── Concrete entities (examples) ───────────────────────────
     class Fenetre {
+        +id: usize
         +est_ouverte: Boolean
         +est_cassee: Boolean
     }
 
     class Garde {
+        +id: usize
         +hp: Integer
         +is_hostile: Boolean
     }
 
     class Pomme {
+        +id: usize
         +aura_rendue: f64
     }
 
@@ -152,6 +155,8 @@ classDiagram
     Zone "1" o-- "0..*" Interactable : contient (IDs)
     InterestPoint "1" o-- "0..*" Interactable : regroupe (IDs)
 ```
+
+> **Note:** Toute entité concrète implémentant `Interactable` stocke un champ `id: usize` égal à son index dans `WorldManager.entities`, renseigné au chargement JSON. Ce champ permet à l'entité de se localiser elle-même (p. ex. pour le ramassage) sans dépendre d'une recherche par pointeur, même lorsque le moteur l'a temporairement swappée hors du `Vec`.
 
 ## Key Architecture Decisions
 
