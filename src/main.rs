@@ -125,17 +125,17 @@ fn main() {
             break;
         }
 
-        clear_screen();
-        println!("\x1B[35m--------------------------------------------------\x1B[0m");
-        println!(
-            "\x1B[36m[Heure : {}]\x1B[0m | \x1B[33m[Aura : {:.1}]\x1B[0m",
+        let mut header = String::new();
+        header.push_str("\x1B[35m--------------------------------------------------\x1B[0m\n");
+        header.push_str(&format!(
+            "\x1B[36m[Heure : {}]\x1B[0m | \x1B[33m[Aura : {:.1}]\x1B[0m\n",
             world.format_time(),
             world.player.aura
-        );
-        println!(
-            "Lieu : \x1B[1;36m{}\x1B[0m",
+        ));
+        header.push_str(&format!(
+            "Lieu : \x1B[1;36m{}\x1B[0m\n",
             world.zones[world.player.zone].description
-        );
+        ));
 
         if !world.player.inventory.is_empty() {
             let inv_names: Vec<String> = world
@@ -144,11 +144,11 @@ fn main() {
                 .iter()
                 .map(|&id| world.entities[id].name().to_string())
                 .collect();
-            println!("Inventaire : \x1B[35m{}\x1B[0m", inv_names.join(", "));
+            header.push_str(&format!("Inventaire : \x1B[35m{}\x1B[0m\n", inv_names.join(", ")));
         } else {
-            println!("Inventaire : Vide");
+            header.push_str("Inventaire : Vide\n");
         }
-        println!("\x1B[35m--------------------------------------------------\x1B[0m");
+        header.push_str("\x1B[35m--------------------------------------------------\x1B[0m");
 
         let zone_interactables = &world.zones[world.player.zone].interactables;
         if zone_interactables.is_empty() {
@@ -162,12 +162,13 @@ fn main() {
         }
         menu_options.push(MenuOption::special("Attendre (consomme 15 minutes)"));
 
-        let result = match select_from_menu(menu_options) {
+        let result = match select_from_menu(menu_options, &header) {
             Ok(res) => res,
             Err(_) => continue,
         };
 
         match result {
+            MenuResult::Cancelled => continue,
             MenuResult::Save => {
                 clear_screen();
                 println!("\x1B[32m✓ Jeu en cours de sauvegarde...\x1B[0m");
@@ -195,89 +196,90 @@ fn main() {
                 }
 
                 let chosen_entity_idx = zone_interactables[choix_idx];
-        let actions = world.entities[chosen_entity_idx].get_actions(&world.player, &world);
+                let actions = world.entities[chosen_entity_idx].get_actions(&world.player, &world);
 
-        clear_screen();
-        println!("\x1B[35m--------------------------------------------------\x1B[0m");
-        println!(
-            "\x1B[36m[Heure : {}]\x1B[0m | \x1B[33m[Aura : {:.1}]\x1B[0m",
-            world.format_time(),
-            world.player.aura
-        );
-        println!(
-            "Interaction avec : \x1B[1;36m{}\x1B[0m",
-            world.entities[chosen_entity_idx].name()
-        );
-        println!("\x1B[35m--------------------------------------------------\x1B[0m");
+                let mut action_header = String::new();
+                action_header.push_str("\x1B[35m--------------------------------------------------\x1B[0m\n");
+                action_header.push_str(&format!(
+                    "\x1B[36m[Heure : {}]\x1B[0m | \x1B[33m[Aura : {:.1}]\x1B[0m\n",
+                    world.format_time(),
+                    world.player.aura
+                ));
+                action_header.push_str(&format!(
+                    "Interaction avec : \x1B[1;36m{}\x1B[0m\n",
+                    world.entities[chosen_entity_idx].name()
+                ));
+                action_header.push_str("\x1B[35m--------------------------------------------------\x1B[0m");
 
-        let mut menu_options = Vec::new();
-        for action in actions.iter() {
-            let label = match action {
-                Action::Observer => "Observer".to_string(),
-                Action::Utiliser => "Utiliser (Dormir / Bricoler / etc.)".to_string(),
-                Action::Ramasser => "Ramasser (Prendre)".to_string(),
-                Action::Ouvrir => "Ouvrir".to_string(),
-                Action::Fermer => "Fermer".to_string(),
-                Action::Attaquer { degats } => {
-                    format!("Attaquer (Enfoncer / Casser, dégâts: {})", degats)
+                let mut menu_options = Vec::new();
+                for action in actions.iter() {
+                    let label = match action {
+                        Action::Observer => "Observer".to_string(),
+                        Action::Utiliser => "Utiliser (Dormir / Bricoler / etc.)".to_string(),
+                        Action::Ramasser => "Ramasser (Prendre)".to_string(),
+                        Action::Ouvrir => "Ouvrir".to_string(),
+                        Action::Fermer => "Fermer".to_string(),
+                        Action::Attaquer { degats } => {
+                            format!("Attaquer (Enfoncer / Casser, dégâts: {})", degats)
+                        }
+                        Action::Deplacer { target_zone: _ } => "Passer / Traverser / Sauter".to_string(),
+                        _ => format!("{:?}", action),
+                    };
+                    menu_options.push(MenuOption::new(label));
                 }
-                Action::Deplacer { target_zone: _ } => "Passer / Traverser / Sauter".to_string(),
-                _ => format!("{:?}", action),
-            };
-            menu_options.push(MenuOption::new(label));
-        }
-        menu_options.push(MenuOption::special("Retour"));
+                menu_options.push(MenuOption::special("Retour"));
 
-        let action_result = match select_from_menu(menu_options) {
-            Ok(res) => res,
-            Err(_) => continue,
-        };
+                let action_result = match select_from_menu(menu_options, &action_header) {
+                    Ok(res) => res,
+                    Err(_) => continue,
+                };
 
-        match action_result {
-            MenuResult::Save => {
-                clear_screen();
-                println!("\x1B[32m✓ Jeu en cours de sauvegarde...\x1B[0m");
-                wait_for_enter();
-                continue;
-            }
-            MenuResult::Quit => {
-                clear_screen();
-                print!("\x1B[36mVoulez-vous sauvegarder avant de quitter? (o/n) : \x1B[0m");
-                io::stdout().flush().unwrap();
-                let mut response = String::new();
-                let _ = io::stdin().read_line(&mut response);
-                if response.trim().to_lowercase() == "o" {
-                    println!("\x1B[32m✓ Jeu sauvegardé.\x1B[0m");
+                match action_result {
+                    MenuResult::Cancelled => continue,
+                    MenuResult::Save => {
+                        clear_screen();
+                        println!("\x1B[32m✓ Jeu en cours de sauvegarde...\x1B[0m");
+                        wait_for_enter();
+                        continue;
+                    }
+                    MenuResult::Quit => {
+                        clear_screen();
+                        print!("\x1B[36mVoulez-vous sauvegarder avant de quitter? (o/n) : \x1B[0m");
+                        io::stdout().flush().unwrap();
+                        let mut response = String::new();
+                        let _ = io::stdin().read_line(&mut response);
+                        if response.trim().to_lowercase() == "o" {
+                            println!("\x1B[32m✓ Jeu sauvegardé.\x1B[0m");
+                        }
+                        println!("\x1B[33mAu revoir !\x1B[0m");
+                        return;
+                    }
+                    MenuResult::Selected(action_idx) => {
+                        if action_idx == actions.len() {
+                            continue;
+                        }
+
+                        let chosen_action = &actions[action_idx];
+
+                        let mut entity = std::mem::replace(
+                            &mut world.entities[chosen_entity_idx],
+                            Box::new(DummyEntity),
+                        );
+                        let mut temp_player = std::mem::replace(
+                            &mut world.player,
+                            Player {
+                                aura: 0.0,
+                                zone: 0,
+                                inventory: vec![],
+                            },
+                        );
+                        entity.execute_action(chosen_action, &mut temp_player, &mut world);
+                        let _ = std::mem::replace(&mut world.player, temp_player);
+                        let _ = std::mem::replace(&mut world.entities[chosen_entity_idx], entity);
+
+                        wait_for_enter();
+                    }
                 }
-                println!("\x1B[33mAu revoir !\x1B[0m");
-                return;
-            }
-            MenuResult::Selected(action_idx) => {
-                if action_idx == actions.len() {
-                    continue;
-                }
-
-                let chosen_action = &actions[action_idx];
-
-                let mut entity = std::mem::replace(
-                    &mut world.entities[chosen_entity_idx],
-                    Box::new(DummyEntity),
-                );
-                let mut temp_player = std::mem::replace(
-                    &mut world.player,
-                    Player {
-                        aura: 0.0,
-                        zone: 0,
-                        inventory: vec![],
-                    },
-                );
-                entity.execute_action(chosen_action, &mut temp_player, &mut world);
-                let _ = std::mem::replace(&mut world.player, temp_player);
-                let _ = std::mem::replace(&mut world.entities[chosen_entity_idx], entity);
-
-                wait_for_enter();
-            }
-        }
             }
         }
     }
