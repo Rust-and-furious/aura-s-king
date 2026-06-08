@@ -1,14 +1,16 @@
 pub mod actions;
 pub mod audio;
 pub mod entities;
+pub mod loader;
 pub mod player;
 pub mod traits;
 pub mod world;
 
 use actions::Action;
+use loader::load_from_json;
 use player::Player;
 use std::io::{self, Write};
-use world::{WorldManager, load_first_zone};
+use world::WorldManager;
 
 struct DummyEntity;
 impl entities::Interactable for DummyEntity {
@@ -67,32 +69,25 @@ fn main() {
         player_name
     };
 
+    let loaded = match load_from_json("data/world.json") {
+        Ok(l) => l,
+        Err(e) => {
+            eprintln!("\x1B[1;31mErreur : impossible de charger le monde : {e}\x1B[0m");
+            return;
+        }
+    };
+
     clear_screen();
-    // TODO: Ce texte d'introduction et de contexte narratif devrait être extrait et chargé
-    // depuis un fichier de données JSON lors de l'implémentation de la séralisation par l'équipe.
     println!(
         "\x1B[1;35m================================================================================\x1B[0m"
     );
-    println!(
-        "Vous êtes {}, un paysan dont la lignée est connue depuis sept générations pour",
-        player_name
-    );
-    println!("une seule chose : la culture intensive de légumes oubliés. Votre famille a fourni");
-    println!("au royaume assez de navets pour nourrir une armée, mais n'a jamais reçu en retour");
-    println!("qu'une dette fiscale et des ampoules aux mains.");
-    println!("\nLe Royaume est dirigé par le Roi Anthony, un souverain dont la bonté n'a d'égale");
-    println!("que son besoin viscéral d'être impressionné. Pour sortir de votre condition et");
-    println!(
-        "devenir enfin 'Chevalier', il ne suffit pas d'être courageux. Il faut être légendaire."
-    );
-    println!("\nVotre unique monnaie d'échange est l'Aura. Attention, le Grand Bal d'adoubement");
-    println!("aura lieu ce soir à 20h00 précises. Ne soyez pas en retard !");
+    println!("{}", loaded.intro_text.replace("{player_name}", player_name));
     println!(
         "\x1B[1;35m================================================================================\x1B[0m\n"
     );
     wait_for_enter();
 
-    let mut world = load_first_zone();
+    let mut world = loaded.world;
 
     loop {
         if world.current_tick >= world.max_ticks {
@@ -275,9 +270,15 @@ fn main() {
 mod tests {
     use super::*;
 
+    fn load_test_world() -> WorldManager {
+        load_from_json("data/world.json")
+            .expect("Le fichier data/world.json doit être présent et valide pour les tests")
+            .world
+    }
+
     #[test]
     fn test_format_time() {
-        let mut world = load_first_zone();
+        let mut world = load_test_world();
         assert_eq!(world.format_time(), "08h00");
         world.current_tick = 90;
         assert_eq!(world.format_time(), "09h30");
@@ -287,7 +288,7 @@ mod tests {
 
     #[test]
     fn test_lit_sleep_advances_time_and_changes_aura() {
-        let mut world = load_first_zone();
+        let mut world = load_test_world();
         let mut temp_player = std::mem::replace(
             &mut world.player,
             Player {
@@ -296,6 +297,7 @@ mod tests {
                 inventory: vec![],
             },
         );
+        // entities[0] est le Lit (lit_joueur, premier du tableau JSON)
         let mut lit = std::mem::replace(&mut world.entities[0], Box::new(DummyEntity));
 
         lit.execute_action(&Action::Utiliser, &mut temp_player, &mut world);
