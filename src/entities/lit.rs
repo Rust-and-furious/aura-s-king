@@ -5,6 +5,7 @@ use crate::traits::Useable;
 use crate::world::WorldManager;
 
 pub struct Lit {
+    pub id: usize,
     pub name: String,
     pub description: String,
 }
@@ -32,6 +33,7 @@ impl Useable for Lit {
 }
 
 impl Interactable for Lit {
+    fn id(&self) -> usize { self.id }
     fn name(&self) -> &str { &self.name }
     fn description(&self) -> &str { &self.description }
 

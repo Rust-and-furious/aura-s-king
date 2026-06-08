@@ -5,6 +5,7 @@ use crate::traits::{Fightable, Openable};
 use crate::world::WorldManager;
 
 pub struct Porte {
+    pub id: usize,
     pub name: String,
     pub description: String,
     pub est_ouverte: bool,
@@ -45,6 +46,9 @@ impl Fightable for Porte {
 }
 
 impl Interactable for Porte {
+    fn id(&self) -> usize {
+        self.id
+    }
     fn name(&self) -> &str {
         &self.name
     }
