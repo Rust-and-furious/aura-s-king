@@ -5,7 +5,6 @@ use crate::traits::Openable;
 use crate::world::WorldManager;
 
 pub struct Fenetre {
-    pub id: usize,
     pub name: String,
     pub description: String,
     pub est_ouverte: bool,

@@ -216,8 +216,7 @@ pub fn load_from_json(path: &str) -> Result<LoadedWorld, LoadError> {
     let entities: Vec<Box<dyn Interactable>> = dto
         .entities
         .into_iter()
-        .enumerate()
-        .map(|(i, e)| build_entity(i, e, &resolve_entity, &resolve_zone))
+        .map(|e| build_entity(e, &resolve_entity, &resolve_zone))
         .collect::<Result<_, _>>()?;
 
     // ── Construction des zones ────────────────────────────────
@@ -292,13 +291,12 @@ pub fn load_from_json(path: &str) -> Result<LoadedWorld, LoadError> {
 // ──────────────────────────────────────────────────────────────
 
 fn build_entity(
-    id: usize,
     dto: EntityDto,
     resolve_entity: &impl Fn(&str) -> Result<usize, LoadError>,
     resolve_zone: &impl Fn(&str) -> Result<usize, LoadError>,
 ) -> Result<Box<dyn Interactable>, LoadError> {
     match dto {
-        EntityDto::Lit { name, description, .. } => Ok(Box::new(Lit { id, name, description })),
+        EntityDto::Lit { name, description, .. } => Ok(Box::new(Lit { name, description })),
 
         EntityDto::Marmite {
             name,
@@ -308,7 +306,6 @@ fn build_entity(
             key_entity_id,
             ..
         } => Ok(Box::new(Marmite {
-            id,
             name,
             description,
             has_key,
@@ -317,10 +314,10 @@ fn build_entity(
         })),
 
         EntityDto::CleMaison { name, description, .. } => {
-            Ok(Box::new(CleMaison { id, name, description }))
+            Ok(Box::new(CleMaison { name, description }))
         }
 
-        EntityDto::Balai { name, description, .. } => Ok(Box::new(Balai { id, name, description })),
+        EntityDto::Balai { name, description, .. } => Ok(Box::new(Balai { name, description })),
 
         EntityDto::Fenetre {
             name,
@@ -330,7 +327,6 @@ fn build_entity(
             target_zone,
             ..
         } => Ok(Box::new(Fenetre {
-            id,
             name,
             description,
             est_ouverte,
@@ -347,7 +343,6 @@ fn build_entity(
             target_zone,
             ..
         } => Ok(Box::new(Porte {
-            id,
             name,
             description,
             est_ouverte,

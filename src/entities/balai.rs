@@ -1,10 +1,9 @@
 use crate::actions::Action;
-use crate::entities::Interactable;
+use crate::entities::{Interactable, find_entity_id};
 use crate::player::Player;
 use crate::world::WorldManager;
 
 pub struct Balai {
-    pub id: usize,
     pub name: String,
     pub description: String,
 }
@@ -30,11 +29,13 @@ impl Interactable for Balai {
                 );
             }
             Action::Ramasser => {
-                let current_zone = player.zone;
-                // On enlève le balai de la zone
-                world.zones[current_zone].interactables.retain(|&x| x != self.id);
-                player.inventory.push(self.id);
-                println!("Vous ramassez le balai. Il est ajouté à votre inventaire.");
+                if let Some(id) = find_entity_id(self, world) {
+                    let current_zone = player.zone;
+                    // On enléve le balai de la zone
+                    world.zones[current_zone].interactables.retain(|&x| x != id);
+                    player.inventory.push(id);
+                    println!("Vous ramassez le balai. Il est ajouté à votre inventaire.");
+                }
             }
             _ => println!("Action impossible sur le balai."),
         }
