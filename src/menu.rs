@@ -28,54 +28,69 @@ impl MenuOption {
 #[derive(Debug, Clone, Copy)]
 pub enum MenuResult {
     Selected(usize),
+    Cancelled,
     Save,
     Quit,
 }
 
-pub fn select_from_menu(options: Vec<MenuOption>) -> io::Result<MenuResult> {
+pub fn select_from_menu(options: Vec<MenuOption>, header: &str) -> io::Result<MenuResult> {
     let mut selected = 0;
 
     loop {
         disable_raw_mode().ok();
-        draw_menu(&options, selected)?;
+        draw_menu(header, &options, selected)?;
 
         enable_raw_mode()?;
-        if let Event::Key(key) = event::read()? {
-            match key.code {
-                KeyCode::Up => {
-                    selected = if selected == 0 {
-                        options.len() - 1
-                    } else {
-                        selected - 1
-                    };
+        let event = match event::read() {
+            Ok(ev) => ev,
+            Err(e) => {
+                let _ = disable_raw_mode();
+                return Err(e);
+            }
+        };
+
+        if let Event::Key(key) = event {
+            if key.kind == event::KeyEventKind::Press {
+                match key.code {
+                    KeyCode::Up => {
+                        selected = if selected == 0 {
+                            options.len() - 1
+                        } else {
+                            selected - 1
+                        };
+                    }
+                    KeyCode::Down => {
+                        selected = (selected + 1) % options.len();
+                    }
+                    KeyCode::Enter => {
+                        disable_raw_mode()?;
+                        return Ok(MenuResult::Selected(selected));
+                    }
+                    KeyCode::Esc => {
+                        disable_raw_mode()?;
+                        return Ok(MenuResult::Cancelled);
+                    }
+                    KeyCode::Char('s') | KeyCode::Char('S') => {
+                        disable_raw_mode()?;
+                        return Ok(MenuResult::Save);
+                    }
+                    KeyCode::Char('q') | KeyCode::Char('Q') => {
+                        disable_raw_mode()?;
+                        return Ok(MenuResult::Quit);
+                    }
+                    _ => {}
                 }
-                KeyCode::Down => {
-                    selected = (selected + 1) % options.len();
-                }
-                KeyCode::Enter => {
-                    disable_raw_mode()?;
-                    return Ok(MenuResult::Selected(selected));
-                }
-                KeyCode::Esc => {
-                    disable_raw_mode()?;
-                    return Ok(MenuResult::Selected(options.len()));
-                }
-                KeyCode::Char('s') | KeyCode::Char('S') => {
-                    disable_raw_mode()?;
-                    return Ok(MenuResult::Save);
-                }
-                KeyCode::Char('q') | KeyCode::Char('Q') => {
-                    disable_raw_mode()?;
-                    return Ok(MenuResult::Quit);
-                }
-                _ => {}
             }
         }
     }
 }
 
-fn draw_menu(options: &[MenuOption], selected: usize) -> io::Result<()> {
+fn draw_menu(header: &str, options: &[MenuOption], selected: usize) -> io::Result<()> {
     print!("\x1B[2J\x1B[1;1H");
+
+    if !header.is_empty() {
+        println!("{}", header);
+    }
 
     for (i, option) in options.iter().enumerate() {
         let is_selected = i == selected;
