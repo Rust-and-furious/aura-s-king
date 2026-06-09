@@ -5,6 +5,7 @@ use crate::traits::Openable;
 use crate::world::WorldManager;
 
 pub struct Fenetre {
+    pub id: usize,
     pub name: String,
     pub description: String,
     pub est_ouverte: bool,
@@ -28,6 +29,7 @@ impl Openable for Fenetre {
 }
 
 impl Interactable for Fenetre {
+    fn id(&self) -> usize { self.id }
     fn name(&self) -> &str { &self.name }
     fn description(&self) -> &str { &self.description }
 
