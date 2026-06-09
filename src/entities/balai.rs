@@ -33,8 +33,7 @@ impl Interactable for Balai {
                 );
             }
             Action::Ramasser => {
-                let current_zone = player.zone;
-                world.zones[current_zone].interactables.retain(|&x| x != self.id);
+                world.remove_interactable_from_zone(player.zone, self.id);
                 player.inventory.push(self.id);
                 println!("Vous ramassez le balai. Il est ajouté à votre inventaire.");
             }

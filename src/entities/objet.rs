@@ -3,13 +3,15 @@ use crate::entities::Interactable;
 use crate::player::Player;
 use crate::world::WorldManager;
 
-pub struct CleMaison {
+// objet ramassable générique (corde, chapeau, pièce...), surtout un jeton d'inventaire
+pub struct Objet {
     pub id: usize,
     pub name: String,
     pub description: String,
+    pub aura_ramassage: f64,
 }
 
-impl Interactable for CleMaison {
+impl Interactable for Objet {
     fn id(&self) -> usize {
         self.id
     }
@@ -26,17 +28,16 @@ impl Interactable for CleMaison {
 
     fn execute_action(&mut self, action: &Action, player: &mut Player, world: &mut WorldManager) {
         match action {
-            Action::Observer => {
-                println!("Vous observez la clé. {}", self.description);
-            }
+            Action::Observer => println!("{}", self.description),
             Action::Ramasser => {
                 world.remove_interactable_from_zone(player.zone, self.id);
                 player.inventory.push(self.id);
-                println!(
-                    "Vous mettez la clé dans votre poche. Elle est ajoutée à votre inventaire."
-                );
+                if self.aura_ramassage != 0.0 {
+                    player.aura += self.aura_ramassage;
+                }
+                println!("Vous ramassez {}. Ajouté à l'inventaire.", self.name);
             }
-            _ => println!("Action impossible sur la clé."),
+            _ => println!("Vous ne pouvez pas faire ça avec {}.", self.name),
         }
     }
 }

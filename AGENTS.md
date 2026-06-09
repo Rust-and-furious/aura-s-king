@@ -31,12 +31,17 @@ The game engine (Rust code) **must be strictly separated** from game data (descr
 
 ```
 src/
-  main.rs       # Entry point, demonstrates the Command Pattern
-  actions.rs    # enum Action — all verbs the player can perform
-  traits.rs     # Capability traits: Openable, Fightable, Useable
-  entities.rs   # trait Interactable + concrete entity examples (Garde, Fenetre, Pomme)
+  main.rs       # Point d'entrée + boucle de jeu (Command Pattern, navigation zones/points d'intérêt)
+  actions.rs    # enum Action — tous les verbes possibles
+  traits.rs     # Traits de capacité : Openable, Fightable, Useable
+  loader.rs     # Chargement du monde depuis data/world.json (DTOs serde + factory build_entity)
+  menu.rs       # Menus interactifs clavier (crossterm) : select_from_menu
+  audio.rs      # Lecture des sons (Windows)
   player.rs     # struct Player
-  world.rs      # struct WorldManager, Zone, InterestPoint
+  world.rs      # struct WorldManager, Zone, InterestPoint + helpers
+  entities/
+    mod.rs      # trait Interactable + helpers (pseudo_rand, jet_reussite) + ré-exports
+    *.rs        # une entité concrète par fichier (lit, porte, puits, meunier, michu, objet...)
 ```
 
 ## Class Diagram
@@ -179,7 +184,19 @@ Specific behaviours are isolated into focused traits:
 An entity implements `Interactable` for the game engine interface **and** any capability traits relevant to its behaviour. `execute_action` delegates to the capability trait internally (e.g. `Action::Ouvrir` → `self.ouvrir()`).
 
 ### 4. JSON loading
-A dedicated loader function (to be implemented) reads world data from external JSON files. Each entity entry contains a `"type"` discriminant field that tells the loader which concrete struct to instantiate. The result is pushed into `WorldManager.entities` as a `Box<dyn Interactable>`.
+La fonction de chargement (`loader::load_from_json`, ou `load_from_str` pour les tests) lit le monde depuis `data/world.json`. Chaque entrée d'entité contient un champ discriminant `"type"` qui indique au loader quel struct concret instancier (factory `build_entity`). Le résultat est poussé dans `WorldManager.entities` sous forme de `Box<dyn Interactable>`. Toutes les références (zones, entités) sont des IDs **texte** dans le JSON, résolus en `usize` au chargement.
+
+### 5. Plusieurs actions sous un même verbe → sous-menu interne
+Le moteur identifie une interaction par le couple **(entité, verbe `Action`)** ; ce couple doit rester unique. Quand une entité a besoin de plusieurs variantes du même verbe (ex. un PNJ avec 3 « Dialoguer »), elle n'expose **qu'un seul** verbe dans `get_actions`, puis ouvre un **sous-menu** dans son `execute_action` via `menu::select_from_menu`. Cela évite de modifier l'enum `Action` (et donc le diagramme). **Contrepartie assumée :** l'entité dépend alors de l'UI pour lire le sous-choix (cf. rapport_architecture.md §9).
+
+### 6. Ajouter une nouvelle entité (recette)
+1. Créer `src/entities/<nom>.rs` : une `struct` + `impl Interactable` (+ traits de capacité utiles).
+2. La déclarer dans `src/entities/mod.rs` (`pub mod` + `pub use`).
+3. Dans `loader.rs` : ajouter une variante à `enum EntityDto`, un bras à `EntityDto::id()`, et un bras à la factory `build_entity`.
+4. Décrire l'entité dans `data/world.json` avec son champ `"type"`.
+5. Pour un simple objet ramassable (clé, corde, pièce…), réutiliser le type générique **`Objet`** plutôt que de créer un nouveau type.
+
+> **Note de flux de jeu :** sortir de la maison ne termine plus la partie (placeholder retiré) — on peut explorer la Plaine. La fin réelle (salle du trône) reste à brancher.
 
 ## Implementation Mapping (IDs)
 

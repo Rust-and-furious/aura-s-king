@@ -25,16 +25,39 @@ pub fn pseudo_rand(seed: usize) -> usize {
     seed.wrapping_mul(1103515245).wrapping_add(12345)
 }
 
+// renvoie true avec une proba de `pourcentage`% (petit jet de chance)
+pub fn jet_reussite(seed: usize, pourcentage: usize) -> bool {
+    pseudo_rand(seed) % 100 < pourcentage
+}
+
 pub mod balai;
+pub mod chat;
 pub mod cle;
+pub mod epouvantail;
 pub mod fenetre;
 pub mod lit;
 pub mod marmite;
+pub mod meule;
+pub mod meunier;
+pub mod michu;
+pub mod objet;
 pub mod porte;
+pub mod porte_michu;
+pub mod puits;
+pub mod sacs_farine;
 
 pub use balai::Balai;
+pub use chat::Chat;
 pub use cle::CleMaison;
+pub use epouvantail::Epouvantail;
 pub use fenetre::Fenetre;
 pub use lit::Lit;
 pub use marmite::Marmite;
+pub use meule::Meule;
+pub use meunier::Meunier;
+pub use michu::Michu;
+pub use objet::Objet;
 pub use porte::Porte;
+pub use porte_michu::PorteMichu;
+pub use puits::Puits;
+pub use sacs_farine::SacsFarine;

@@ -17,6 +17,15 @@ impl WorldManager {
         let minutes = total_minutes % 60;
         format!("{:02}h{:02}", hours, minutes)
     }
+
+    // retire un objet ramassé de la zone : de la liste directe ET des points d'intérêt
+    pub fn remove_interactable_from_zone(&mut self, zone_id: usize, entity_id: usize) {
+        let zone = &mut self.zones[zone_id];
+        zone.interactables.retain(|&x| x != entity_id);
+        for ip in &mut zone.interest_points {
+            ip.interactables.retain(|&x| x != entity_id);
+        }
+    }
 }
 
 pub struct Zone {

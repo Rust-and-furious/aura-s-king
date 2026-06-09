@@ -15,7 +15,10 @@ use std::fmt;
 
 use serde::Deserialize;
 
-use crate::entities::{Balai, CleMaison, Fenetre, Interactable, Lit, Marmite, Porte};
+use crate::entities::{
+    Balai, Chat, CleMaison, Epouvantail, Fenetre, Interactable, Lit, Marmite, Meule, Meunier,
+    Michu, Objet, Porte, PorteMichu, Puits, SacsFarine,
+};
 use crate::player::Player;
 use crate::world::{InterestPoint, WorldManager, Zone};
 
@@ -142,6 +145,66 @@ enum EntityDto {
         key_entity_id: String,
         target_zone: String,
     },
+    // ── Entités de la Plaine ──────────────────────────────────
+    Objet {
+        id: String,
+        name: String,
+        description: String,
+        #[serde(default)]
+        aura_ramassage: f64,
+    },
+    Puits {
+        id: String,
+        name: String,
+        description: String,
+        corde_entity_id: String,
+    },
+    Epouvantail {
+        id: String,
+        name: String,
+        description: String,
+        chapeau_entity_id: String,
+    },
+    Meunier {
+        id: String,
+        name: String,
+        description: String,
+        marmite_entity_id: String,
+        farine_entity_id: String,
+    },
+    Meule {
+        id: String,
+        name: String,
+        description: String,
+    },
+    SacsFarine {
+        id: String,
+        name: String,
+        description: String,
+        piece_entity_id: String,
+    },
+    PorteMichu {
+        id: String,
+        name: String,
+        description: String,
+        #[serde(default)]
+        est_ouverte: bool,
+        michu_entity_id: String,
+        chat_entity_id: String,
+    },
+    Michu {
+        id: String,
+        name: String,
+        description: String,
+        biscuit_entity_id: String,
+        broche_entity_id: String,
+        chapeau_entity_id: String,
+    },
+    Chat {
+        id: String,
+        name: String,
+        description: String,
+    },
 }
 
 impl EntityDto {
@@ -153,6 +216,15 @@ impl EntityDto {
             EntityDto::Balai { id, .. } => id,
             EntityDto::Fenetre { id, .. } => id,
             EntityDto::Porte { id, .. } => id,
+            EntityDto::Objet { id, .. } => id,
+            EntityDto::Puits { id, .. } => id,
+            EntityDto::Epouvantail { id, .. } => id,
+            EntityDto::Meunier { id, .. } => id,
+            EntityDto::Meule { id, .. } => id,
+            EntityDto::SacsFarine { id, .. } => id,
+            EntityDto::PorteMichu { id, .. } => id,
+            EntityDto::Michu { id, .. } => id,
+            EntityDto::Chat { id, .. } => id,
         }
     }
 }
@@ -179,9 +251,18 @@ pub struct LoadedWorld {
 /// (zones, entités). Cette fonction les résout en indices `usize` via
 /// deux passes, avant d'instancier les structs concrets.
 pub fn load_from_json(path: &str) -> Result<LoadedWorld, LoadError> {
-    // ── Lecture et désérialisation ────────────────────────────
     let content = std::fs::read_to_string(path)?;
-    let dto: WorldDto = serde_json::from_str(&content)?;
+    load_from_str(&content)
+}
+
+/// Variante de [`load_from_json`] qui prend le contenu JSON directement en
+/// mémoire plutôt qu'un chemin de fichier.
+///
+/// Utile pour les tests unitaires : on peut charger un mini-monde décrit dans
+/// une chaîne, sans dépendre d'un fichier sur le disque.
+pub fn load_from_str(content: &str) -> Result<LoadedWorld, LoadError> {
+    // ── Désérialisation ───────────────────────────────────────
+    let dto: WorldDto = serde_json::from_str(content)?;
 
     // ── Passe 1 : construction des index String → usize ──────
     let entity_index: HashMap<String, usize> = dto
@@ -221,49 +302,48 @@ pub fn load_from_json(path: &str) -> Result<LoadedWorld, LoadError> {
         .collect::<Result<_, _>>()?;
 
     // ── Construction des zones ────────────────────────────────
-    let zones: Vec<Zone> = dto
-        .zones
-        .into_iter()
-        .enumerate()
-        .map(|(i, z)| {
-            let connected_zones = z
-                .connected_zones
-                .iter()
-                .map(|id| resolve_zone(id))
-                .collect::<Result<Vec<_>, _>>()?;
+    // Chaque point d'intérêt reçoit un ID unique (compteur global), et non plus
+    // l'index de sa zone parente : deux points d'intérêt distincts ne doivent
+    // jamais partager le même ID.
+    let mut zones: Vec<Zone> = Vec::with_capacity(dto.zones.len());
+    let mut next_ip_id: usize = 0;
 
-            let interactables = z
+    for (i, z) in dto.zones.into_iter().enumerate() {
+        let connected_zones = z
+            .connected_zones
+            .iter()
+            .map(|id| resolve_zone(id))
+            .collect::<Result<Vec<_>, _>>()?;
+
+        let interactables = z
+            .interactables
+            .iter()
+            .map(|id| resolve_entity(id))
+            .collect::<Result<Vec<_>, _>>()?;
+
+        let mut interest_points = Vec::with_capacity(z.interest_points.len());
+        for ip in z.interest_points {
+            let ip_interactables = ip
                 .interactables
                 .iter()
                 .map(|id| resolve_entity(id))
                 .collect::<Result<Vec<_>, _>>()?;
+            interest_points.push(InterestPoint {
+                id: next_ip_id,
+                description: ip.description,
+                interactables: ip_interactables,
+            });
+            next_ip_id += 1;
+        }
 
-            let interest_points = z
-                .interest_points
-                .into_iter()
-                .map(|ip| {
-                    let ip_interactables = ip
-                        .interactables
-                        .iter()
-                        .map(|id| resolve_entity(id))
-                        .collect::<Result<Vec<_>, _>>()?;
-                    Ok::<InterestPoint, LoadError>(InterestPoint {
-                        id: i, // l'ID numérique est l'index de la zone parente
-                        description: ip.description,
-                        interactables: ip_interactables,
-                    })
-                })
-                .collect::<Result<Vec<_>, _>>()?;
-
-            Ok(Zone {
-                id: i,
-                description: z.description,
-                interest_points,
-                interactables,
-                connected_zones,
-            })
-        })
-        .collect::<Result<_, LoadError>>()?;
+        zones.push(Zone {
+            id: i,
+            description: z.description,
+            interest_points,
+            interactables,
+            connected_zones,
+        });
+    }
 
     // ── Joueur ────────────────────────────────────────────────
     let player = Player {
@@ -355,5 +435,200 @@ fn build_entity(
             key_entity_id: resolve_entity(&key_entity_id)?,
             target_zone: resolve_zone(&target_zone)?,
         })),
+
+        // ── Entités de la Plaine ──────────────────────────────
+        EntityDto::Objet {
+            name,
+            description,
+            aura_ramassage,
+            ..
+        } => Ok(Box::new(Objet {
+            id,
+            name,
+            description,
+            aura_ramassage,
+        })),
+
+        EntityDto::Puits {
+            name,
+            description,
+            corde_entity_id,
+            ..
+        } => Ok(Box::new(Puits {
+            id,
+            name,
+            description,
+            corde_id: resolve_entity(&corde_entity_id)?,
+        })),
+
+        EntityDto::Epouvantail {
+            name,
+            description,
+            chapeau_entity_id,
+            ..
+        } => Ok(Box::new(Epouvantail {
+            id,
+            name,
+            description,
+            chapeau_id: resolve_entity(&chapeau_entity_id)?,
+            chapeau_pris: false,
+        })),
+
+        EntityDto::Meunier {
+            name,
+            description,
+            marmite_entity_id,
+            farine_entity_id,
+            ..
+        } => Ok(Box::new(Meunier {
+            id,
+            name,
+            description,
+            marmite_id: resolve_entity(&marmite_entity_id)?,
+            farine_id: resolve_entity(&farine_entity_id)?,
+        })),
+
+        EntityDto::Meule { name, description, .. } => {
+            Ok(Box::new(Meule { id, name, description }))
+        }
+
+        EntityDto::SacsFarine {
+            name,
+            description,
+            piece_entity_id,
+            ..
+        } => Ok(Box::new(SacsFarine {
+            id,
+            name,
+            description,
+            piece_id: resolve_entity(&piece_entity_id)?,
+            piece_trouvee: false,
+        })),
+
+        EntityDto::PorteMichu {
+            name,
+            description,
+            est_ouverte,
+            michu_entity_id,
+            chat_entity_id,
+            ..
+        } => Ok(Box::new(PorteMichu {
+            id,
+            name,
+            description,
+            est_ouverte,
+            michu_id: resolve_entity(&michu_entity_id)?,
+            chat_id: resolve_entity(&chat_entity_id)?,
+        })),
+
+        EntityDto::Michu {
+            name,
+            description,
+            biscuit_entity_id,
+            broche_entity_id,
+            chapeau_entity_id,
+            ..
+        } => Ok(Box::new(Michu {
+            id,
+            name,
+            description,
+            biscuit_id: resolve_entity(&biscuit_entity_id)?,
+            broche_id: resolve_entity(&broche_entity_id)?,
+            chapeau_id: resolve_entity(&chapeau_entity_id)?,
+            biscuit_donne: false,
+        })),
+
+        EntityDto::Chat { name, description, .. } => {
+            Ok(Box::new(Chat { id, name, description }))
+        }
+    }
+}
+
+// ──────────────────────────────────────────────────────────────
+// Tests unitaires
+// ──────────────────────────────────────────────────────────────
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Mini-monde de test : une zone avec deux objets directs (lit + balai),
+    /// un premier point d'intérêt regroupant le balai, et un second vide.
+    const MINI_WORLD: &str = r#"{
+        "start_zone": "z0",
+        "max_ticks": 100,
+        "start_aura": 5.0,
+        "intro_text": "test",
+        "zones": [
+            {
+                "id": "z0",
+                "description": "zone test",
+                "connected_zones": [],
+                "interactables": ["lit0", "balai0"],
+                "interest_points": [
+                    { "id": "coin", "description": "le coin", "interactables": ["balai0"] },
+                    { "id": "autre", "description": "autre coin", "interactables": [] }
+                ]
+            }
+        ],
+        "entities": [
+            { "id": "lit0", "type": "Lit", "name": "Lit", "description": "d" },
+            { "id": "balai0", "type": "Balai", "name": "Balai", "description": "d" }
+        ]
+    }"#;
+
+    #[test]
+    fn points_interet_charges_avec_interactables_resolus() {
+        let world = load_from_str(MINI_WORLD).expect("chargement").world;
+        let zone = &world.zones[0];
+
+        // lit0 -> index 0, balai0 -> index 1 (ordre du tableau "entities").
+        assert_eq!(zone.interactables, vec![0, 1]);
+        assert_eq!(zone.interest_points.len(), 2);
+        // Le 1er point d'intérêt regroupe le balai (index 1), résolu depuis "balai0".
+        assert_eq!(zone.interest_points[0].interactables, vec![1]);
+        // Le 2e est vide.
+        assert!(zone.interest_points[1].interactables.is_empty());
+    }
+
+    #[test]
+    fn points_interet_ont_des_ids_uniques() {
+        let world = load_from_str(MINI_WORLD).expect("chargement").world;
+        let ips = &world.zones[0].interest_points;
+        // IDs distincts issus du compteur global (et non l'index de la zone).
+        assert_eq!(ips[0].id, 0);
+        assert_eq!(ips[1].id, 1);
+        assert_ne!(ips[0].id, ips[1].id);
+    }
+
+    #[test]
+    fn remove_interactable_vide_zone_et_points_interet() {
+        let mut world = load_from_str(MINI_WORLD).expect("chargement").world;
+
+        // On retire le balai (id 1), présent à la fois dans la zone et dans un PI.
+        world.remove_interactable_from_zone(0, 1);
+
+        assert_eq!(world.zones[0].interactables, vec![0]); // ne reste que le lit
+        assert!(world.zones[0].interest_points[0].interactables.is_empty());
+    }
+
+    #[test]
+    fn reference_inconnue_renvoie_une_erreur() {
+        let bad = r#"{
+            "start_zone": "z0",
+            "max_ticks": 100,
+            "start_aura": 0.0,
+            "intro_text": "test",
+            "zones": [
+                {
+                    "id": "z0",
+                    "description": "d",
+                    "interactables": ["objet_inexistant"]
+                }
+            ],
+            "entities": []
+        }"#;
+        let res = load_from_str(bad);
+        assert!(matches!(res, Err(LoadError::UnknownRef(_))));
     }
 }

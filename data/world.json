@@ -15,10 +15,21 @@
     },
     {
       "id": "zone_plaine",
-      "description": "La Plaine. L'air frais vous frappe le visage. Vous y êtes enfin !",
-      "connected_zones": [],
-      "interactables": [],
-      "interest_points": []
+      "description": "La Plaine. L'air frais vous frappe le visage. Devant vous, une plaine s'étend, parsemée de trucs plus ou moins intéressants. Au loin, un moulin tourne. Ou pas.",
+      "connected_zones": ["zone_maison"],
+      "interactables": ["puits_plaine", "epouvantail_plaine"],
+      "interest_points": [
+        {
+          "id": "moulin_plaine",
+          "description": "Le moulin (le meunier, large et couvert de farine, vous observe avec méfiance)",
+          "interactables": ["meunier_pnj", "meule_moulin", "sacs_farine"]
+        },
+        {
+          "id": "maison_michu_plaine",
+          "description": "La maison de Michu (votre voisine de 847 ans, reine des ragots et des biscuits)",
+          "interactables": ["porte_michu"]
+        }
+      ]
     }
   ],
 
@@ -68,6 +79,104 @@
       "is_locked": true,
       "key_entity_id": "cle_maison",
       "target_zone": "zone_plaine"
+    },
+
+    {
+      "id": "puits_plaine",
+      "type": "Puits",
+      "name": "Puits",
+      "description": "Un vieux puits de pierre. C'est profond et sombre.",
+      "corde_entity_id": "corde_puits"
+    },
+    {
+      "id": "epouvantail_plaine",
+      "type": "Epouvantail",
+      "name": "Épouvantail",
+      "description": "Un épouvantail planté au milieu du champ, coiffé d'un chapeau étonnamment classe.",
+      "chapeau_entity_id": "chapeau_epouvantail"
+    },
+    {
+      "id": "meunier_pnj",
+      "type": "Meunier",
+      "name": "Le Meunier",
+      "description": "Un homme large, couvert de farine, qui vous regarde avec la méfiance de quelqu'un qui a déjà été volé par un paysan. Peut-être même vous.",
+      "marmite_entity_id": "marmite_cuisine",
+      "farine_entity_id": "farine_enchantee"
+    },
+    {
+      "id": "meule_moulin",
+      "type": "Meule",
+      "name": "Meule de pierre",
+      "description": "Une grande meule de pierre qui tourne lentement."
+    },
+    {
+      "id": "sacs_farine",
+      "type": "SacsFarine",
+      "name": "Sacs de farine",
+      "description": "Des dizaines de sacs empilés. Ça sent le pain et le labeur.",
+      "piece_entity_id": "piece_monnaie"
+    },
+    {
+      "id": "porte_michu",
+      "type": "PorteMichu",
+      "name": "Porte de Michu",
+      "description": "Une porte rustique ornée d'un heurtoir en forme de poule.",
+      "est_ouverte": false,
+      "michu_entity_id": "michu_pnj",
+      "chat_entity_id": "chat_michu"
+    },
+    {
+      "id": "michu_pnj",
+      "type": "Michu",
+      "name": "Michu",
+      "description": "Votre voisine de 847 ans, la plus grande commère du royaume.",
+      "biscuit_entity_id": "biscuit_michu",
+      "broche_entity_id": "broche_michu",
+      "chapeau_entity_id": "chapeau_epouvantail"
+    },
+    {
+      "id": "chat_michu",
+      "type": "Chat",
+      "name": "Pataud (le chat)",
+      "description": "Un gros chat roux au regard méprisant."
+    },
+
+    {
+      "id": "corde_puits",
+      "type": "Objet",
+      "name": "Corde solide",
+      "description": "Une corde robuste récupérée au fond du puits. Pourrait servir à réparer pas mal de choses."
+    },
+    {
+      "id": "chapeau_epouvantail",
+      "type": "Objet",
+      "name": "Chapeau de l'épouvantail",
+      "description": "Un chapeau de paille étonnamment élégant, volé à un épouvantail."
+    },
+    {
+      "id": "farine_enchantee",
+      "type": "Objet",
+      "name": "Farine enchantée",
+      "description": "Un sac de farine qui scintille légèrement. Le meunier jure qu'elle est magique."
+    },
+    {
+      "id": "piece_monnaie",
+      "type": "Objet",
+      "name": "Pièce de monnaie",
+      "description": "Une petite pièce de cuivre. Pas grand-chose, mais c'est un début de fortune."
+    },
+    {
+      "id": "biscuit_michu",
+      "type": "Objet",
+      "name": "Biscuit de Michu",
+      "description": "Un biscuit encore tiède. Il donne du courage rien qu'à le regarder.",
+      "aura_ramassage": 0.0
+    },
+    {
+      "id": "broche_michu",
+      "type": "Objet",
+      "name": "Broche de Michu",
+      "description": "Une jolie broche ancienne offerte par Michu. Ça en jette."
     }
   ]
 }

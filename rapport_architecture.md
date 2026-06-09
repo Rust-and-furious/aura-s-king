@@ -234,6 +234,28 @@ impl Interactable for Fenetre {
 
 ---
 
-## 8. Conclusion
+## 8. Le Système de Points d'Intérêt (navigation à deux niveaux)
+
+Une `Zone` regroupe ses entités sur **deux niveaux** : des **interactables directs** (posés dans la zone) et des **points d'intérêt** (`InterestPoint`), qui sont des sous-lieux regroupant eux-mêmes des interactables. Exemple dans la Plaine : le point d'intérêt « Moulin » regroupe le meunier, la meule et les sacs de farine.
+
+Côté moteur, la boucle de jeu construit le menu d'une zone à partir de deux sources : `Zone.interactables` (objets directs) et `Zone.interest_points` (sous-lieux dans lesquels on peut « entrer »). Entrer dans un point d'intérêt ouvre un second menu listant ses propres interactables ; la **même fonction d'interaction** (`interact_with_entity`) est réutilisée, qu'une entité soit directe ou regroupée.
+
+- **Découverte dynamique :** le contenu d'un point d'intérêt peut évoluer en jeu. Tant que la porte de Michu est fermée, le sous-lieu ne contient que la porte ; une fois ouverte, Michu et son chat y sont ajoutés — par simple ajout de leur `usize` dans la liste du point d'intérêt, sans réallocation d'entité.
+- **Cohérence du ramassage :** ramasser un objet le retire à la fois de la liste directe de la zone **et** de tous ses points d'intérêt (`WorldManager::remove_interactable_from_zone`), pour qu'un objet pris dans un sous-lieu en disparaisse réellement.
+- **Identifiant propre :** chaque `InterestPoint` reçoit un `id` unique au chargement (compteur global), distinct de l'index de sa zone.
+
+## 9. Gestion de Plusieurs Actions sous un Même Verbe (sous-menus)
+
+Le moteur identifie une interaction par le couple **(entité, verbe `Action`)** : c'est la struct concrète qui reçoit l'appel (`Porte::execute_action` ≠ `Lit::execute_action`). Tant qu'une entité n'expose chaque verbe qu'une seule fois, ce couple est unique et `execute_action` sait quoi faire.
+
+Or certains PNJ proposent **plusieurs variantes du même verbe** : le Meunier a trois `Dialoguer` (parler, demander du travail, offrir un objet), la Meule a trois `Utiliser`. Avec un `Action::Dialoguer` sans donnée, ces variantes seraient indistinguables.
+
+**Décision retenue :** ne pas alourdir l'énumération `Action` (et donc **ne pas modifier le diagramme de classe**). L'entité n'expose qu'**un seul** verbe ; lorsqu'il est choisi, c'est l'entité elle-même qui ouvre un **sous-menu** de variantes depuis son `execute_action` (via `select_from_menu`). C'est le pattern classique des arbres de dialogue.
+
+**Compromis assumé :** cela introduit une dépendance entité → interface (une entité lit un choix clavier pour ses sous-choix). Cela **nuance le découplage total** décrit en section 3 : en plus de leur sortie console, les entités à sous-menu effectuent une lecture d'entrée. Ce compromis a été préféré à une modification de l'`Action`, qui est un contrat partagé par toute l'équipe.
+
+---
+
+## 10. Conclusion
 
 Cette architecture répond intégralement aux exigences du cahier des charges. L'association d'un gestionnaire central par identifiants (`WorldManager` + `usize`) et d'un système d'événements découplés (Enum `Action`) confère au jeu des performances optimales et une sécurité mémoire garantie par le compilateur. La modélisation par traits de capacité offre une souplesse exceptionnelle, favorisant un gameplay riche et extensible. L'équipe dispose ainsi d'une fondation idiomatique en Rust, saine, maintenable et prête pour la phase de production.
