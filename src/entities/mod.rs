@@ -25,19 +25,6 @@ pub fn pseudo_rand(seed: usize) -> usize {
     seed.wrapping_mul(1103515245).wrapping_add(12345)
 }
 
-/// Trouve l'index physique (ID) d'une entité dans la liste globale du WorldManager.
-pub fn find_entity_id(entity: &dyn Interactable, world: &WorldManager) -> Option<usize> {
-    let self_ptr = entity as *const dyn Interactable as *const ();
-    for (i, ent) in world.entities.iter().enumerate() {
-        let ent_ptr = &**ent as *const dyn Interactable as *const ();
-        // reference égale ?
-        if std::ptr::eq(self_ptr, ent_ptr) {
-            return Some(i);
-        }
-    }
-    None
-}
-
 pub mod balai;
 pub mod cle;
 pub mod fenetre;

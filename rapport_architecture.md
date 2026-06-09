@@ -117,16 +117,19 @@ classDiagram
 
 
     class Fenetre {
+        +id: usize
         +est_ouverte: Boolean
         +est_cassee: Boolean
     }
 
     class Garde {
+        +id: usize
         +hp: Integer
         +is_hostile: Boolean
     }
 
     class Pomme {
+        +id: usize
         +aura_rendue: f64
     }
 
@@ -148,6 +151,8 @@ classDiagram
     InterestPoint "1" o-- "0..*" Interactable : regroupe (IDs)
     Player ..> WorldManager : inventaire (IDs usize)
 ```
+
+> **Note :** Toute entité concrète implémentant `Interactable` stocke un champ `id: usize` égal à son index dans `WorldManager.entities`, renseigné au chargement JSON. Ce champ permet à l'entité de se localiser elle-même (p. ex. pour le ramassage) sans dépendre d'une recherche par pointeur, même lorsque le moteur l'a temporairement swappée hors du `Vec`.
 
 ## 7. Exemples d'Implémentation en Rust
 

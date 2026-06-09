@@ -33,12 +33,11 @@ impl Interactable for Marmite {
                 println!("Vous observez la marmite. {}", self.description);
                 if self.has_key && !self.key_revealed {
                     self.key_revealed = true;
-                    let current_zone = player.zone;
-                    world.zones[current_zone].interactables.push(self.key_entity_id);
+                    player.inventory.push(self.key_entity_id);
                     println!("\nAu fond de la soupe tiède, quelque chose brille... C'est la clé de votre propre porte !");
-                    println!("La \x1B[36m'Clé de la maison'\x1B[0m est maintenant visible dans la pièce.");
+                    println!("Vous l'empochez : la \x1B[36m'Clé de la maison'\x1B[0m est maintenant dans votre inventaire.");
                 } else if self.has_key {
-                    println!("\nLa soupe est toujours tiède, mais la clé a déjà été retirée.");
+                    println!("\nLa soupe est toujours tiède, mais la clé a déjà été récupérée.");
                 }
             }
             Action::Ramasser => {
