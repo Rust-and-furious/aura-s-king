@@ -10,6 +10,7 @@ pub struct Meunier {
     pub description: String,
     pub marmite_id: usize,
     pub farine_id: usize,
+    pub travail_donne: bool,
 }
 
 impl Interactable for Meunier {
@@ -49,8 +50,15 @@ impl Interactable for Meunier {
                     }
                     1 => {
                         world.current_tick += 5;
-                        player.aura += 5000.0;
-                        println!("\x1B[32m[+5 000 Aura]\x1B[0m Le meunier vous confie une livraison de sacs de farine pour le village. Quel dévouement.");
+                        // une seule livraison à confier : pas une rente d'aura
+                        if self.travail_donne {
+                            println!("« J'ai plus rien à te faire livrer pour aujourd'hui, gamin. »");
+                        } else {
+                            self.travail_donne = true;
+                            player.aura += 5000.0;
+                            crate::audio::play_sound("assets/victory.wav");
+                            println!("\x1B[32m[+5 000 Aura]\x1B[0m Le meunier vous confie une livraison de sacs de farine pour le village. Quel dévouement.");
+                        }
                     }
                     2 => {
                         world.current_tick += 5;
@@ -58,6 +66,7 @@ impl Interactable for Meunier {
                             player.inventory.retain(|&x| x != self.marmite_id);
                             player.inventory.push(self.farine_id);
                             player.aura += 30000.0;
+                            crate::audio::play_sound("assets/victory.wav");
                             println!("\x1B[32m[+30 000 Aura]\x1B[0m « Ah, une marmite ! Parfaite pour ma soupe. Tiens, prends cette farine enchantée ! »");
                         } else {
                             println!("« Qu'est-ce que tu veux que je fasse de ça ? »");

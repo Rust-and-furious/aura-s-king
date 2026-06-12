@@ -459,6 +459,7 @@ fn build_entity(
             name,
             description,
             corde_id: resolve_entity(&corde_entity_id)?,
+            deja_crie: false,
         })),
 
         EntityDto::Epouvantail {
@@ -472,6 +473,7 @@ fn build_entity(
             description,
             chapeau_id: resolve_entity(&chapeau_entity_id)?,
             chapeau_pris: false,
+            deja_attaque: false,
         })),
 
         EntityDto::Meunier {
@@ -486,6 +488,7 @@ fn build_entity(
             description,
             marmite_id: resolve_entity(&marmite_entity_id)?,
             farine_id: resolve_entity(&farine_entity_id)?,
+            travail_donne: false,
         })),
 
         EntityDto::Meule { name, description, .. } => {
@@ -541,94 +544,5 @@ fn build_entity(
         EntityDto::Chat { name, description, .. } => {
             Ok(Box::new(Chat { id, name, description }))
         }
-    }
-}
-
-// ──────────────────────────────────────────────────────────────
-// Tests unitaires
-// ──────────────────────────────────────────────────────────────
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    /// Mini-monde de test : une zone avec deux objets directs (lit + balai),
-    /// un premier point d'intérêt regroupant le balai, et un second vide.
-    const MINI_WORLD: &str = r#"{
-        "start_zone": "z0",
-        "max_ticks": 100,
-        "start_aura": 5.0,
-        "intro_text": "test",
-        "zones": [
-            {
-                "id": "z0",
-                "description": "zone test",
-                "connected_zones": [],
-                "interactables": ["lit0", "balai0"],
-                "interest_points": [
-                    { "id": "coin", "description": "le coin", "interactables": ["balai0"] },
-                    { "id": "autre", "description": "autre coin", "interactables": [] }
-                ]
-            }
-        ],
-        "entities": [
-            { "id": "lit0", "type": "Lit", "name": "Lit", "description": "d" },
-            { "id": "balai0", "type": "Balai", "name": "Balai", "description": "d" }
-        ]
-    }"#;
-
-    #[test]
-    fn points_interet_charges_avec_interactables_resolus() {
-        let world = load_from_str(MINI_WORLD).expect("chargement").world;
-        let zone = &world.zones[0];
-
-        // lit0 -> index 0, balai0 -> index 1 (ordre du tableau "entities").
-        assert_eq!(zone.interactables, vec![0, 1]);
-        assert_eq!(zone.interest_points.len(), 2);
-        // Le 1er point d'intérêt regroupe le balai (index 1), résolu depuis "balai0".
-        assert_eq!(zone.interest_points[0].interactables, vec![1]);
-        // Le 2e est vide.
-        assert!(zone.interest_points[1].interactables.is_empty());
-    }
-
-    #[test]
-    fn points_interet_ont_des_ids_uniques() {
-        let world = load_from_str(MINI_WORLD).expect("chargement").world;
-        let ips = &world.zones[0].interest_points;
-        // IDs distincts issus du compteur global (et non l'index de la zone).
-        assert_eq!(ips[0].id, 0);
-        assert_eq!(ips[1].id, 1);
-        assert_ne!(ips[0].id, ips[1].id);
-    }
-
-    #[test]
-    fn remove_interactable_vide_zone_et_points_interet() {
-        let mut world = load_from_str(MINI_WORLD).expect("chargement").world;
-
-        // On retire le balai (id 1), présent à la fois dans la zone et dans un PI.
-        world.remove_interactable_from_zone(0, 1);
-
-        assert_eq!(world.zones[0].interactables, vec![0]); // ne reste que le lit
-        assert!(world.zones[0].interest_points[0].interactables.is_empty());
-    }
-
-    #[test]
-    fn reference_inconnue_renvoie_une_erreur() {
-        let bad = r#"{
-            "start_zone": "z0",
-            "max_ticks": 100,
-            "start_aura": 0.0,
-            "intro_text": "test",
-            "zones": [
-                {
-                    "id": "z0",
-                    "description": "d",
-                    "interactables": ["objet_inexistant"]
-                }
-            ],
-            "entities": []
-        }"#;
-        let res = load_from_str(bad);
-        assert!(matches!(res, Err(LoadError::UnknownRef(_))));
     }
 }

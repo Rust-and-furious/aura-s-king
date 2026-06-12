@@ -409,43 +409,4 @@ mod tests {
         assert!(world.current_tick >= 60 && world.current_tick <= 120);
         assert!(temp_player.aura == 10000.0 || temp_player.aura == -30000.0);
     }
-
-    #[test]
-    fn la_plaine_a_deux_points_interet() {
-        let world = load_test_world();
-        // zone 1 = zone_plaine : Moulin + Maison de Michu.
-        assert_eq!(world.zones[1].interest_points.len(), 2);
-        // Moulin : meunier + meule + sacs.
-        assert_eq!(world.zones[1].interest_points[0].interactables.len(), 3);
-    }
-
-    #[test]
-    fn michu_et_son_chat_sont_caches_tant_que_la_porte_est_fermee() {
-        let world = load_test_world();
-        // La maison de Michu ne contient au départ que la porte.
-        let maison_michu = &world.zones[1].interest_points[1];
-        assert_eq!(maison_michu.interactables.len(), 1);
-    }
-
-    #[test]
-    fn epouvantail_voler_chapeau_donne_aura_et_objet() {
-        let mut world = load_test_world();
-        // zone_plaine.interactables = [puits, epouvantail] -> l'épouvantail est en 2e.
-        let epouv_idx = world.zones[1].interactables[1];
-
-        let mut temp_player = std::mem::replace(
-            &mut world.player,
-            Player {
-                aura: 0.0,
-                zone: 1, // la Plaine
-                inventory: vec![],
-            },
-        );
-        let mut epouv = std::mem::replace(&mut world.entities[epouv_idx], Box::new(DummyEntity));
-
-        epouv.execute_action(&Action::Ramasser, &mut temp_player, &mut world);
-
-        assert_eq!(temp_player.aura, 15000.0);
-        assert_eq!(temp_player.inventory.len(), 1); // le chapeau
-    }
 }

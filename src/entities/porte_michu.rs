@@ -1,7 +1,7 @@
 use crate::actions::Action;
 use crate::entities::Interactable;
 use crate::player::Player;
-use crate::traits::Openable;
+use crate::traits::{Fightable, Openable};
 use crate::world::WorldManager;
 
 pub struct PorteMichu {
@@ -28,6 +28,16 @@ impl Openable for PorteMichu {
         }
         self.est_ouverte = false;
         Ok(())
+    }
+}
+
+impl Fightable for PorteMichu {
+    // la porte n'a pas de PV : la frapper ne l'ouvre pas, ça réveille juste Michu
+    fn recevoir_degats(&mut self, _degats: i32) {}
+
+    // "vivante" = encore fermée, donc toujours un obstacle
+    fn est_vivant(&self) -> bool {
+        !self.est_ouverte
     }
 }
 
@@ -77,13 +87,16 @@ impl Interactable for PorteMichu {
                 Ok(_) => {
                     world.current_tick += 2;
                     self.reveler_occupants(world, player.zone);
+                    crate::audio::play_sound("assets/victory.wav");
                     println!("« Oh, c'est toi gamin ! Entre donc ! » Michu vous ouvre la porte.");
                 }
                 Err(e) => println!("{}", e),
             },
-            Action::Attaquer { degats: _ } => {
+            Action::Attaquer { degats } => {
+                self.recevoir_degats(*degats);
                 world.current_tick += 120;
                 player.aura -= 150000.0;
+                crate::audio::play_sound("assets/defeat.wav");
                 println!("\x1B[31m[-150 000 Aura]\x1B[0m Michu vous assomme d'un coup de poêle. Sacrés réflexes pour 847 ans. Vous vous réveillez deux heures plus tard.");
             }
             _ => println!("Action impossible sur la porte de Michu."),

@@ -34,6 +34,7 @@ impl Interactable for Objet {
                 player.inventory.push(self.id);
                 if self.aura_ramassage != 0.0 {
                     player.aura += self.aura_ramassage;
+                    crate::audio::play_sound("assets/victory.wav");
                 }
                 println!("Vous ramassez {}. Ajouté à l'inventaire.", self.name);
             }
