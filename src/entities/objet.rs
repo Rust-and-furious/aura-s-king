@@ -1,5 +1,5 @@
 use crate::actions::Action;
-use crate::entities::Interactable;
+use crate::entities::{Interactable, Saveable};
 use crate::player::Player;
 use crate::world::WorldManager;
 
@@ -10,6 +10,8 @@ pub struct Objet {
     pub description: String,
     pub aura_ramassage: f64,
 }
+
+impl Saveable for Objet {}
 
 impl Interactable for Objet {
     fn id(&self) -> usize {

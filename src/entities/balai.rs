@@ -1,5 +1,5 @@
 use crate::actions::Action;
-use crate::entities::Interactable;
+use crate::entities::{Interactable, Saveable};
 use crate::player::Player;
 use crate::world::WorldManager;
 
@@ -8,6 +8,8 @@ pub struct Balai {
     pub name: String,
     pub description: String,
 }
+
+impl Saveable for Balai {}
 
 impl Interactable for Balai {
     fn id(&self) -> usize {

@@ -8,7 +8,18 @@ use crate::world::WorldManager;
 // Cela permet au moteur de jeu de traiter toutes les entités de manière uniforme, sans connaître leurs détails spécifiques.
 // ============================================================
 
-pub trait Interactable {
+use std::collections::HashMap;
+
+pub trait Saveable {
+    /// Exporte l'état mutable de l'entité.
+    fn save_state(&self) -> HashMap<String, serde_json::Value> {
+        HashMap::new()
+    }
+    /// Restaure l'état mutable depuis la map.
+    fn load_state(&mut self, _state: &HashMap<String, serde_json::Value>) {}
+}
+
+pub trait Interactable: Saveable {
     fn id(&self) -> usize;
     fn name(&self) -> &str;
     fn description(&self) -> &str;

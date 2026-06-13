@@ -1,5 +1,5 @@
 use crate::actions::Action;
-use crate::entities::{jet_reussite, Interactable};
+use crate::entities::{jet_reussite, Interactable, Saveable};
 use crate::menu::{select_from_menu, MenuOption, MenuResult};
 use crate::player::Player;
 use crate::traits::Useable;
@@ -10,6 +10,8 @@ pub struct Chat {
     pub name: String,
     pub description: String,
 }
+
+impl Saveable for Chat {}
 
 impl Useable for Chat {
     // caresser ou soulever → on demande lequel via un sous-menu
@@ -34,18 +36,18 @@ impl Useable for Chat {
                 if jet_reussite(world.current_tick, 70) {
                     player.aura += 5000.0;
                     crate::audio::play_sound("assets/victory.wav");
-                    println!("\x1B[32m[+5 000 Aura]\x1B[0m Pataud ronronne bruyamment. Vous vous sentez validé.");
+                    println!("{} Pataud ronronne bruyamment. Vous vous sentez validé.", colore!(Vert, "[+5 000 Aura]"));
                 } else {
                     player.aura -= 15000.0;
                     crate::audio::play_sound("assets/defeat.wav");
-                    println!("\x1B[31m[-15 000 Aura]\x1B[0m Pataud n'est pas d'humeur et vous griffe méchamment le nez.");
+                    println!("{} Pataud n'est pas d'humeur et vous griffe méchamment le nez.", colore!(Rouge, "[-15 000 Aura]"));
                 }
             }
             1 => {
                 world.current_tick += 5;
                 player.aura -= 40000.0;
                 crate::audio::play_sound("assets/defeat.wav");
-                println!("\x1B[31m[-40 000 Aura]\x1B[0m Le chat se transforme en tornade de griffes. Michu vous gronde. Double peine.");
+                println!("{} Le chat se transforme en tornade de griffes. Michu vous gronde. Double peine.", colore!(Rouge, "[-40 000 Aura]"));
             }
             _ => {}
         }

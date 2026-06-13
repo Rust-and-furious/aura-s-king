@@ -1,8 +1,9 @@
 use crate::actions::Action;
-use crate::entities::Interactable;
+use crate::entities::{Interactable, Saveable};
 use crate::player::Player;
 use crate::traits::Fightable;
 use crate::world::WorldManager;
+use std::collections::HashMap;
 
 pub struct Epouvantail {
     pub id: usize,
@@ -11,6 +12,28 @@ pub struct Epouvantail {
     pub chapeau_id: usize,
     pub chapeau_pris: bool,
     pub deja_attaque: bool,
+}
+
+impl Saveable for Epouvantail {
+    fn save_state(&self) -> HashMap<String, serde_json::Value> {
+        let mut state = HashMap::new();
+        state.insert("chapeau_pris".to_string(), serde_json::json!(self.chapeau_pris));
+        state.insert("deja_attaque".to_string(), serde_json::json!(self.deja_attaque));
+        state
+    }
+
+    fn load_state(&mut self, state: &HashMap<String, serde_json::Value>) {
+        if let Some(val) = state.get("chapeau_pris") {
+            if let Some(b) = val.as_bool() {
+                self.chapeau_pris = b;
+            }
+        }
+        if let Some(val) = state.get("deja_attaque") {
+            if let Some(b) = val.as_bool() {
+                self.deja_attaque = b;
+            }
+        }
+    }
 }
 
 impl Fightable for Epouvantail {
@@ -57,7 +80,7 @@ impl Interactable for Epouvantail {
                     player.inventory.push(self.chapeau_id);
                     player.aura += 15000.0;
                     crate::audio::play_sound("assets/victory.wav");
-                    println!("\x1B[32m[+15 000 Aura]\x1B[0m Vous volez le chapeau de l'épouvantail. Petit larcin, grande classe.");
+                    println!("{} Vous volez le chapeau de l'épouvantail. Petit larcin, grande classe.", colore!(Vert, "[+15 000 Aura]"));
                 }
             }
             Action::Attaquer { degats } => {
@@ -70,14 +93,14 @@ impl Interactable for Epouvantail {
                     self.deja_attaque = true;
                     player.aura += 25000.0;
                     crate::audio::play_sound("assets/victory.wav");
-                    println!("\x1B[32m[+25 000 Aura]\x1B[0m Les corbeaux sont impressionnés : vous avez gagné un duel contre un bâton habillé.");
+                    println!("{} Les corbeaux sont impressionnés : vous avez gagné un duel contre un bâton habillé.", colore!(Vert, "[+25 000 Aura]"));
                 }
             }
             Action::Dialoguer => {
                 world.current_tick += 5;
                 player.aura -= 50000.0;
                 crate::audio::play_sound("assets/defeat.wav");
-                println!("\x1B[31m[-50 000 Aura]\x1B[0m Il ne répond pas. Évidemment. Vous venez de parler à un tas de paille devant un corbeau moqueur.");
+                println!("{} Il ne répond pas. Évidemment. Vous venez de parler à un tas de paille devant un corbeau moqueur.", colore!(Rouge, "[-50 000 Aura]"));
             }
             _ => println!("Action impossible sur l'épouvantail."),
         }

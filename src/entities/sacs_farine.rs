@@ -1,8 +1,9 @@
 use crate::actions::Action;
-use crate::entities::{jet_reussite, Interactable};
+use crate::entities::{jet_reussite, Interactable, Saveable};
 use crate::player::Player;
 use crate::traits::Fightable;
 use crate::world::WorldManager;
+use std::collections::HashMap;
 
 pub struct SacsFarine {
     pub id: usize,
@@ -10,6 +11,22 @@ pub struct SacsFarine {
     pub description: String,
     pub piece_id: usize,
     pub piece_trouvee: bool,
+}
+
+impl Saveable for SacsFarine {
+    fn save_state(&self) -> HashMap<String, serde_json::Value> {
+        let mut state = HashMap::new();
+        state.insert("piece_trouvee".to_string(), serde_json::json!(self.piece_trouvee));
+        state
+    }
+
+    fn load_state(&mut self, state: &HashMap<String, serde_json::Value>) {
+        if let Some(val) = state.get("piece_trouvee") {
+            if let Some(b) = val.as_bool() {
+                self.piece_trouvee = b;
+            }
+        }
+    }
 }
 
 impl Fightable for SacsFarine {
@@ -52,7 +69,7 @@ impl Interactable for SacsFarine {
                 if jet_reussite(world.current_tick, 40) {
                     player.aura -= 30000.0;
                     crate::audio::play_sound("assets/defeat.wav");
-                    println!("\x1B[31m[-30 000 Aura]\x1B[0m Le meunier vous attrape la main dans le sac. Littéralement. Aucun butin.");
+                    println!("{} Le meunier vous attrape la main dans le sac. Littéralement. Aucun butin.", colore!(Rouge, "[-30 000 Aura]"));
                 } else if self.piece_trouvee {
                     println!("Vous fouillez encore, mais les sacs ne cachent plus rien d'intéressant.");
                 } else {
@@ -67,7 +84,7 @@ impl Interactable for SacsFarine {
                 world.current_tick += 5;
                 player.aura -= 50000.0;
                 crate::audio::play_sound("assets/defeat.wav");
-                println!("\x1B[31m[-50 000 Aura]\x1B[0m Le meunier hurle, vous êtes couvert de farine. Pas très chevaleresque.");
+                println!("{} Le meunier hurle, vous êtes couvert de farine. Pas très chevaleresque.", colore!(Rouge, "[-50 000 Aura]"));
             }
             _ => println!("Action impossible sur les sacs de farine."),
         }

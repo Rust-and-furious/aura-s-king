@@ -1,8 +1,9 @@
 use crate::actions::Action;
-use crate::entities::Interactable;
+use crate::entities::{Interactable, Saveable};
 use crate::player::Player;
 use crate::traits::{Fightable, Openable};
 use crate::world::WorldManager;
+use std::collections::HashMap;
 
 pub struct PorteMichu {
     pub id: usize,
@@ -11,6 +12,22 @@ pub struct PorteMichu {
     pub est_ouverte: bool,
     pub michu_id: usize,
     pub chat_id: usize,
+}
+
+impl Saveable for PorteMichu {
+    fn save_state(&self) -> HashMap<String, serde_json::Value> {
+        let mut state = HashMap::new();
+        state.insert("est_ouverte".to_string(), serde_json::json!(self.est_ouverte));
+        state
+    }
+
+    fn load_state(&mut self, state: &HashMap<String, serde_json::Value>) {
+        if let Some(val) = state.get("est_ouverte") {
+            if let Some(b) = val.as_bool() {
+                self.est_ouverte = b;
+            }
+        }
+    }
 }
 
 impl Openable for PorteMichu {
@@ -97,7 +114,7 @@ impl Interactable for PorteMichu {
                 world.current_tick += 120;
                 player.aura -= 150000.0;
                 crate::audio::play_sound("assets/defeat.wav");
-                println!("\x1B[31m[-150 000 Aura]\x1B[0m Michu vous assomme d'un coup de poêle. Sacrés réflexes pour 847 ans. Vous vous réveillez deux heures plus tard.");
+                println!("{} Michu vous assomme d'un coup de poêle. Sacrés réflexes pour 847 ans. Vous vous réveillez deux heures plus tard.", colore!(Rouge, "[-150 000 Aura]"));
             }
             _ => println!("Action impossible sur la porte de Michu."),
         }

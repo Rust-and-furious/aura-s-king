@@ -1,0 +1,78 @@
+{
+  "current_tick": 0,
+  "player": {
+    "aura": 0.0,
+    "zone": 0,
+    "inventory": [
+      1
+    ]
+  },
+  "zones": [
+    {
+      "id": 0,
+      "interactables": [
+        0,
+        3,
+        4,
+        5
+      ],
+      "interest_points": []
+    },
+    {
+      "id": 1,
+      "interactables": [
+        6,
+        7
+      ],
+      "interest_points": [
+        {
+          "id": 0,
+          "interactables": [
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "id": 1,
+          "interactables": [
+            11
+          ]
+        }
+      ]
+    }
+  ],
+  "entities": {
+    "8": {
+      "travail_donne": false
+    },
+    "5": {
+      "est_ouverte": false,
+      "is_locked": true
+    },
+    "4": {
+      "est_cassee": false,
+      "est_ouverte": false
+    },
+    "10": {
+      "piece_trouvee": false
+    },
+    "11": {
+      "est_ouverte": false
+    },
+    "1": {
+      "has_key": true,
+      "key_revealed": false
+    },
+    "12": {
+      "biscuit_donne": false
+    },
+    "7": {
+      "deja_attaque": false,
+      "chapeau_pris": false
+    },
+    "6": {
+      "deja_crie": false
+    }
+  }
+}

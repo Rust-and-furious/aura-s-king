@@ -1,8 +1,9 @@
 use crate::actions::Action;
-use crate::entities::Interactable;
+use crate::entities::{Interactable, Saveable};
 use crate::menu::{select_from_menu, MenuOption, MenuResult};
 use crate::player::Player;
 use crate::world::WorldManager;
+use std::collections::HashMap;
 
 pub struct Michu {
     pub id: usize,
@@ -12,6 +13,22 @@ pub struct Michu {
     pub broche_id: usize,
     pub chapeau_id: usize,
     pub biscuit_donne: bool,
+}
+
+impl Saveable for Michu {
+    fn save_state(&self) -> HashMap<String, serde_json::Value> {
+        let mut state = HashMap::new();
+        state.insert("biscuit_donne".to_string(), serde_json::json!(self.biscuit_donne));
+        state
+    }
+
+    fn load_state(&mut self, state: &HashMap<String, serde_json::Value>) {
+        if let Some(val) = state.get("biscuit_donne") {
+            if let Some(b) = val.as_bool() {
+                self.biscuit_donne = b;
+            }
+        }
+    }
 }
 
 impl Interactable for Michu {
@@ -62,7 +79,7 @@ impl Interactable for Michu {
                             player.inventory.push(self.biscuit_id);
                             player.aura += 10000.0;
                             crate::audio::play_sound("assets/victory.wav");
-                            println!("\x1B[32m[+10 000 Aura]\x1B[0m « Tiens, mon grand. » Les biscuits de Michu donnent du courage.");
+                            println!("{} « Tiens, mon grand. » Les biscuits de Michu donnent du courage.", colore!(Vert, "[+10 000 Aura]"));
                         }
                     }
                     3 => {
@@ -72,7 +89,7 @@ impl Interactable for Michu {
                             player.inventory.push(self.broche_id);
                             player.aura += 50000.0;
                             crate::audio::play_sound("assets/victory.wav");
-                            println!("\x1B[32m[+50 000 Aura]\x1B[0m « Oh ! Je cherchais ce chapeau pour mes poules depuis des années ! Tiens, prends cette broche. »");
+                            println!("{} « Oh ! Je cherchais ce chapeau pour mes poules depuis des années ! Tiens, prends cette broche. »", colore!(Vert, "[+50 000 Aura]"));
                         } else {
                             println!("« C'est gentil mais non merci. Je ne suis pas Emmaüs. »");
                         }

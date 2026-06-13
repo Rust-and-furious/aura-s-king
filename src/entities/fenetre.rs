@@ -1,8 +1,9 @@
 use crate::actions::Action;
-use crate::entities::Interactable;
+use crate::entities::{Interactable, Saveable};
 use crate::player::Player;
 use crate::traits::Openable;
 use crate::world::WorldManager;
+use std::collections::HashMap;
 
 pub struct Fenetre {
     pub id: usize,
@@ -11,6 +12,28 @@ pub struct Fenetre {
     pub est_ouverte: bool,
     pub est_cassee: bool,
     pub target_zone: usize,
+}
+
+impl Saveable for Fenetre {
+    fn save_state(&self) -> HashMap<String, serde_json::Value> {
+        let mut state = HashMap::new();
+        state.insert("est_ouverte".to_string(), serde_json::json!(self.est_ouverte));
+        state.insert("est_cassee".to_string(), serde_json::json!(self.est_cassee));
+        state
+    }
+
+    fn load_state(&mut self, state: &HashMap<String, serde_json::Value>) {
+        if let Some(val) = state.get("est_ouverte") {
+            if let Some(b) = val.as_bool() {
+                self.est_ouverte = b;
+            }
+        }
+        if let Some(val) = state.get("est_cassee") {
+            if let Some(b) = val.as_bool() {
+                self.est_cassee = b;
+            }
+        }
+    }
 }
 
 impl Openable for Fenetre {
@@ -79,13 +102,13 @@ impl Interactable for Fenetre {
                 if self.est_ouverte {
                     player.aura += 15000.0;
                     crate::audio::play_sound("assets/victory.wav");
-                    println!("\n\x1B[32m[+15 000 Aura]\x1B[0m Sortie audacieuse ! Vous enjambez le rebord et atterrissez gracieusement dans l'herbe.");
+                    println!("\n{} Sortie audacieuse ! Vous enjambez le rebord et atterrissez gracieusement dans l'herbe.", colore!(Vert, "[+15 000 Aura]"));
                 } else {
                     self.est_cassee = true;
                     self.est_ouverte = true;
                     player.aura -= 100000.0;
                     crate::audio::play_sound("assets/defeat.wav");
-                    println!("\n\x1B[31m[-100 000 Aura]\x1B[0m BAM ! Vous traversez la vitre fermée tête la première.");
+                    println!("\n{} BAM ! Vous traversez la vitre fermée tête la première.", colore!(Rouge, "[-100 000 Aura]"));
                     println!("Votre dignité ne s'en remet pas, votre peau non plus. Des éclats de verre s'enfoncent à chacun de vos pas.");
                 }
             }

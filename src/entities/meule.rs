@@ -1,5 +1,5 @@
 use crate::actions::Action;
-use crate::entities::{jet_reussite, Interactable};
+use crate::entities::{jet_reussite, Interactable, Saveable};
 use crate::menu::{select_from_menu, MenuOption, MenuResult};
 use crate::player::Player;
 use crate::traits::Useable;
@@ -10,6 +10,8 @@ pub struct Meule {
     pub name: String,
     pub description: String,
 }
+
+impl Saveable for Meule {}
 
 impl Useable for Meule {
     // trois façons de l'utiliser → on demande laquelle via un sous-menu
@@ -33,7 +35,7 @@ impl Useable for Meule {
                 world.current_tick += 60;
                 player.aura -= 500000.0;
                 crate::audio::play_sound("assets/defeat.wav");
-                println!("\x1B[31m[-500 000 Aura]\x1B[0m Mauvaise idée. Très mauvaise idée. Le meunier doit appeler le guérisseur pour recoudre votre dignité.");
+                println!("{} Mauvaise idée. Très mauvaise idée. Le meunier doit appeler le guérisseur pour recoudre votre dignité.", colore!(Rouge, "[-500 000 Aura]"));
             }
             1 => {
                 world.current_tick += 15;
@@ -41,18 +43,18 @@ impl Useable for Meule {
                 if jet_reussite(world.current_tick, 2) {
                     player.aura += 750000.0;
                     crate::audio::play_sound("assets/victory.wav");
-                    println!("\x1B[32m[+750 000 Aura]\x1B[0m Le meunier est bouche bée. EXPLOIT LÉGENDAIRE : vous soulevez la meule !");
+                    println!("{} Le meunier est bouche bée. EXPLOIT LÉGENDAIRE : vous soulevez la meule !", colore!(Vert, "[+750 000 Aura]"));
                 } else {
                     player.aura -= 20000.0;
                     crate::audio::play_sound("assets/defeat.wav");
-                    println!("\x1B[31m[-20 000 Aura]\x1B[0m Votre dos fait un bruit de branche sèche et s'en souviendra longtemps.");
+                    println!("{} Votre dos fait un bruit de branche sèche et s'en souviendra longtemps.", colore!(Rouge, "[-20 000 Aura]"));
                 }
             }
             2 => {
                 world.current_tick += 5;
                 player.aura -= 80000.0;
                 crate::audio::play_sound("assets/defeat.wav");
-                println!("\x1B[31m[-80 000 Aura]\x1B[0m C'est une meule de pierre, pas de fromage, idiot. Vous avez encore plus l'air d'un paysan sans dents.");
+                println!("{} C'est une meule de pierre, pas de fromage, idiot. Vous avez encore plus l'air d'un paysan sans dents.", colore!(Rouge, "[-80 000 Aura]"));
             }
             _ => {}
         }

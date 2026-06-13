@@ -1,9 +1,10 @@
 use crate::actions::Action;
-use crate::entities::{jet_reussite, Interactable};
+use crate::entities::{jet_reussite, Interactable, Saveable};
 use crate::menu::{select_from_menu, MenuOption, MenuResult};
 use crate::player::Player;
 use crate::traits::Useable;
 use crate::world::WorldManager;
+use std::collections::HashMap;
 
 pub struct Puits {
     pub id: usize,
@@ -11,6 +12,22 @@ pub struct Puits {
     pub description: String,
     pub corde_id: usize,
     pub deja_crie: bool,
+}
+
+impl Saveable for Puits {
+    fn save_state(&self) -> HashMap<String, serde_json::Value> {
+        let mut state = HashMap::new();
+        state.insert("deja_crie".to_string(), serde_json::json!(self.deja_crie));
+        state
+    }
+
+    fn load_state(&mut self, state: &HashMap<String, serde_json::Value>) {
+        if let Some(val) = state.get("deja_crie") {
+            if let Some(b) = val.as_bool() {
+                self.deja_crie = b;
+            }
+        }
+    }
 }
 
 impl Useable for Puits {
@@ -39,11 +56,11 @@ impl Useable for Puits {
                         player.inventory.push(self.corde_id);
                     }
                     crate::audio::play_sound("assets/victory.wav");
-                    println!("\x1B[32m[+20 000 Aura]\x1B[0m Au fond, vous trouvez une corde solide et la récupérez !");
+                    println!("{} Au fond, vous trouvez une corde solide et la récupérez !", colore!(Vert, "[+20 000 Aura]"));
                 } else {
                     player.aura -= 15000.0;
                     crate::audio::play_sound("assets/defeat.wav");
-                    println!("\x1B[31m[-15 000 Aura]\x1B[0m Vous glissez et remontez trempé. Un crapaud vous juge en coassant.");
+                    println!("{} Vous glissez et remontez trempé. Un crapaud vous juge en coassant.", colore!(Rouge, "[-15 000 Aura]"));
                 }
             }
             1 => {
@@ -70,7 +87,8 @@ impl Useable for Puits {
                 player.aura -= 8000.0;
                 crate::audio::play_sound("assets/defeat.wav");
                 println!(
-                    "\x1B[31m[-8 000 Aura]\x1B[0m Vous jetez {} dans le puits. Pourquoi ?! Le peuple taupe n'a pas besoin de ça !",
+                    "{} Vous jetez {} dans le puits. Pourquoi ?! Le peuple taupe n'a pas besoin de ça !",
+                    colore!(Rouge, "[-8 000 Aura]"),
                     world.entities[jete].name()
                 );
             }
@@ -110,7 +128,7 @@ impl Interactable for Puits {
                     self.deja_crie = true;
                     player.aura += 5000.0;
                     crate::audio::play_sound("assets/victory.wav");
-                    println!("\x1B[32m[+5 000 Aura]\x1B[0m Vous criez dans le puits. L'écho répond « CHEVALIEEEER ». Vous êtes galvanisé.");
+                    println!("{} Vous criez dans le puits. L'écho répond « CHEVALIEEEER ». Vous êtes galvanisé.", colore!(Vert, "[+5 000 Aura]"));
                 }
             }
             Action::Utiliser => {

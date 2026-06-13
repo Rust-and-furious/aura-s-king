@@ -1,8 +1,9 @@
 use crate::actions::Action;
-use crate::entities::Interactable;
+use crate::entities::{Interactable, Saveable};
 use crate::menu::{select_from_menu, MenuOption, MenuResult};
 use crate::player::Player;
 use crate::world::WorldManager;
+use std::collections::HashMap;
 
 pub struct Meunier {
     pub id: usize,
@@ -11,6 +12,22 @@ pub struct Meunier {
     pub marmite_id: usize,
     pub farine_id: usize,
     pub travail_donne: bool,
+}
+
+impl Saveable for Meunier {
+    fn save_state(&self) -> HashMap<String, serde_json::Value> {
+        let mut state = HashMap::new();
+        state.insert("travail_donne".to_string(), serde_json::json!(self.travail_donne));
+        state
+    }
+
+    fn load_state(&mut self, state: &HashMap<String, serde_json::Value>) {
+        if let Some(val) = state.get("travail_donne") {
+            if let Some(b) = val.as_bool() {
+                self.travail_donne = b;
+            }
+        }
+    }
 }
 
 impl Interactable for Meunier {
@@ -57,7 +74,7 @@ impl Interactable for Meunier {
                             self.travail_donne = true;
                             player.aura += 5000.0;
                             crate::audio::play_sound("assets/victory.wav");
-                            println!("\x1B[32m[+5 000 Aura]\x1B[0m Le meunier vous confie une livraison de sacs de farine pour le village. Quel dévouement.");
+                            println!("{} Le meunier vous confie une livraison de sacs de farine pour le village. Quel dévouement.", colore!(Vert, "[+5 000 Aura]"));
                         }
                     }
                     2 => {
@@ -67,7 +84,7 @@ impl Interactable for Meunier {
                             player.inventory.push(self.farine_id);
                             player.aura += 30000.0;
                             crate::audio::play_sound("assets/victory.wav");
-                            println!("\x1B[32m[+30 000 Aura]\x1B[0m « Ah, une marmite ! Parfaite pour ma soupe. Tiens, prends cette farine enchantée ! »");
+                            println!("{} « Ah, une marmite ! Parfaite pour ma soupe. Tiens, prends cette farine enchantée ! »", colore!(Vert, "[+30 000 Aura]"));
                         } else {
                             println!("« Qu'est-ce que tu veux que je fasse de ça ? »");
                         }
