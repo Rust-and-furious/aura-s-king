@@ -9,14 +9,14 @@
     {
       "id": "zone_maison",
       "description": "Votre modeste demeure. Il y fait sombre et l'air est lourd de regrets et d'odeur de chou.",
-      "connected_zones": ["zone_plaine"],
+      "connected_zones": [],
       "interactables": ["lit_joueur", "marmite_cuisine", "balai_maison", "fenetre_maison", "porte_maison"],
       "interest_points": []
     },
     {
       "id": "zone_plaine",
       "description": "La Plaine. L'air frais vous frappe le visage. Devant vous, une plaine s'étend, parsemée de trucs plus ou moins intéressants. Au loin, un moulin tourne. Ou pas.",
-      "connected_zones": ["zone_maison"],
+      "connected_zones": ["zone_maison", "zone_foret"],
       "interactables": ["puits_plaine", "epouvantail_plaine"],
       "interest_points": [
         {
@@ -28,6 +28,24 @@
           "id": "maison_michu_plaine",
           "description": "La maison de Michu (votre voisine de 847 ans, reine des ragots et des biscuits)",
           "interactables": ["porte_michu"]
+        }
+      ]
+    },
+    {
+      "id": "zone_foret",
+      "description": "La Forêt de Brâme. Les arbres se referment autour de vous comme les bras d'une belle-mère insistante. Il fait sombre, ça craque de partout, et vous êtes à peu près sûr que quelque chose vous observe. C'est un écureuil.",
+      "connected_zones": ["zone_plaine"],
+      "interactables": ["panneau_foret", "champignon_foret"],
+      "interest_points": [
+        {
+          "id": "vieux_chene_foret",
+          "description": "Le Vieux Chêne (un chêne titanesque, si vieux qu'il a sûrement vu le premier roi se prendre les pieds dans sa cape)",
+          "interactables": ["vieux_chene", "ermite_pnj"]
+        },
+        {
+          "id": "clairiere_foret",
+          "description": "La Clairière (un cercle d'herbe parfaitement tondu, donc suspect ; au centre, une souche avec quelque chose dessus)",
+          "interactables": ["souche_epee", "renard_clairiere"]
         }
       ]
     }
@@ -177,6 +195,96 @@
       "type": "Objet",
       "name": "Broche de Michu",
       "description": "Une jolie broche ancienne offerte par Michu. Ça en jette."
+    },
+
+    {
+      "id": "panneau_foret",
+      "type": "Panneau",
+      "name": "Panneau en bois",
+      "description": "Un panneau de bois planté à l'entrée de la forêt, couvert d'interdictions absurdes.",
+      "planche_entity_id": "planche_bois"
+    },
+    {
+      "id": "champignon_foret",
+      "type": "Champignon",
+      "name": "Champignon suspect",
+      "description": "Un champignon violet, brillant, qui vibre légèrement. Tout va bien.",
+      "champignon_objet_id": "champignon_suspect"
+    },
+    {
+      "id": "vieux_chene",
+      "type": "Chene",
+      "name": "Le Vieux Chêne",
+      "description": "Un chêne titanesque dont le tronc fait dix fois votre tour de taille.",
+      "oeuf_entity_id": "oeuf_dore"
+    },
+    {
+      "id": "ermite_pnj",
+      "type": "Ermite",
+      "name": "L'Ermite",
+      "description": "Un vieil homme installé dans les branches du chêne. Il jure être un ancien chevalier.",
+      "medaille_entity_id": "medaille_ermite",
+      "talisman_entity_id": "talisman_ermite",
+      "champignon_entity_id": "champignon_suspect",
+      "marmite_entity_id": "marmite_cuisine"
+    },
+    {
+      "id": "souche_epee",
+      "type": "Souche",
+      "name": "Souche mystérieuse",
+      "description": "Une souche au milieu de la clairière, avec une épée rouillée plantée dedans.",
+      "epee_entity_id": "epee_rouillee"
+    },
+    {
+      "id": "renard_clairiere",
+      "type": "Renard",
+      "name": "Le Renard",
+      "description": "Un renard roux qui vous fixe avec une intelligence dérangeante.",
+      "baie_entity_id": "baie_mysterieuse",
+      "target_zone": "zone_foret"
+    },
+
+    {
+      "id": "planche_bois",
+      "type": "Objet",
+      "name": "Planche de bois",
+      "description": "Une solide planche arrachée à un panneau forestier. Idéale pour réparer une coque trouée."
+    },
+    {
+      "id": "champignon_suspect",
+      "type": "Objet",
+      "name": "Champignon suspect",
+      "description": "Un champignon violet qui vibre encore un peu. Quelqu'un, quelque part, le cherche peut-être."
+    },
+    {
+      "id": "oeuf_dore",
+      "type": "Objet",
+      "name": "Œuf doré",
+      "description": "Un œuf entièrement doré, trouvé dans un nid au sommet du vieux chêne. Anormalement lourd."
+    },
+    {
+      "id": "medaille_ermite",
+      "type": "Objet",
+      "name": "Médaille de l'ermite",
+      "description": "Une vieille médaille de chevalerie, donnée par l'ermite en échange de son champignon perdu."
+    },
+    {
+      "id": "talisman_ermite",
+      "type": "Objet",
+      "name": "Talisman de l'ermite",
+      "description": "Un petit talisman protecteur en bois sculpté, offert par l'ermite."
+    },
+    {
+      "id": "epee_rouillee",
+      "type": "Objet",
+      "name": "Épée rouillée",
+      "description": "Une épée tirée d'une souche. Rouillée, tordue, mais c'est une épée. Prévoyez un vaccin contre le tétanos."
+    },
+    {
+      "id": "baie_mysterieuse",
+      "type": "Objet",
+      "name": "Baie mystérieuse",
+      "description": "Une petite baie offerte par un renard. Vous n'osez pas la manger. Pour l'instant."
     }
   ]
 }

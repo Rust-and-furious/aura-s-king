@@ -42,9 +42,12 @@ pub fn jet_reussite(seed: usize, pourcentage: usize) -> bool {
 }
 
 pub mod balai;
+pub mod champignon;
 pub mod chat;
+pub mod chene;
 pub mod cle;
 pub mod epouvantail;
+pub mod ermite;
 pub mod fenetre;
 pub mod lit;
 pub mod marmite;
@@ -52,15 +55,21 @@ pub mod meule;
 pub mod meunier;
 pub mod michu;
 pub mod objet;
+pub mod panneau;
 pub mod porte;
 pub mod porte_michu;
 pub mod puits;
+pub mod renard;
 pub mod sacs_farine;
+pub mod souche;
 
 pub use balai::Balai;
+pub use champignon::Champignon;
 pub use chat::Chat;
+pub use chene::Chene;
 pub use cle::CleMaison;
 pub use epouvantail::Epouvantail;
+pub use ermite::Ermite;
 pub use fenetre::Fenetre;
 pub use lit::Lit;
 pub use marmite::Marmite;
@@ -68,7 +77,10 @@ pub use meule::Meule;
 pub use meunier::Meunier;
 pub use michu::Michu;
 pub use objet::Objet;
+pub use panneau::Panneau;
 pub use porte::Porte;
 pub use porte_michu::PorteMichu;
 pub use puits::Puits;
+pub use renard::Renard;
 pub use sacs_farine::SacsFarine;
+pub use souche::Souche;

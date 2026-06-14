@@ -55,12 +55,18 @@ enum Flow {
     Quit,
 }
 
-// une ligne du menu d'une zone : un objet, un point d'intérêt, ou "Attendre"
+// une ligne du menu d'une zone : un objet, un point d'intérêt, un déplacement, ou "Attendre"
 #[derive(Clone, Copy)]
 enum ZoneEntry {
     Interactable(usize),  // index dans world.entities
     InterestPoint(usize), // index dans world.zones[zone].interest_points
+    Move,                 // ouvre le menu de déplacement vers une zone connectée
     Wait,
+}
+
+// libellé court d'une zone pour les menus : on garde la première phrase de sa description
+fn zone_short_name(description: &str) -> &str {
+    description.split('.').next().unwrap_or(description).trim()
 }
 
 fn clear_screen() {
@@ -242,6 +248,59 @@ fn enter_interest_point(world: &mut WorldManager, zone_idx: usize, ip_idx: usize
     }
 }
 
+// menu de déplacement : liste les zones connectées et y déplace le joueur.
+// C'est ici qu'on consomme Zone.connected_zones (la marche entre zones extérieures).
+fn travel_to_connected_zone(world: &mut WorldManager, zone_idx: usize) -> Flow {
+    let targets: Vec<usize> = world.zones[zone_idx].connected_zones.clone();
+    if targets.is_empty() {
+        clear_screen();
+        println!("Il n'y a aucun chemin praticable depuis ici.");
+        wait_for_enter();
+        return Flow::Continue;
+    }
+
+    let mut header = String::new();
+    header.push_str(&sep());
+    header.push('\n');
+    header.push_str(&format!(
+        "{} | {}\n",
+        colore!(Cyan, "[Heure : {}]", world.format_time()),
+        colore!(Jaune, "[Aura : {:.1}]", world.player.aura),
+    ));
+    header.push_str("Où voulez-vous aller ?\n");
+    header.push_str(&sep());
+
+    let mut menu_options = Vec::new();
+    for &z in &targets {
+        menu_options.push(MenuOption::new(zone_short_name(&world.zones[z].description)));
+    }
+    menu_options.push(MenuOption::special("Rester ici"));
+
+    match select_from_menu(menu_options, &header) {
+        Ok(MenuResult::Selected(sel)) => {
+            if sel == targets.len() {
+                return Flow::Continue; // « Rester ici »
+            }
+            let dest = targets[sel];
+            world.current_tick += 15; // une marche dure environ 15 minutes
+            world.player.zone = dest;
+            clear_screen();
+            println!(
+                "Vous marchez un moment... Vous arrivez : {}",
+                colore!(CyanGras, "{}", zone_short_name(&world.zones[dest].description)),
+            );
+            wait_for_enter();
+            Flow::Continue
+        }
+        Ok(MenuResult::Save) => {
+            handle_save(world);
+            Flow::Continue
+        }
+        Ok(MenuResult::Quit) => Flow::Quit,
+        _ => Flow::Continue,
+    }
+}
+
 fn main() {
     clear_screen();
     audio::play_music_loop("assets/music.wav");
@@ -380,6 +439,10 @@ fn main() {
             menu_options.push(MenuOption::new(label));
             entries.push(ZoneEntry::InterestPoint(ip_idx));
         }
+        if !world.zones[zone_idx].connected_zones.is_empty() {
+            menu_options.push(MenuOption::new("Se déplacer vers une autre zone"));
+            entries.push(ZoneEntry::Move);
+        }
         menu_options.push(MenuOption::special("Attendre (consomme 15 minutes)"));
         entries.push(ZoneEntry::Wait);
 
@@ -409,6 +472,12 @@ fn main() {
                 }
                 ZoneEntry::InterestPoint(ip_idx) => {
                     if let Flow::Quit = enter_interest_point(&mut world, zone_idx, ip_idx) {
+                        confirm_quit(&world);
+                        return;
+                    }
+                }
+                ZoneEntry::Move => {
+                    if let Flow::Quit = travel_to_connected_zone(&mut world, zone_idx) {
                         confirm_quit(&world);
                         return;
                     }

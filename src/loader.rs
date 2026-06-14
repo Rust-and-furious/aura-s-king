@@ -16,8 +16,9 @@ use std::fmt;
 use serde::Deserialize;
 
 use crate::entities::{
-    Balai, Chat, CleMaison, Epouvantail, Fenetre, Interactable, Lit, Marmite, Meule, Meunier,
-    Michu, Objet, Porte, PorteMichu, Puits, SacsFarine,
+    Balai, Champignon, Chat, Chene, CleMaison, Epouvantail, Ermite, Fenetre, Interactable, Lit,
+    Marmite, Meule, Meunier, Michu, Objet, Panneau, Porte, PorteMichu, Puits, Renard, SacsFarine,
+    Souche,
 };
 use crate::player::Player;
 use crate::world::{InterestPoint, WorldManager, Zone};
@@ -205,6 +206,47 @@ enum EntityDto {
         name: String,
         description: String,
     },
+    // ── Entités de la Forêt ───────────────────────────────────
+    Panneau {
+        id: String,
+        name: String,
+        description: String,
+        planche_entity_id: String,
+    },
+    Champignon {
+        id: String,
+        name: String,
+        description: String,
+        champignon_objet_id: String,
+    },
+    Chene {
+        id: String,
+        name: String,
+        description: String,
+        oeuf_entity_id: String,
+    },
+    Ermite {
+        id: String,
+        name: String,
+        description: String,
+        medaille_entity_id: String,
+        talisman_entity_id: String,
+        champignon_entity_id: String,
+        marmite_entity_id: String,
+    },
+    Souche {
+        id: String,
+        name: String,
+        description: String,
+        epee_entity_id: String,
+    },
+    Renard {
+        id: String,
+        name: String,
+        description: String,
+        baie_entity_id: String,
+        target_zone: String,
+    },
 }
 
 impl EntityDto {
@@ -225,6 +267,12 @@ impl EntityDto {
             EntityDto::PorteMichu { id, .. } => id,
             EntityDto::Michu { id, .. } => id,
             EntityDto::Chat { id, .. } => id,
+            EntityDto::Panneau { id, .. } => id,
+            EntityDto::Champignon { id, .. } => id,
+            EntityDto::Chene { id, .. } => id,
+            EntityDto::Ermite { id, .. } => id,
+            EntityDto::Souche { id, .. } => id,
+            EntityDto::Renard { id, .. } => id,
         }
     }
 }
@@ -544,5 +592,93 @@ fn build_entity(
         EntityDto::Chat { name, description, .. } => {
             Ok(Box::new(Chat { id, name, description }))
         }
+
+        // ── Entités de la Forêt ────────────────────────────────
+        EntityDto::Panneau {
+            name,
+            description,
+            planche_entity_id,
+            ..
+        } => Ok(Box::new(Panneau {
+            id,
+            name,
+            description,
+            planche_id: resolve_entity(&planche_entity_id)?,
+        })),
+
+        EntityDto::Champignon {
+            name,
+            description,
+            champignon_objet_id,
+            ..
+        } => Ok(Box::new(Champignon {
+            id,
+            name,
+            description,
+            champignon_objet_id: resolve_entity(&champignon_objet_id)?,
+        })),
+
+        EntityDto::Chene {
+            name,
+            description,
+            oeuf_entity_id,
+            ..
+        } => Ok(Box::new(Chene {
+            id,
+            name,
+            description,
+            oeuf_id: resolve_entity(&oeuf_entity_id)?,
+            deja_grimpe: false,
+            deja_enlace: false,
+            deja_grave: false,
+        })),
+
+        EntityDto::Ermite {
+            name,
+            description,
+            medaille_entity_id,
+            talisman_entity_id,
+            champignon_entity_id,
+            marmite_entity_id,
+            ..
+        } => Ok(Box::new(Ermite {
+            id,
+            name,
+            description,
+            medaille_id: resolve_entity(&medaille_entity_id)?,
+            talisman_id: resolve_entity(&talisman_entity_id)?,
+            champignon_id: resolve_entity(&champignon_entity_id)?,
+            marmite_id: resolve_entity(&marmite_entity_id)?,
+            conseil_donne: false,
+        })),
+
+        EntityDto::Souche {
+            name,
+            description,
+            epee_entity_id,
+            ..
+        } => Ok(Box::new(Souche {
+            id,
+            name,
+            description,
+            epee_id: resolve_entity(&epee_entity_id)?,
+            epee_prise: false,
+            deja_assis: false,
+        })),
+
+        EntityDto::Renard {
+            name,
+            description,
+            baie_entity_id,
+            target_zone,
+            ..
+        } => Ok(Box::new(Renard {
+            id,
+            name,
+            description,
+            baie_id: resolve_entity(&baie_entity_id)?,
+            target_zone: resolve_zone(&target_zone)?,
+            baie_donnee: false,
+        })),
     }
 }
