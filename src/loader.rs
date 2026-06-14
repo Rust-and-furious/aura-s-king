@@ -16,9 +16,9 @@ use std::fmt;
 use serde::Deserialize;
 
 use crate::entities::{
-    Balai, Champignon, Chat, Chene, CleMaison, Epouvantail, Ermite, Fenetre, Interactable, Lit,
-    Marmite, Meule, Meunier, Michu, Objet, Panneau, Porte, PorteMichu, Puits, Renard, SacsFarine,
-    Souche,
+    Balai, Champignon, Chat, Chene, CleMaison, Epouvantail, Ermite, Esprit, Fenetre, Fossoyeur,
+    Gargouille, Interactable, Lit, Marmite, Meule, Meunier, Michu, Objet, Panneau, Porte,
+    PorteMichu, Puits, Renard, SacsFarine, Souche, Tombe,
 };
 use crate::player::Player;
 use crate::world::{InterestPoint, WorldManager, Zone};
@@ -247,6 +247,32 @@ enum EntityDto {
         baie_entity_id: String,
         target_zone: String,
     },
+    // ── Entités du Cimetière ──────────────────────────────────
+    Tombe {
+        id: String,
+        name: String,
+        description: String,
+        ver_entity_id: String,
+    },
+    Fossoyeur {
+        id: String,
+        name: String,
+        description: String,
+    },
+    Gargouille {
+        id: String,
+        name: String,
+        description: String,
+        rubis_entity_id: String,
+        bidule_entity_id: String,
+        balai_entity_id: String,
+    },
+    Esprit {
+        id: String,
+        name: String,
+        description: String,
+        manuel_entity_id: String,
+    },
 }
 
 impl EntityDto {
@@ -273,6 +299,10 @@ impl EntityDto {
             EntityDto::Ermite { id, .. } => id,
             EntityDto::Souche { id, .. } => id,
             EntityDto::Renard { id, .. } => id,
+            EntityDto::Tombe { id, .. } => id,
+            EntityDto::Fossoyeur { id, .. } => id,
+            EntityDto::Gargouille { id, .. } => id,
+            EntityDto::Esprit { id, .. } => id,
         }
     }
 }
@@ -679,6 +709,55 @@ fn build_entity(
             baie_id: resolve_entity(&baie_entity_id)?,
             target_zone: resolve_zone(&target_zone)?,
             baie_donnee: false,
+        })),
+
+        // ── Entités du Cimetière ───────────────────────────────
+        EntityDto::Tombe {
+            name,
+            description,
+            ver_entity_id,
+            ..
+        } => Ok(Box::new(Tombe {
+            id,
+            name,
+            description,
+            ver_id: resolve_entity(&ver_entity_id)?,
+            ver_trouve: false,
+        })),
+
+        EntityDto::Fossoyeur { name, description, .. } => {
+            Ok(Box::new(Fossoyeur { id, name, description }))
+        }
+
+        EntityDto::Gargouille {
+            name,
+            description,
+            rubis_entity_id,
+            bidule_entity_id,
+            balai_entity_id,
+            ..
+        } => Ok(Box::new(Gargouille {
+            id,
+            name,
+            description,
+            rubis_id: resolve_entity(&rubis_entity_id)?,
+            bidule_id: resolve_entity(&bidule_entity_id)?,
+            balai_id: resolve_entity(&balai_entity_id)?,
+            deja_insulte: false,
+            gargouille_brisee: false,
+        })),
+
+        EntityDto::Esprit {
+            name,
+            description,
+            manuel_entity_id,
+            ..
+        } => Ok(Box::new(Esprit {
+            id,
+            name,
+            description,
+            manuel_id: resolve_entity(&manuel_entity_id)?,
+            duel_gagne: false,
         })),
     }
 }

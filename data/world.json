@@ -34,7 +34,7 @@
     {
       "id": "zone_foret",
       "description": "La Forêt de Brâme. Les arbres se referment autour de vous comme les bras d'une belle-mère insistante. Il fait sombre, ça craque de partout, et vous êtes à peu près sûr que quelque chose vous observe. C'est un écureuil.",
-      "connected_zones": ["zone_plaine"],
+      "connected_zones": ["zone_plaine", "zone_cimetiere"],
       "interactables": ["panneau_foret", "champignon_foret"],
       "interest_points": [
         {
@@ -46,6 +46,19 @@
           "id": "clairiere_foret",
           "description": "La Clairière (un cercle d'herbe parfaitement tondu, donc suspect ; au centre, une souche avec quelque chose dessus)",
           "interactables": ["souche_epee", "renard_clairiere"]
+        }
+      ]
+    },
+    {
+      "id": "zone_cimetiere",
+      "description": "Le Cimetière des Chevaliers Ratés. Un lieu brumeux et sinistre où reposent ceux qui ont cru qu'un peu d'aura et une épée rouillée suffisaient à impressionner le roi. L'herbe est morte, et votre moral s'apprête à faire de même.",
+      "connected_zones": ["zone_foret"],
+      "interactables": ["tombe_fraiche", "fossoyeur_pnj"],
+      "interest_points": [
+        {
+          "id": "mausolee_godefroy",
+          "description": "Le Mausolée de Sire Godefroy (un grand bâtiment de pierre couvert de statues qui ont l'air de vous juger ; la porte entrouverte laisse échapper un courant d'air glacial)",
+          "interactables": ["gargouille_statue", "esprit_godefroy"]
         }
       ]
     }
@@ -285,6 +298,61 @@
       "type": "Objet",
       "name": "Baie mystérieuse",
       "description": "Une petite baie offerte par un renard. Vous n'osez pas la manger. Pour l'instant."
+    },
+
+    {
+      "id": "tombe_fraiche",
+      "type": "Tombe",
+      "name": "Tombe fraîchement creusée",
+      "description": "Une tombe sans nom, fraîchement creusée, aux dimensions étrangement familières.",
+      "ver_entity_id": "ver_de_terre"
+    },
+    {
+      "id": "fossoyeur_pnj",
+      "type": "Fossoyeur",
+      "name": "Le Fossoyeur",
+      "description": "Un homme maigre et voûté, appuyé sur sa pelle, qui vous regarde comme un futur pensionnaire."
+    },
+    {
+      "id": "gargouille_statue",
+      "type": "Gargouille",
+      "name": "Statue de Gargouille",
+      "description": "Une gargouille de pierre, très laide, perchée à l'entrée du mausolée.",
+      "rubis_entity_id": "rubis_rutilant",
+      "bidule_entity_id": "bidule_metal",
+      "balai_entity_id": "balai_maison"
+    },
+    {
+      "id": "esprit_godefroy",
+      "type": "Esprit",
+      "name": "Esprit de Sire Godefroy",
+      "description": "Le fantôme grincheux d'un ancien chevalier mort de façon ridicule.",
+      "manuel_entity_id": "manuel_chevalier"
+    },
+
+    {
+      "id": "ver_de_terre",
+      "type": "Objet",
+      "name": "Ver de terre",
+      "description": "Un gros ver de terre bien gras, déterré d'une tombe. Étonnamment vigoureux."
+    },
+    {
+      "id": "rubis_rutilant",
+      "type": "Objet",
+      "name": "Rubis rutilant",
+      "description": "Un rubis énorme et rutilant, niché au cœur d'une gargouille brisée. Ça vaut une fortune."
+    },
+    {
+      "id": "manuel_chevalier",
+      "type": "Objet",
+      "name": "Manuel du Parfait Petit Chevalier",
+      "description": "Un vieux manuel laissé par un fantôme. Plein de conseils douteux mais terriblement classe à exhiber."
+    },
+    {
+      "id": "bidule_metal",
+      "type": "Objet",
+      "name": "Bidule en métal",
+      "description": "Un objet métallique informe sorti d'une forge. Personne ne sait à quoi ça sert, mais c'est solide."
     }
   ]
 }
