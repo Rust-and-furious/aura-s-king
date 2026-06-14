@@ -34,4 +34,4 @@ Le projet respecte une séparation stricte entre le **moteur** (code Rust) et le
 
 ### Contenu du jeu
 
-Zones jouables : **Maison, Plaine, Forêt, Cimetière, Lac, Île** (Village, Château et Salle du trône à venir). On se déplace entre zones reliées via l'option **« Se déplacer »**, ou par des entités-passages (porte, fenêtre, barque). Le scénario complet est décrit dans `histoire.md`.
+Zones jouables : **Maison, Plaine, Forêt, Cimetière, Lac, Île, Village** (Château et Salle du trône à venir). On se déplace entre zones reliées via l'option **« Se déplacer »**, ou par des entités-passages (porte, fenêtre, barque). Le scénario complet est décrit dans `histoire.md`.

@@ -16,10 +16,10 @@ use std::fmt;
 use serde::Deserialize;
 
 use crate::entities::{
-    ArbreTordu, Balai, Barque, Canne, Champignon, Chat, Chene, CleMaison, Coffre, Epouvantail,
-    Ermite, Esprit, Fenetre, Fossoyeur, Gargouille, Interactable, Lac, Lit, Marmite, Meule,
-    Meunier, Michu, Objet, Panneau, Porte, PorteMichu, Puits, Renard, SacsFarine, Seau, Souche,
-    Tombe,
+    ArbreTordu, Balai, Barde, Barque, Canne, Champignon, Chat, Chene, CleMaison, Coffre, Enclume,
+    Epouvantail, Ermite, Esprit, Fenetre, Fontaine, Forgeron, Fossoyeur, Gargouille, Interactable,
+    Lac, Lit, Marchand, Marmite, Meule, Meunier, Michu, Objet, Panneau, Porte, PorteMichu, Poules,
+    Puits, Renard, SacsFarine, Seau, Souche, Tavernier, Tombe, Tonneau,
 };
 use crate::player::Player;
 use crate::world::{InterestPoint, WorldManager, Zone};
@@ -317,6 +317,63 @@ enum EntityDto {
         description: String,
         seau_vide_entity_id: String,
     },
+    // ── Entités du Village ────────────────────────────────────
+    Poules {
+        id: String,
+        name: String,
+        description: String,
+        target_zone: String,
+    },
+    Fontaine {
+        id: String,
+        name: String,
+        description: String,
+        piece_entity_id: String,
+    },
+    Marchand {
+        id: String,
+        name: String,
+        description: String,
+        philtre_entity_id: String,
+        armure_entity_id: String,
+        rubis_entity_id: String,
+        piece_entity_id: String,
+    },
+    Tavernier {
+        id: String,
+        name: String,
+        description: String,
+        poisson_entity_id: String,
+        noix_entity_id: String,
+    },
+    Barde {
+        id: String,
+        name: String,
+        description: String,
+        oeuf_entity_id: String,
+        botte_entity_id: String,
+    },
+    Tonneau {
+        id: String,
+        name: String,
+        description: String,
+    },
+    Forgeron {
+        id: String,
+        name: String,
+        description: String,
+        epee_entity_id: String,
+        reforgee_entity_id: String,
+        medaille_entity_id: String,
+        bouclier_entity_id: String,
+    },
+    Enclume {
+        id: String,
+        name: String,
+        description: String,
+        bidule_entity_id: String,
+        marmite_entity_id: String,
+    },
 }
 
 impl EntityDto {
@@ -353,6 +410,14 @@ impl EntityDto {
             EntityDto::ArbreTordu { id, .. } => id,
             EntityDto::Canne { id, .. } => id,
             EntityDto::Seau { id, .. } => id,
+            EntityDto::Poules { id, .. } => id,
+            EntityDto::Fontaine { id, .. } => id,
+            EntityDto::Marchand { id, .. } => id,
+            EntityDto::Tavernier { id, .. } => id,
+            EntityDto::Barde { id, .. } => id,
+            EntityDto::Tonneau { id, .. } => id,
+            EntityDto::Forgeron { id, .. } => id,
+            EntityDto::Enclume { id, .. } => id,
         }
     }
 }
@@ -902,6 +967,121 @@ fn build_entity(
             name,
             description,
             seau_vide_id: resolve_entity(&seau_vide_entity_id)?,
+        })),
+
+        // ── Entités du Village ─────────────────────────────────
+        EntityDto::Poules {
+            name,
+            description,
+            target_zone,
+            ..
+        } => Ok(Box::new(Poules {
+            id,
+            name,
+            description,
+            target_zone: resolve_zone(&target_zone)?,
+            deja_caresse: false,
+        })),
+
+        EntityDto::Fontaine {
+            name,
+            description,
+            piece_entity_id,
+            ..
+        } => Ok(Box::new(Fontaine {
+            id,
+            name,
+            description,
+            piece_id: resolve_entity(&piece_entity_id)?,
+            deja_bu: false,
+            deja_lave: false,
+        })),
+
+        EntityDto::Marchand {
+            name,
+            description,
+            philtre_entity_id,
+            armure_entity_id,
+            rubis_entity_id,
+            piece_entity_id,
+            ..
+        } => Ok(Box::new(Marchand {
+            id,
+            name,
+            description,
+            philtre_id: resolve_entity(&philtre_entity_id)?,
+            armure_id: resolve_entity(&armure_entity_id)?,
+            rubis_id: resolve_entity(&rubis_entity_id)?,
+            piece_id: resolve_entity(&piece_entity_id)?,
+        })),
+
+        EntityDto::Tavernier {
+            name,
+            description,
+            poisson_entity_id,
+            noix_entity_id,
+            ..
+        } => Ok(Box::new(Tavernier {
+            id,
+            name,
+            description,
+            poisson_id: resolve_entity(&poisson_entity_id)?,
+            noix_id: resolve_entity(&noix_entity_id)?,
+        })),
+
+        EntityDto::Barde {
+            name,
+            description,
+            oeuf_entity_id,
+            botte_entity_id,
+            ..
+        } => Ok(Box::new(Barde {
+            id,
+            name,
+            description,
+            oeuf_id: resolve_entity(&oeuf_entity_id)?,
+            botte_id: resolve_entity(&botte_entity_id)?,
+            chanson_faite: false,
+        })),
+
+        EntityDto::Tonneau { name, description, .. } => Ok(Box::new(Tonneau {
+            id,
+            name,
+            description,
+            deja_cache: false,
+        })),
+
+        EntityDto::Forgeron {
+            name,
+            description,
+            epee_entity_id,
+            reforgee_entity_id,
+            medaille_entity_id,
+            bouclier_entity_id,
+            ..
+        } => Ok(Box::new(Forgeron {
+            id,
+            name,
+            description,
+            epee_id: resolve_entity(&epee_entity_id)?,
+            reforgee_id: resolve_entity(&reforgee_entity_id)?,
+            medaille_id: resolve_entity(&medaille_entity_id)?,
+            bouclier_id: resolve_entity(&bouclier_entity_id)?,
+        })),
+
+        EntityDto::Enclume {
+            name,
+            description,
+            bidule_entity_id,
+            marmite_entity_id,
+            ..
+        } => Ok(Box::new(Enclume {
+            id,
+            name,
+            description,
+            bidule_id: resolve_entity(&bidule_entity_id)?,
+            marmite_id: resolve_entity(&marmite_entity_id)?,
+            bidule_pris: false,
         })),
     }
 }

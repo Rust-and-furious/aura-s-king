@@ -210,7 +210,7 @@ La boucle de jeu propose une entrée **« Se déplacer »** dès qu'une zone pos
 ### 9. Pas d'aura infinie (gating)
 L'aura est l'enjeu central du jeu : toute source d'aura **positive et répétable** doit être plafonnée, sinon elle se farme à l'infini. Deux techniques utilisées : **(a)** gain ponctuel gardé par un bool d'état (`deja_*`, `*_donne`, `*_pris`, `*_trouve`…) passé à `true` au premier gain ; **(b)** pari à espérance ≤ 0 (ex. puits « descendre » 30 %, meule « soulever » 2 %). Les **pertes** répétables sont autorisées (ce sont des pièges assumés). _(Origine : retour du scrum master sur le puits, dont l'espérance de gain était positive.)_
 
-> **Note de flux de jeu :** zones implémentées et navigables : **Maison → Plaine → Forêt → Cimetière**, et **Plaine / Forêt → Lac → Île**. Restent à faire : **Village, Château, Salle du trône** (la fin). La maison se quitte par la porte (clé / enfoncer) ou la fenêtre — pas par « Se déplacer ».
+> **Note de flux de jeu :** zones implémentées et navigables : **Maison → Plaine → Forêt → Cimetière**, **Plaine / Forêt → Lac → Île**, et **Plaine / Lac → Village**. Restent à faire : **Château, Salle du trône** (la fin). La maison se quitte par la porte (clé / enfoncer) ou la fenêtre — pas par « Se déplacer ».
 
 ## Contenu du monde (implémenté)
 
@@ -224,14 +224,17 @@ L'aura est l'enjeu central du jeu : toute source d'aura **positive et répétabl
 | `zone_cimetiere` | Tombe, Fossoyeur | Mausolée (Gargouille, Esprit) |
 | `zone_lac` | Lac, Barque | Ponton (Canne, Seau) |
 | `zone_ile` | Coffre, ArbreTordu | — |
+| `zone_village` | Poules, Fontaine, Marchand | Taverne (Tavernier, Barde, Tonneau) · Forge (Forgeron, Enclume) |
 
 **Choix de conception spécifiques au contenu :**
 - **Île = zone à part entière** (`zone_ile`), pas un point d'intérêt : on y accède via la **barque** (`Action::Deplacer`), ce qui permet de gérer le verrou « barque réparée » comme la porte gère son `Deplacer`. Le retour se fait par « Se déplacer ».
 - **Sortie de la maison** : la maison n'a **pas** de `connected_zones` (fidèle à `histoire.md`) → on sort par la porte ou la fenêtre, jamais par « Se déplacer ».
 - **Corde partagée, non consommée** : réparer la barque **et** la canne nécessite la corde du puits ; aucune des deux réparations ne la consomme (il n'existe qu'une corde → sinon soft-lock).
 - **`balai_maison` vs `balai_depart`** : `histoire.md` nomme le balai `balai_depart`, mais son id réel dans le JSON est `balai_maison`. La gargouille (cassable avec le balai ou un `bidule_metal`) est branchée sur l'id réel.
-- **Objets créés en avance** : certains objets sont définis avant la zone qui les produit/consomme (ex. `bidule_metal` pour la future forge ; objets de la Forêt utilisés plus tard au Lac) afin que les références JSON résolvent au chargement. Ils sont simplement inaccessibles tant que leur zone d'origine n'existe pas.
-- **Bools d'état** (état runtime, **non** dans le diagramme — comme `chapeau_pris` — initialisés à `false` dans `build_entity`, sérialisés via `Saveable`) : `deja_crie`, `deja_attaque`, `travail_donne`, `deja_grimpe`/`deja_enlace`/`deja_grave`, `conseil_donne`, `epee_prise`, `deja_assis`, `baie_donnee`, `ver_trouve`, `deja_insulte`, `gargouille_brisee`, `duel_gagne`, `deja_baigne`, `deja_bu`, `reparee`, `est_ouverte`, `poisson_pris`, `botte_prise`.
+- **Objets créés en avance** : certains objets sont définis avant la zone qui les produit/consomme (ex. objets de la Forêt utilisés plus tard au Lac/Village) afin que les références JSON résolvent au chargement. Ils sont simplement inaccessibles tant que leur zone d'origine n'existe pas. _Cas résolu :_ `bidule_metal`, créé en avance pour la gargouille du Cimetière, est désormais **réellement produit par la forge du Village** (enclume) — la boucle est fermée.
+- **Bools d'état** (état runtime, **non** dans le diagramme — comme `chapeau_pris` — initialisés à `false` dans `build_entity`, sérialisés via `Saveable`) : `deja_crie`, `deja_attaque`, `travail_donne`, `deja_grimpe`/`deja_enlace`/`deja_grave`, `conseil_donne`, `epee_prise`, `deja_assis`, `baie_donnee`, `ver_trouve`, `deja_insulte`, `gargouille_brisee`, `duel_gagne`, `deja_baigne`, `deja_bu`, `reparee`, `est_ouverte`, `poisson_pris`, `botte_prise`, `deja_caresse`, `deja_lave`, `chanson_faite`, `deja_cache`, `bidule_pris`.
+
+> **Limitation connue (moteur) :** il n'existe **pas** de menu « utiliser un objet depuis l'inventaire ». Un objet de l'inventaire n'agit que lorsqu'une entité teste `player.inventory.contains(...)` (échanges, déverrouillages, réparations). Conséquences : un consommable « actif » comme le `philtre_charisme` ne peut pas être utilisé volontairement (son effet de malus ne se déclenche jamais), et un objet déjà ramassé ne peut plus être ré-observé ni réutilisé en dehors de ce que les entités proposent.
 
 ## Implementation Mapping (IDs)
 

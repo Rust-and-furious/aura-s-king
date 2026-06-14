@@ -16,7 +16,7 @@
     {
       "id": "zone_plaine",
       "description": "La Plaine. L'air frais vous frappe le visage. Devant vous, une plaine s'étend, parsemée de trucs plus ou moins intéressants. Au loin, un moulin tourne. Ou pas.",
-      "connected_zones": ["zone_maison", "zone_foret", "zone_lac"],
+      "connected_zones": ["zone_maison", "zone_foret", "zone_lac", "zone_village"],
       "interactables": ["puits_plaine", "epouvantail_plaine"],
       "interest_points": [
         {
@@ -65,7 +65,7 @@
     {
       "id": "zone_lac",
       "description": "Le Lac. Un lac d'un bleu étrangement parfait s'étale devant vous. La surface est lisse comme un miroir. Vous vous y voyez. Vous détournez le regard.",
-      "connected_zones": ["zone_plaine", "zone_foret"],
+      "connected_zones": ["zone_plaine", "zone_foret", "zone_village"],
       "interactables": ["eau_lac", "barque_lac"],
       "interest_points": [
         {
@@ -81,6 +81,24 @@
       "connected_zones": ["zone_lac"],
       "interactables": ["coffre_ile", "arbre_tordu_ile"],
       "interest_points": []
+    },
+    {
+      "id": "zone_village",
+      "description": "Le Village de Bourg-les-Navets. Trois maisons, une taverne, une forge et un château qui essaie très fort d'être impressionnant. Des poules se promènent avec plus d'assurance que vous.",
+      "connected_zones": ["zone_plaine", "zone_lac"],
+      "interactables": ["poules_village", "fontaine_village", "marchand_pnj"],
+      "interest_points": [
+        {
+          "id": "taverne_village",
+          "description": "La taverne « Au Cochon Pendu » (ça sent la bière renversée et les décisions regrettables ; un barde chante faux dans un coin)",
+          "interactables": ["tavernier_pnj", "barde_pnj", "tonneau_taverne"]
+        },
+        {
+          "id": "forge_village",
+          "description": "La Forge (la chaleur vous gifle ; le forgeron, un colosse tatoué, tape sur son enclume avec la passion d'un règlement de comptes)",
+          "interactables": ["forgeron_pnj", "enclume_forge"]
+        }
+      ]
     }
   ],
 
@@ -453,6 +471,96 @@
       "type": "Objet",
       "name": "Cape brodée",
       "description": "Une magnifique cape brodée trouvée dans un coffre sur une île. Enfin un vêtement digne d'un futur chevalier."
+    },
+
+    {
+      "id": "poules_village",
+      "type": "Poules",
+      "name": "Poules",
+      "description": "Des poules de village qui se baladent avec une assurance déconcertante.",
+      "target_zone": "zone_village"
+    },
+    {
+      "id": "fontaine_village",
+      "type": "Fontaine",
+      "name": "Fontaine",
+      "description": "Une fontaine de pierre au centre du village.",
+      "piece_entity_id": "piece_monnaie"
+    },
+    {
+      "id": "marchand_pnj",
+      "type": "Marchand",
+      "name": "Le Marchand",
+      "description": "Un marchand au sourire trop large, entouré d'objets aussi douteux que coûteux.",
+      "philtre_entity_id": "philtre_charisme",
+      "armure_entity_id": "armure_rutilante",
+      "rubis_entity_id": "rubis_rutilant",
+      "piece_entity_id": "piece_monnaie"
+    },
+    {
+      "id": "tavernier_pnj",
+      "type": "Tavernier",
+      "name": "Le Tavernier",
+      "description": "Le tavernier essuie un verre qui n'a jamais été propre de sa vie.",
+      "poisson_entity_id": "poisson_frais",
+      "noix_entity_id": "noix_de_coco"
+    },
+    {
+      "id": "barde_pnj",
+      "type": "Barde",
+      "name": "Le Barde",
+      "description": "Un barde qui chante faux dans un coin de la taverne.",
+      "oeuf_entity_id": "oeuf_dore",
+      "botte_entity_id": "vieille_botte"
+    },
+    {
+      "id": "tonneau_taverne",
+      "type": "Tonneau",
+      "name": "Tonneau de la taverne",
+      "description": "Un tonneau entrouvert. Ça sent fort le fermenté."
+    },
+    {
+      "id": "forgeron_pnj",
+      "type": "Forgeron",
+      "name": "Le Forgeron",
+      "description": "Un colosse tatoué qui tape sur son enclume avec la passion de quelqu'un qui règle des comptes personnels avec le métal.",
+      "epee_entity_id": "epee_rouillee",
+      "reforgee_entity_id": "epee_reforgee",
+      "medaille_entity_id": "medaille_ermite",
+      "bouclier_entity_id": "bouclier_fer"
+    },
+    {
+      "id": "enclume_forge",
+      "type": "Enclume",
+      "name": "Enclume",
+      "description": "Une enclume massive. Lourde. Très lourde.",
+      "bidule_entity_id": "bidule_metal",
+      "marmite_entity_id": "marmite_cuisine"
+    },
+
+    {
+      "id": "philtre_charisme",
+      "type": "Objet",
+      "name": "Philtre de Charisme Absolu",
+      "description": "Une fiole achetée à un marchand. Elle promet un charisme absolu. On a des doutes."
+    },
+    {
+      "id": "armure_rutilante",
+      "type": "Objet",
+      "name": "Armure rutilante",
+      "description": "Une armure étincelante échangée contre un rubis. Vous en jetez enfin, digne d'un vrai chevalier."
+    },
+    {
+      "id": "epee_reforgee",
+      "type": "Objet",
+      "name": "Épée reforgée",
+      "description": "Une épée reforgée à neuf par le forgeron. Plus de rouille, plus de tétanos."
+    },
+    {
+      "id": "bouclier_fer",
+      "type": "Objet",
+      "name": "Bouclier de fer",
+      "description": "Un solide bouclier de fer forgé à partir d'un bon métal ancien."
     }
   ]
 }
