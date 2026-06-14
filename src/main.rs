@@ -372,6 +372,18 @@ fn main() {
     }
 
     loop {
+        // fin de partie déclenchée par le Roi lors de l'évaluation finale
+        if let Some(gagne) = world.fin_partie {
+            clear_screen();
+            if gagne {
+                println!("\n{}", colore!(JauneGras, "Vous avez été adoubé CHEVALIER. Votre légende ne fait que commencer."));
+            } else {
+                println!("\n{}", colore!(RougeGras, "Votre rêve de chevalerie s'arrête ici. Retournez à vos navets."));
+            }
+            println!("\n{}", colore!(MagentaGras, "=== FIN ==="));
+            break;
+        }
+
         if world.current_tick >= world.max_ticks {
             clear_screen();
             println!("\n{}", colore!(RougeGras, "20h00 - L'HEURE DE LA DÉFAITE !"));

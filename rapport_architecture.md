@@ -61,6 +61,7 @@ classDiagram
         +player: Player
         +zones: array~Zone~
         +entities: array~Interactable~
+        +fin_partie: Option~Boolean~
     }
 
     class Zone {
@@ -269,6 +270,8 @@ Trois mécanismes complètent l'architecture à mesure que le monde s'est étoff
 **Persistance (`Saveable`).** Le trait `Saveable`, super-trait de `Interactable`, expose `save_state()` / `load_state()` sous la forme d'une table associative sérialisable. La sauvegarde collecte l'état mutable de chaque entité (ses booléens d'état), l'état du joueur et la composition des zones, puis l'écrit en JSON ; le chargement reconstruit un monde neuf depuis `world.json` avant d'y réinjecter cet état. Le modèle par identifiants (§1) rend l'opération triviale : on ne sérialise que des nombres et quelques booléens, jamais un graphe d'objets.
 
 **Équilibrage de l'aura (anti-farm).** L'aura étant l'unique ressource de progression, toute source de gain *positive et répétable* doit être plafonnée, sous peine de permettre une accumulation infinie. Deux techniques sont employées : un booléen d'état qui « consomme » un gain ponctuel dès sa première obtention, ou un jet de probabilité calibré pour une espérance mathématique négative. Les pertes, elles, demeurent répétables : ce sont des pièges assumés du game design.
+
+**Fin de partie.** La condition de victoire est portée par un champ `fin_partie: Option<bool>` du `WorldManager`. Lors de l'évaluation finale dans la salle du trône, le Roi y inscrit le verdict (`Some(true)` si l'aura atteint le seuil d'adoubement, sinon un tirage de chance) ; la boucle de jeu lit ce champ à chaque tour et termine la partie en conséquence. Ce mécanisme évite qu'une entité ait à piloter directement la boucle principale.
 
 ---
 

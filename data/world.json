@@ -85,7 +85,7 @@
     {
       "id": "zone_village",
       "description": "Le Village de Bourg-les-Navets. Trois maisons, une taverne, une forge et un château qui essaie très fort d'être impressionnant. Des poules se promènent avec plus d'assurance que vous.",
-      "connected_zones": ["zone_plaine", "zone_lac"],
+      "connected_zones": ["zone_plaine", "zone_lac", "zone_chateau"],
       "interactables": ["poules_village", "fontaine_village", "marchand_pnj"],
       "interest_points": [
         {
@@ -99,6 +99,20 @@
           "interactables": ["forgeron_pnj", "enclume_forge"]
         }
       ]
+    },
+    {
+      "id": "zone_chateau",
+      "description": "Le Château du Roi. Il se dresse devant vous, majestueux et... légèrement de travers ? Le pont-levis grince. Les gardes ont l'air de s'ennuyer profondément.",
+      "connected_zones": ["zone_village"],
+      "interactables": ["gardes_chateau", "pont_levis"],
+      "interest_points": []
+    },
+    {
+      "id": "zone_salle_trone",
+      "description": "La Salle du Trône. Tapis rouge usé, courtisans hypocrites, et au bout, le Roi Anthony sur un trône légèrement bancal. C'est l'heure de vérité.",
+      "connected_zones": ["zone_chateau"],
+      "interactables": ["roi_anthony"],
+      "interest_points": []
     }
   ],
 
@@ -492,7 +506,6 @@
       "type": "Marchand",
       "name": "Le Marchand",
       "description": "Un marchand au sourire trop large, entouré d'objets aussi douteux que coûteux.",
-      "philtre_entity_id": "philtre_charisme",
       "armure_entity_id": "armure_rutilante",
       "rubis_entity_id": "rubis_rutilant",
       "piece_entity_id": "piece_monnaie"
@@ -539,12 +552,6 @@
     },
 
     {
-      "id": "philtre_charisme",
-      "type": "Objet",
-      "name": "Philtre de Charisme Absolu",
-      "description": "Une fiole achetée à un marchand. Elle promet un charisme absolu. On a des doutes."
-    },
-    {
       "id": "armure_rutilante",
       "type": "Objet",
       "name": "Armure rutilante",
@@ -561,6 +568,44 @@
       "type": "Objet",
       "name": "Bouclier de fer",
       "description": "Un solide bouclier de fer forgé à partir d'un bon métal ancien."
+    },
+
+    {
+      "id": "gardes_chateau",
+      "type": "Gardes",
+      "name": "Les Gardes",
+      "description": "Deux gardes en armure devant le pont-levis. Ils s'ennuient, mais ils sont costauds.",
+      "cape_entity_id": "cape_brodee",
+      "armure_entity_id": "armure_rutilante",
+      "piece_entity_id": "piece_monnaie",
+      "rubis_entity_id": "rubis_rutilant",
+      "laissez_passer_entity_id": "laissez_passer"
+    },
+    {
+      "id": "pont_levis",
+      "type": "PontLevis",
+      "name": "Pont-levis",
+      "description": "Le pont-levis du château. Il mène à la salle du trône.",
+      "target_zone": "zone_salle_trone",
+      "laissez_passer_entity_id": "laissez_passer"
+    },
+    {
+      "id": "roi_anthony",
+      "type": "Roi",
+      "name": "Le Roi Anthony",
+      "description": "Le souverain du royaume, dont la bonté n'a d'égale que son besoin viscéral d'être impressionné.",
+      "oeuf_entity_id": "oeuf_dore",
+      "talisman_entity_id": "talisman_ermite",
+      "bidule_entity_id": "bidule_metal",
+      "marmite_entity_id": "marmite_cuisine",
+      "seau_entity_id": "seau_vide"
+    },
+
+    {
+      "id": "laissez_passer",
+      "type": "Objet",
+      "name": "Laissez-passer",
+      "description": "L'accord (tacite ou monnayé) des gardes pour entrer au château. Votre sésame vers le trône."
     }
   ]
 }

@@ -17,9 +17,10 @@ use serde::Deserialize;
 
 use crate::entities::{
     ArbreTordu, Balai, Barde, Barque, Canne, Champignon, Chat, Chene, CleMaison, Coffre, Enclume,
-    Epouvantail, Ermite, Esprit, Fenetre, Fontaine, Forgeron, Fossoyeur, Gargouille, Interactable,
-    Lac, Lit, Marchand, Marmite, Meule, Meunier, Michu, Objet, Panneau, Porte, PorteMichu, Poules,
-    Puits, Renard, SacsFarine, Seau, Souche, Tavernier, Tombe, Tonneau,
+    Epouvantail, Ermite, Esprit, Fenetre, Fontaine, Forgeron, Fossoyeur, Gardes, Gargouille,
+    Interactable, Lac, Lit, Marchand, Marmite, Meule, Meunier, Michu, Objet, Panneau, PontLevis,
+    Porte, PorteMichu, Poules, Puits, Renard, Roi, SacsFarine, Seau, Souche, Tavernier, Tombe,
+    Tonneau,
 };
 use crate::player::Player;
 use crate::world::{InterestPoint, WorldManager, Zone};
@@ -334,7 +335,6 @@ enum EntityDto {
         id: String,
         name: String,
         description: String,
-        philtre_entity_id: String,
         armure_entity_id: String,
         rubis_entity_id: String,
         piece_entity_id: String,
@@ -373,6 +373,34 @@ enum EntityDto {
         description: String,
         bidule_entity_id: String,
         marmite_entity_id: String,
+    },
+    // ── Entités du Château et de la Salle du trône ────────────
+    Gardes {
+        id: String,
+        name: String,
+        description: String,
+        cape_entity_id: String,
+        armure_entity_id: String,
+        piece_entity_id: String,
+        rubis_entity_id: String,
+        laissez_passer_entity_id: String,
+    },
+    PontLevis {
+        id: String,
+        name: String,
+        description: String,
+        target_zone: String,
+        laissez_passer_entity_id: String,
+    },
+    Roi {
+        id: String,
+        name: String,
+        description: String,
+        oeuf_entity_id: String,
+        talisman_entity_id: String,
+        bidule_entity_id: String,
+        marmite_entity_id: String,
+        seau_entity_id: String,
     },
 }
 
@@ -418,6 +446,9 @@ impl EntityDto {
             EntityDto::Tonneau { id, .. } => id,
             EntityDto::Forgeron { id, .. } => id,
             EntityDto::Enclume { id, .. } => id,
+            EntityDto::Gardes { id, .. } => id,
+            EntityDto::PontLevis { id, .. } => id,
+            EntityDto::Roi { id, .. } => id,
         }
     }
 }
@@ -552,6 +583,7 @@ pub fn load_from_str(content: &str) -> Result<LoadedWorld, LoadError> {
         player,
         zones,
         entities,
+        fin_partie: None,
     };
 
     Ok(LoadedWorld {
@@ -1000,7 +1032,6 @@ fn build_entity(
         EntityDto::Marchand {
             name,
             description,
-            philtre_entity_id,
             armure_entity_id,
             rubis_entity_id,
             piece_entity_id,
@@ -1009,7 +1040,6 @@ fn build_entity(
             id,
             name,
             description,
-            philtre_id: resolve_entity(&philtre_entity_id)?,
             armure_id: resolve_entity(&armure_entity_id)?,
             rubis_id: resolve_entity(&rubis_entity_id)?,
             piece_id: resolve_entity(&piece_entity_id)?,
@@ -1082,6 +1112,61 @@ fn build_entity(
             bidule_id: resolve_entity(&bidule_entity_id)?,
             marmite_id: resolve_entity(&marmite_entity_id)?,
             bidule_pris: false,
+        })),
+
+        // ── Entités du Château et de la Salle du trône ─────────
+        EntityDto::Gardes {
+            name,
+            description,
+            cape_entity_id,
+            armure_entity_id,
+            piece_entity_id,
+            rubis_entity_id,
+            laissez_passer_entity_id,
+            ..
+        } => Ok(Box::new(Gardes {
+            id,
+            name,
+            description,
+            cape_id: resolve_entity(&cape_entity_id)?,
+            armure_id: resolve_entity(&armure_entity_id)?,
+            piece_id: resolve_entity(&piece_entity_id)?,
+            rubis_id: resolve_entity(&rubis_entity_id)?,
+            laissez_passer_id: resolve_entity(&laissez_passer_entity_id)?,
+        })),
+
+        EntityDto::PontLevis {
+            name,
+            description,
+            target_zone,
+            laissez_passer_entity_id,
+            ..
+        } => Ok(Box::new(PontLevis {
+            id,
+            name,
+            description,
+            target_zone: resolve_zone(&target_zone)?,
+            laissez_passer_id: resolve_entity(&laissez_passer_entity_id)?,
+        })),
+
+        EntityDto::Roi {
+            name,
+            description,
+            oeuf_entity_id,
+            talisman_entity_id,
+            bidule_entity_id,
+            marmite_entity_id,
+            seau_entity_id,
+            ..
+        } => Ok(Box::new(Roi {
+            id,
+            name,
+            description,
+            oeuf_id: resolve_entity(&oeuf_entity_id)?,
+            talisman_id: resolve_entity(&talisman_entity_id)?,
+            bidule_id: resolve_entity(&bidule_entity_id)?,
+            marmite_id: resolve_entity(&marmite_entity_id)?,
+            seau_id: resolve_entity(&seau_entity_id)?,
         })),
     }
 }

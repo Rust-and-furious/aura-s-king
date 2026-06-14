@@ -8,7 +8,6 @@ pub struct Marchand {
     pub id: usize,
     pub name: String,
     pub description: String,
-    pub philtre_id: usize,
     pub armure_id: usize,
     pub rubis_id: usize,
     pub piece_id: usize,
@@ -52,13 +51,13 @@ impl Interactable for Marchand {
                 match choix {
                     0 => {
                         world.current_tick += 5;
-                        if player.inventory.contains(&self.philtre_id) {
-                            println!("« Tu as déjà ton philtre, mon grand. Un seul suffit pour finir aux toilettes. »");
-                        } else if player.inventory.contains(&self.piece_id) {
+                        if player.inventory.contains(&self.piece_id) {
                             player.inventory.retain(|&x| x != self.piece_id);
-                            player.inventory.push(self.philtre_id);
-                            crate::audio::play_sound("assets/victory.wav");
-                            println!("« Marché conclu ! Un Philtre de Charisme Absolu, garanti 100 % charismatique. » (Vous rangez la fiole, dubitatif.)");
+                            // pas d'inventaire « actif » dans le moteur : on boit le philtre à l'achat (c'est un piège)
+                            player.aura -= 100000.0;
+                            world.current_tick += 60;
+                            crate::audio::play_sound("assets/defeat.wav");
+                            println!("{} « Un Philtre de Charisme Absolu ! » Vous le buvez cul sec... C'était de l'eau du lac et du jus de chou. Vous êtes malade comme un chien pendant une heure.", colore!(Rouge, "[-100 000 Aura]"));
                         } else {
                             println!("« Pas de pièce, pas de philtre. Reviens quand tu seras solvable. »");
                         }

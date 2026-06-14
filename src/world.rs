@@ -7,6 +7,9 @@ pub struct WorldManager {
     pub player: Player,
     pub zones: Vec<Zone>,
     pub entities: Vec<Box<dyn Interactable>>,
+    /// Fin de partie : None = en cours, Some(true) = victoire, Some(false) = défaite.
+    /// Renseigné par le Roi lors de l'évaluation finale ; lu par la boucle de jeu.
+    pub fin_partie: Option<bool>,
 }
 
 impl WorldManager {

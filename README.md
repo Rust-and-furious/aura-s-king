@@ -34,4 +34,4 @@ Le projet respecte une séparation stricte entre le **moteur** (code Rust) et le
 
 ### Contenu du jeu
 
-Zones jouables : **Maison, Plaine, Forêt, Cimetière, Lac, Île, Village** (Château et Salle du trône à venir). On se déplace entre zones reliées via l'option **« Se déplacer »**, ou par des entités-passages (porte, fenêtre, barque). Le scénario complet est décrit dans `histoire.md`.
+Zones jouables : **Maison, Plaine, Forêt, Cimetière, Lac, Île, Village, Château, Salle du trône** — **le jeu est complet**. Le but : impressionner le Roi Anthony (atteindre **1 000 000 d'aura** avant 20h00) pour être adoubé chevalier. On se déplace entre zones reliées via l'option **« Se déplacer »**, ou par des entités-passages (porte, fenêtre, barque). Le scénario complet est décrit dans `histoire.md`.
