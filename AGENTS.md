@@ -31,17 +31,19 @@ The game engine (Rust code) **must be strictly separated** from game data (descr
 
 ```
 src/
-  main.rs       # Point d'entrée + boucle de jeu (Command Pattern, navigation zones/points d'intérêt)
+  main.rs       # Point d'entrée + boucle de jeu (Command Pattern, navigation zones / points d'intérêt / déplacement)
   actions.rs    # enum Action — tous les verbes possibles
   traits.rs     # Traits de capacité : Openable, Fightable, Useable
   loader.rs     # Chargement du monde depuis data/world.json (DTOs serde + factory build_entity)
   menu.rs       # Menus interactifs clavier (crossterm) : select_from_menu
+  couleur.rs    # Macro colore! + enum Couleur (codes ANSI)
   audio.rs      # Lecture des sons (Windows)
+  save.rs       # Sauvegarde / chargement JSON de l'état (data/save.json, trait Saveable)
   player.rs     # struct Player
   world.rs      # struct WorldManager, Zone, InterestPoint + helpers
   entities/
-    mod.rs      # trait Interactable + helpers (pseudo_rand, jet_reussite) + ré-exports
-    *.rs        # une entité concrète par fichier (lit, porte, puits, meunier, michu, objet...)
+    mod.rs      # traits Interactable + Saveable + helpers (pseudo_rand, jet_reussite) + ré-exports
+    *.rs        # une entité concrète par fichier (lit, puits, chene, gargouille, barque...)
 ```
 
 ## Class Diagram
@@ -164,6 +166,8 @@ classDiagram
 
 > **Note:** Toute entité concrète implémentant `Interactable` stocke un champ `id: usize` égal à son index dans `WorldManager.entities`, renseigné au chargement JSON. Ce champ permet à l'entité de se localiser elle-même (p. ex. pour le ramassage) sans dépendre d'une recherche par pointeur, même lorsque le moteur l'a temporairement swappée hors du `Vec`.
 
+> **Note (sauvegarde) :** depuis l'ajout du système de save, `Interactable` a pour super-trait `Saveable` (méthodes `save_state()` / `load_state()`). Toute entité concrète implémente donc aussi `Saveable` (vide par défaut si elle n'a pas d'état mutable). Voir Décision #7.
+
 ## Key Architecture Decisions
 
 ### 1. Central storage via `WorldManager`
@@ -190,13 +194,44 @@ La fonction de chargement (`loader::load_from_json`, ou `load_from_str` pour les
 Le moteur identifie une interaction par le couple **(entité, verbe `Action`)** ; ce couple doit rester unique. Quand une entité a besoin de plusieurs variantes du même verbe (ex. un PNJ avec 3 « Dialoguer »), elle n'expose **qu'un seul** verbe dans `get_actions`, puis ouvre un **sous-menu** dans son `execute_action` via `menu::select_from_menu`. Cela évite de modifier l'enum `Action` (et donc le diagramme). **Contrepartie assumée :** l'entité dépend alors de l'UI pour lire le sous-choix (cf. rapport_architecture.md §9).
 
 ### 6. Ajouter une nouvelle entité (recette)
-1. Créer `src/entities/<nom>.rs` : une `struct` + `impl Interactable` (+ traits de capacité utiles).
+1. Créer `src/entities/<nom>.rs` : une `struct` + `impl Interactable` + **`impl Saveable`** (obligatoire — vide si pas d'état mutable) + les traits de capacité utiles (`Useable`/`Openable`/`Fightable`).
 2. La déclarer dans `src/entities/mod.rs` (`pub mod` + `pub use`).
-3. Dans `loader.rs` : ajouter une variante à `enum EntityDto`, un bras à `EntityDto::id()`, et un bras à la factory `build_entity`.
+3. Dans `loader.rs` : ajouter une variante à `enum EntityDto`, un bras à `EntityDto::id()`, et un bras à la factory `build_entity` (en y initialisant les bools d'état à `false`).
 4. Décrire l'entité dans `data/world.json` avec son champ `"type"`.
 5. Pour un simple objet ramassable (clé, corde, pièce…), réutiliser le type générique **`Objet`** plutôt que de créer un nouveau type.
+6. Si une action donne de l'aura **positive et répétable**, la plafonner avec un bool d'état (cf. Décision #9).
 
-> **Note de flux de jeu :** sortir de la maison ne termine plus la partie (placeholder retiré) — on peut explorer la Plaine. La fin réelle (salle du trône) reste à brancher.
+### 7. Persistance et sauvegarde (`Saveable`)
+Le trait `Saveable` (super-trait de `Interactable`) expose `save_state()` / `load_state()` — une map `String → JSON`. `save.rs` sérialise dans `data/save.json` l'état mutable de chaque entité (bools), plus le joueur et les listes d'entités des zones. Une entité **sans** état mutable utilise l'implémentation par défaut (vide) ; une entité **avec** état sérialise ses bools (ex. `Puits` → `deja_crie`, `Barque` → `reparee`, `Coffre` → `est_ouverte`).
+
+### 8. Navigation entre zones (« Se déplacer »)
+La boucle de jeu propose une entrée **« Se déplacer »** dès qu'une zone possède des `connected_zones` : elle liste les zones reliées et y déplace le joueur (≈ 15 min de marche). C'est le **seul** usage de `Zone.connected_zones` (avant, ce champ était chargé mais inutilisé). Les transitions **verrouillées/conditionnelles** (porte, fenêtre, barque) restent gérées par l'entité elle-même via `Action::Deplacer` (la zone-cible est stockée dans l'entité, résolue au chargement). Conséquence : une zone sans `connected_zones` (ex. la **maison**) ne se quitte que par ses entités-sorties.
+
+### 9. Pas d'aura infinie (gating)
+L'aura est l'enjeu central du jeu : toute source d'aura **positive et répétable** doit être plafonnée, sinon elle se farme à l'infini. Deux techniques utilisées : **(a)** gain ponctuel gardé par un bool d'état (`deja_*`, `*_donne`, `*_pris`, `*_trouve`…) passé à `true` au premier gain ; **(b)** pari à espérance ≤ 0 (ex. puits « descendre » 30 %, meule « soulever » 2 %). Les **pertes** répétables sont autorisées (ce sont des pièges assumés). _(Origine : retour du scrum master sur le puits, dont l'espérance de gain était positive.)_
+
+> **Note de flux de jeu :** zones implémentées et navigables : **Maison → Plaine → Forêt → Cimetière**, et **Plaine / Forêt → Lac → Île**. Restent à faire : **Village, Château, Salle du trône** (la fin). La maison se quitte par la porte (clé / enfoncer) ou la fenêtre — pas par « Se déplacer ».
+
+## Contenu du monde (implémenté)
+
+> `histoire.md` = spécification complète du jeu. Ce tableau dit ce qui est **réellement codé** à ce jour.
+
+| Zone | Entités directes | Points d'intérêt (entités) |
+|---|---|---|
+| `zone_maison` | Lit, Marmite, CleMaison, Balai, Fenetre, Porte | — |
+| `zone_plaine` | Puits, Epouvantail | Moulin (Meunier, Meule, SacsFarine) · Maison Michu (PorteMichu, Michu, Chat) |
+| `zone_foret` | Panneau, Champignon | Vieux Chêne (Chene, Ermite) · Clairière (Souche, Renard) |
+| `zone_cimetiere` | Tombe, Fossoyeur | Mausolée (Gargouille, Esprit) |
+| `zone_lac` | Lac, Barque | Ponton (Canne, Seau) |
+| `zone_ile` | Coffre, ArbreTordu | — |
+
+**Choix de conception spécifiques au contenu :**
+- **Île = zone à part entière** (`zone_ile`), pas un point d'intérêt : on y accède via la **barque** (`Action::Deplacer`), ce qui permet de gérer le verrou « barque réparée » comme la porte gère son `Deplacer`. Le retour se fait par « Se déplacer ».
+- **Sortie de la maison** : la maison n'a **pas** de `connected_zones` (fidèle à `histoire.md`) → on sort par la porte ou la fenêtre, jamais par « Se déplacer ».
+- **Corde partagée, non consommée** : réparer la barque **et** la canne nécessite la corde du puits ; aucune des deux réparations ne la consomme (il n'existe qu'une corde → sinon soft-lock).
+- **`balai_maison` vs `balai_depart`** : `histoire.md` nomme le balai `balai_depart`, mais son id réel dans le JSON est `balai_maison`. La gargouille (cassable avec le balai ou un `bidule_metal`) est branchée sur l'id réel.
+- **Objets créés en avance** : certains objets sont définis avant la zone qui les produit/consomme (ex. `bidule_metal` pour la future forge ; objets de la Forêt utilisés plus tard au Lac) afin que les références JSON résolvent au chargement. Ils sont simplement inaccessibles tant que leur zone d'origine n'existe pas.
+- **Bools d'état** (état runtime, **non** dans le diagramme — comme `chapeau_pris` — initialisés à `false` dans `build_entity`, sérialisés via `Saveable`) : `deja_crie`, `deja_attaque`, `travail_donne`, `deja_grimpe`/`deja_enlace`/`deja_grave`, `conseil_donne`, `epee_prise`, `deja_assis`, `baie_donnee`, `ver_trouve`, `deja_insulte`, `gargouille_brisee`, `duel_gagne`, `deja_baigne`, `deja_bu`, `reparee`, `est_ouverte`, `poisson_pris`, `botte_prise`.
 
 ## Implementation Mapping (IDs)
 

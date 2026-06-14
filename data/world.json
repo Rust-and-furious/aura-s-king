@@ -16,7 +16,7 @@
     {
       "id": "zone_plaine",
       "description": "La Plaine. L'air frais vous frappe le visage. Devant vous, une plaine s'étend, parsemée de trucs plus ou moins intéressants. Au loin, un moulin tourne. Ou pas.",
-      "connected_zones": ["zone_maison", "zone_foret"],
+      "connected_zones": ["zone_maison", "zone_foret", "zone_lac"],
       "interactables": ["puits_plaine", "epouvantail_plaine"],
       "interest_points": [
         {
@@ -34,7 +34,7 @@
     {
       "id": "zone_foret",
       "description": "La Forêt de Brâme. Les arbres se referment autour de vous comme les bras d'une belle-mère insistante. Il fait sombre, ça craque de partout, et vous êtes à peu près sûr que quelque chose vous observe. C'est un écureuil.",
-      "connected_zones": ["zone_plaine", "zone_cimetiere"],
+      "connected_zones": ["zone_plaine", "zone_cimetiere", "zone_lac"],
       "interactables": ["panneau_foret", "champignon_foret"],
       "interest_points": [
         {
@@ -61,6 +61,26 @@
           "interactables": ["gargouille_statue", "esprit_godefroy"]
         }
       ]
+    },
+    {
+      "id": "zone_lac",
+      "description": "Le Lac. Un lac d'un bleu étrangement parfait s'étale devant vous. La surface est lisse comme un miroir. Vous vous y voyez. Vous détournez le regard.",
+      "connected_zones": ["zone_plaine", "zone_foret"],
+      "interactables": ["eau_lac", "barque_lac"],
+      "interest_points": [
+        {
+          "id": "ponton_lac",
+          "description": "Le Ponton de pêche (un ponton branlant, un seau, une canne cassée et une odeur de poisson d'un autre siècle)",
+          "interactables": ["canne_peche", "seau_ponton"]
+        }
+      ]
+    },
+    {
+      "id": "zone_ile",
+      "description": "L'Île au milieu du lac. Une minuscule île avec un unique arbre tordu et un coffre recouvert de mousse. On dirait la planque d'un pirate au très petit budget.",
+      "connected_zones": ["zone_lac"],
+      "interactables": ["coffre_ile", "arbre_tordu_ile"],
+      "interest_points": []
     }
   ],
 
@@ -353,6 +373,86 @@
       "type": "Objet",
       "name": "Bidule en métal",
       "description": "Un objet métallique informe sorti d'une forge. Personne ne sait à quoi ça sert, mais c'est solide."
+    },
+
+    {
+      "id": "eau_lac",
+      "type": "Lac",
+      "name": "Le Lac",
+      "description": "Une étendue d'eau d'un bleu étrangement parfait, lisse comme un miroir.",
+      "piece_entity_id": "piece_monnaie"
+    },
+    {
+      "id": "barque_lac",
+      "type": "Barque",
+      "name": "Vieille barque",
+      "description": "Une barque échouée sur la berge, avec un trou béant dans la coque.",
+      "planche_entity_id": "planche_bois",
+      "corde_entity_id": "corde_puits",
+      "target_zone": "zone_ile"
+    },
+    {
+      "id": "canne_peche",
+      "type": "Canne",
+      "name": "Canne à pêche",
+      "description": "Une canne à pêche cassée en deux qui traîne sur le ponton.",
+      "corde_entity_id": "corde_puits",
+      "poisson_entity_id": "poisson_frais",
+      "botte_entity_id": "vieille_botte"
+    },
+    {
+      "id": "seau_ponton",
+      "type": "Seau",
+      "name": "Seau",
+      "description": "Un vieux seau vide posé au bout du ponton.",
+      "seau_vide_entity_id": "seau_vide"
+    },
+    {
+      "id": "coffre_ile",
+      "type": "Coffre",
+      "name": "Coffre moussu",
+      "description": "Un coffre en bois solide, recouvert de mousse, fermé par un cadenas rouillé.",
+      "cape_entity_id": "cape_brodee",
+      "epee_entity_id": "epee_rouillee",
+      "marmite_entity_id": "marmite_cuisine"
+    },
+    {
+      "id": "arbre_tordu_ile",
+      "type": "ArbreTordu",
+      "name": "Arbre tordu",
+      "description": "L'unique arbre de l'île, tordu et solitaire. Quelque chose pend à ses branches.",
+      "noix_entity_id": "noix_de_coco"
+    },
+
+    {
+      "id": "noix_de_coco",
+      "type": "Objet",
+      "name": "Noix de coco",
+      "description": "Une noix de coco tombée d'un arbre qui n'a rien à faire dans la région. Ne cherchez pas."
+    },
+    {
+      "id": "poisson_frais",
+      "type": "Objet",
+      "name": "Poisson frais",
+      "description": "Un beau poisson frais, fraîchement pêché. Ça change du ragoût éternel."
+    },
+    {
+      "id": "vieille_botte",
+      "type": "Objet",
+      "name": "Vieille botte",
+      "description": "Une vieille botte taille 47 repêchée dans le lac. Inutile mais étrangement amusante."
+    },
+    {
+      "id": "seau_vide",
+      "type": "Objet",
+      "name": "Seau vide",
+      "description": "Un seau parfaitement vide. Son utilité reste à prouver."
+    },
+    {
+      "id": "cape_brodee",
+      "type": "Objet",
+      "name": "Cape brodée",
+      "description": "Une magnifique cape brodée trouvée dans un coffre sur une île. Enfin un vêtement digne d'un futur chevalier."
     }
   ]
 }

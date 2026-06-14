@@ -16,9 +16,10 @@ use std::fmt;
 use serde::Deserialize;
 
 use crate::entities::{
-    Balai, Champignon, Chat, Chene, CleMaison, Epouvantail, Ermite, Esprit, Fenetre, Fossoyeur,
-    Gargouille, Interactable, Lit, Marmite, Meule, Meunier, Michu, Objet, Panneau, Porte,
-    PorteMichu, Puits, Renard, SacsFarine, Souche, Tombe,
+    ArbreTordu, Balai, Barque, Canne, Champignon, Chat, Chene, CleMaison, Coffre, Epouvantail,
+    Ermite, Esprit, Fenetre, Fossoyeur, Gargouille, Interactable, Lac, Lit, Marmite, Meule,
+    Meunier, Michu, Objet, Panneau, Porte, PorteMichu, Puits, Renard, SacsFarine, Seau, Souche,
+    Tombe,
 };
 use crate::player::Player;
 use crate::world::{InterestPoint, WorldManager, Zone};
@@ -273,6 +274,49 @@ enum EntityDto {
         description: String,
         manuel_entity_id: String,
     },
+    // ── Entités du Lac ────────────────────────────────────────
+    Lac {
+        id: String,
+        name: String,
+        description: String,
+        piece_entity_id: String,
+    },
+    Barque {
+        id: String,
+        name: String,
+        description: String,
+        planche_entity_id: String,
+        corde_entity_id: String,
+        target_zone: String,
+    },
+    Coffre {
+        id: String,
+        name: String,
+        description: String,
+        cape_entity_id: String,
+        epee_entity_id: String,
+        marmite_entity_id: String,
+    },
+    ArbreTordu {
+        id: String,
+        name: String,
+        description: String,
+        noix_entity_id: String,
+    },
+    Canne {
+        id: String,
+        name: String,
+        description: String,
+        corde_entity_id: String,
+        poisson_entity_id: String,
+        botte_entity_id: String,
+    },
+    Seau {
+        id: String,
+        name: String,
+        description: String,
+        seau_vide_entity_id: String,
+    },
 }
 
 impl EntityDto {
@@ -303,6 +347,12 @@ impl EntityDto {
             EntityDto::Fossoyeur { id, .. } => id,
             EntityDto::Gargouille { id, .. } => id,
             EntityDto::Esprit { id, .. } => id,
+            EntityDto::Lac { id, .. } => id,
+            EntityDto::Barque { id, .. } => id,
+            EntityDto::Coffre { id, .. } => id,
+            EntityDto::ArbreTordu { id, .. } => id,
+            EntityDto::Canne { id, .. } => id,
+            EntityDto::Seau { id, .. } => id,
         }
     }
 }
@@ -758,6 +808,100 @@ fn build_entity(
             description,
             manuel_id: resolve_entity(&manuel_entity_id)?,
             duel_gagne: false,
+        })),
+
+        // ── Entités du Lac ─────────────────────────────────────
+        EntityDto::Lac {
+            name,
+            description,
+            piece_entity_id,
+            ..
+        } => Ok(Box::new(Lac {
+            id,
+            name,
+            description,
+            piece_id: resolve_entity(&piece_entity_id)?,
+            deja_baigne: false,
+            deja_bu: false,
+        })),
+
+        EntityDto::Barque {
+            name,
+            description,
+            planche_entity_id,
+            corde_entity_id,
+            target_zone,
+            ..
+        } => Ok(Box::new(Barque {
+            id,
+            name,
+            description,
+            planche_id: resolve_entity(&planche_entity_id)?,
+            corde_id: resolve_entity(&corde_entity_id)?,
+            target_zone: resolve_zone(&target_zone)?,
+            reparee: false,
+        })),
+
+        EntityDto::Coffre {
+            name,
+            description,
+            cape_entity_id,
+            epee_entity_id,
+            marmite_entity_id,
+            ..
+        } => Ok(Box::new(Coffre {
+            id,
+            name,
+            description,
+            cape_id: resolve_entity(&cape_entity_id)?,
+            epee_id: resolve_entity(&epee_entity_id)?,
+            marmite_id: resolve_entity(&marmite_entity_id)?,
+            est_ouverte: false,
+        })),
+
+        EntityDto::ArbreTordu {
+            name,
+            description,
+            noix_entity_id,
+            ..
+        } => Ok(Box::new(ArbreTordu {
+            id,
+            name,
+            description,
+            noix_id: resolve_entity(&noix_entity_id)?,
+            deja_grimpe: false,
+            deja_secoue: false,
+        })),
+
+        EntityDto::Canne {
+            name,
+            description,
+            corde_entity_id,
+            poisson_entity_id,
+            botte_entity_id,
+            ..
+        } => Ok(Box::new(Canne {
+            id,
+            name,
+            description,
+            corde_id: resolve_entity(&corde_entity_id)?,
+            poisson_id: resolve_entity(&poisson_entity_id)?,
+            botte_id: resolve_entity(&botte_entity_id)?,
+            reparee: false,
+            poisson_pris: false,
+            botte_prise: false,
+        })),
+
+        EntityDto::Seau {
+            name,
+            description,
+            seau_vide_entity_id,
+            ..
+        } => Ok(Box::new(Seau {
+            id,
+            name,
+            description,
+            seau_vide_id: resolve_entity(&seau_vide_entity_id)?,
         })),
     }
 }

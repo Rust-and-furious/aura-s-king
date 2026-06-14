@@ -1,11 +1,12 @@
 {
-  "current_tick": 30,
+  "current_tick": 380,
   "player": {
-    "aura": 0.0,
-    "zone": 2,
+    "aura": -45000.0,
+    "zone": 4,
     "inventory": [
       2,
-      27
+      27,
+      32
     ]
   },
   "zones": [
@@ -64,54 +65,122 @@
           ]
         }
       ]
+    },
+    {
+      "id": 3,
+      "interactables": [
+        33,
+        34
+      ],
+      "interest_points": [
+        {
+          "id": 4,
+          "interactables": [
+            35,
+            36
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "interactables": [
+        41,
+        42
+      ],
+      "interest_points": [
+        {
+          "id": 5,
+          "interactables": [
+            43
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "interactables": [
+        45,
+        46
+      ],
+      "interest_points": []
     }
   ],
   "entities": {
-    "10": {
-      "piece_trouvee": false
+    "1": {
+      "key_revealed": true,
+      "has_key": true
     },
-    "22": {
+    "46": {
       "deja_grimpe": false,
-      "deja_enlace": false,
-      "deja_grave": false
+      "deja_secoue": false
+    },
+    "36": {
+      "duel_gagne": false
     },
     "5": {
-      "est_ouverte": true,
-      "is_locked": false
+      "is_locked": false,
+      "est_ouverte": true
     },
     "4": {
       "est_ouverte": false,
       "est_cassee": false
     },
-    "11": {
-      "est_ouverte": false
-    },
-    "23": {
-      "conseil_donne": false
-    },
-    "24": {
-      "epee_prise": false,
-      "deja_assis": false
+    "22": {
+      "deja_enlace": true,
+      "deja_grave": true,
+      "deja_grimpe": false
     },
     "6": {
       "deja_crie": false
     },
+    "23": {
+      "conseil_donne": true
+    },
+    "33": {
+      "ver_trouve": false
+    },
+    "25": {
+      "baie_donnee": true
+    },
+    "35": {
+      "gargouille_brisee": false,
+      "deja_insulte": false
+    },
     "7": {
       "chapeau_pris": false,
       "deja_attaque": false
+    },
+    "10": {
+      "piece_trouvee": false
+    },
+    "24": {
+      "epee_prise": false,
+      "deja_assis": true
+    },
+    "41": {
+      "deja_baigne": false,
+      "deja_bu": false
+    },
+    "42": {
+      "reparee": false
+    },
+    "43": {
+      "reparee": false,
+      "poisson_pris": false,
+      "botte_prise": false
+    },
+    "11": {
+      "est_ouverte": false
+    },
+    "45": {
+      "est_ouverte": false
     },
     "8": {
       "travail_donne": false
     },
     "12": {
       "biscuit_donne": false
-    },
-    "1": {
-      "key_revealed": true,
-      "has_key": true
-    },
-    "25": {
-      "baie_donnee": false
     }
   }
 }

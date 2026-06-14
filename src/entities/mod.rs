@@ -41,17 +41,22 @@ pub fn jet_reussite(seed: usize, pourcentage: usize) -> bool {
     pseudo_rand(seed) % 100 < pourcentage
 }
 
+pub mod arbre_tordu;
 pub mod balai;
+pub mod barque;
+pub mod canne;
 pub mod champignon;
 pub mod chat;
 pub mod chene;
 pub mod cle;
+pub mod coffre;
 pub mod epouvantail;
 pub mod ermite;
 pub mod esprit;
 pub mod fenetre;
 pub mod fossoyeur;
 pub mod gargouille;
+pub mod lac;
 pub mod lit;
 pub mod marmite;
 pub mod meule;
@@ -64,20 +69,26 @@ pub mod porte_michu;
 pub mod puits;
 pub mod renard;
 pub mod sacs_farine;
+pub mod seau;
 pub mod souche;
 pub mod tombe;
 
+pub use arbre_tordu::ArbreTordu;
 pub use balai::Balai;
+pub use barque::Barque;
+pub use canne::Canne;
 pub use champignon::Champignon;
 pub use chat::Chat;
 pub use chene::Chene;
 pub use cle::CleMaison;
+pub use coffre::Coffre;
 pub use epouvantail::Epouvantail;
 pub use ermite::Ermite;
 pub use esprit::Esprit;
 pub use fenetre::Fenetre;
 pub use fossoyeur::Fossoyeur;
 pub use gargouille::Gargouille;
+pub use lac::Lac;
 pub use lit::Lit;
 pub use marmite::Marmite;
 pub use meule::Meule;
@@ -90,5 +101,6 @@ pub use porte_michu::PorteMichu;
 pub use puits::Puits;
 pub use renard::Renard;
 pub use sacs_farine::SacsFarine;
+pub use seau::Seau;
 pub use souche::Souche;
 pub use tombe::Tombe;
