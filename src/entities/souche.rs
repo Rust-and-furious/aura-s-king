@@ -64,12 +64,11 @@ impl Useable for Souche {
                         self.epee_prise = true;
                         player.inventory.push(self.epee_id);
                         player.aura += 120000.0;
-                        crate::audio::play_sound("assets/victory.wav");
+                        crate::audio::play_sound("assets/sword.wav");
                         println!("{} VOUS AVEZ TIRÉ L'ÉPÉE DE LA SOUCHE ! Bon, ce n'est pas Excalibur, et prévoyez peut-être un vaccin contre le tétanos.", colore!(Vert, "[+120 000 Aura]"));
                     }
                 } else {
                     player.aura -= 20000.0;
-                    crate::audio::play_sound("assets/defeat.wav");
                     println!("{} L'épée ne bouge pas. Vous vous êtes fait un tour de rein. Aïe.", colore!(Rouge, "[-20 000 Aura]"));
                 }
             }
@@ -80,7 +79,6 @@ impl Useable for Souche {
                 } else {
                     self.deja_assis = true;
                     player.aura += 8000.0;
-                    crate::audio::play_sound("assets/victory.wav");
                     println!("{} Vous méditez un instant. Un papillon se pose sur votre nez. Très poétique.", colore!(Vert, "[+8 000 Aura]"));
                 }
             }

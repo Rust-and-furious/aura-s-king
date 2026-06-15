@@ -59,10 +59,10 @@ impl Fightable for Coffre {
 }
 
 impl Coffre {
-    // donne la cape une seule fois, à la première ouverture (peu importe la méthode)
     fn donner_cape(&mut self, player: &mut Player) {
         let _ = self.ouvrir();
         player.inventory.push(self.cape_id);
+        crate::audio::play_sound("assets/cape.wav");
     }
 }
 
@@ -102,11 +102,9 @@ impl Interactable for Coffre {
                 if jet_reussite(world.current_tick, 40) {
                     self.donner_cape(player);
                     player.aura += 150000.0;
-                    crate::audio::play_sound("assets/victory.wav");
                     println!("{} Le cadenas cède ! À l'intérieur, une magnifique cape brodée.", colore!(Vert, "[+150 000 Aura]"));
                 } else {
                     player.aura -= 40000.0;
-                    crate::audio::play_sound("assets/defeat.wav");
                     println!("{} Vos doigts saignent sur la rouille. Le cadenas tient bon.", colore!(Rouge, "[-40 000 Aura]"));
                 }
             }
@@ -117,13 +115,11 @@ impl Interactable for Coffre {
                     player.inventory.retain(|&x| x != self.epee_id);
                     self.donner_cape(player);
                     player.aura += 150000.0;
-                    crate::audio::play_sound("assets/victory.wav");
                     println!("{} L'épée se brise mais le cadenas aussi. Marché conclu. Une cape brodée vous attend à l'intérieur.", colore!(Vert, "[+150 000 Aura]"));
                 } else if player.inventory.contains(&self.marmite_id) {
                     player.inventory.retain(|&x| x != self.marmite_id);
                     self.donner_cape(player);
                     player.aura += 100000.0;
-                    crate::audio::play_sound("assets/victory.wav");
                     println!("{} BONG ! Le bruit résonne sur tout le lac. Le coffre cède. Une cape brodée vous attend.", colore!(Vert, "[+100 000 Aura]"));
                 } else {
                     println!("Ça fait « toc ». Le coffre s'en fiche.");

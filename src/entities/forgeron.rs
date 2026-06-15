@@ -63,13 +63,12 @@ impl Interactable for Forgeron {
                             player.inventory.retain(|&x| x != self.epee_id);
                             player.inventory.push(self.reforgee_id);
                             player.aura += 150000.0;
-                            crate::audio::play_sound("assets/victory.wav");
+                            crate::audio::play_sound("assets/sword.wav");
                             println!("{} « Oh ! Du bon acier sous la rouille ! Tiens, je te l'ai reforgée. »", colore!(Vert, "[+150 000 Aura]"));
                         } else if player.inventory.contains(&self.medaille_id) {
                             player.inventory.retain(|&x| x != self.medaille_id);
                             player.inventory.push(self.bouclier_id);
                             player.aura += 100000.0;
-                            crate::audio::play_sound("assets/victory.wav");
                             println!("{} « Un bon métal ancien. Tiens, je t'ai fait un bouclier en échange. »", colore!(Vert, "[+100 000 Aura]"));
                         } else {
                             println!("« C'est de la camelote, ça. Reviens avec du vrai métal. »");

@@ -27,6 +27,7 @@ impl Interactable for Balai {
     }
 
     fn execute_action(&mut self, action: &Action, player: &mut Player, world: &mut WorldManager) {
+        crate::audio::play_sound("assets/balai.wav");
         match action {
             Action::Observer => {
                 println!("Vous observez le balai. {}", self.description);

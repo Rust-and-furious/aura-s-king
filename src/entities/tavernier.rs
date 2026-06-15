@@ -55,12 +55,12 @@ impl Interactable for Tavernier {
                         if player.inventory.contains(&self.poisson_id) {
                             player.inventory.retain(|&x| x != self.poisson_id);
                             player.aura += 50000.0;
-                            crate::audio::play_sound("assets/victory.wav");
+                            crate::audio::play_sound("assets/boire.wav");
                             println!("{} « Un poisson frais ! Ça change du ragoût éternel. Tiens, bois un coup à ma santé. »", colore!(Vert, "[+50 000 Aura]"));
                         } else if player.inventory.contains(&self.noix_id) {
                             player.inventory.retain(|&x| x != self.noix_id);
                             player.aura += 30000.0;
-                            crate::audio::play_sound("assets/victory.wav");
+                            crate::audio::play_sound("assets/boire.wav");
                             println!("{} « C'est quoi ce truc ? ...On va en faire un cocktail. »", colore!(Vert, "[+30 000 Aura]"));
                         } else {
                             println!("« Garde ça pour toi, j'ai déjà bien assez de bric-à-brac. »");

@@ -42,7 +42,6 @@ impl Useable for Poules {
         } else {
             self.deja_caresse = true;
             player.aura += 5000.0;
-            crate::audio::play_sound("assets/victory.wav");
             println!("{} La poule accepte. C'est doux. Vous repensez brièvement à vos choix de vie.", colore!(Vert, "[+5 000 Aura]"));
         }
         Ok(())
@@ -84,7 +83,6 @@ impl Interactable for Poules {
                 world.current_tick += 15;
                 player.aura -= 30000.0;
                 player.zone = *target_zone;
-                crate::audio::play_sound("assets/defeat.wav");
                 println!("{} Vous courez après les poules. Tout le village vous regarde. Elles sont bien plus rapides. Vous avez l'air ridicule.", colore!(Rouge, "[-30 000 Aura]"));
             }
             Action::Dialoguer => {

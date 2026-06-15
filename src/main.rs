@@ -180,7 +180,20 @@ fn interact_with_entity(world: &mut WorldManager, entity_idx: usize) -> Flow {
                     inventory: vec![],
                 },
             );
+            
+            let old_aura = temp_player.aura;
+            
             entity.execute_action(chosen_action, &mut temp_player, world);
+            
+            let new_aura = temp_player.aura;
+            let entity_name = entity.name().to_lowercase();
+            
+            if new_aura > old_aura && !entity_name.contains("chat") {
+                crate::audio::play_sound("assets/victory.wav");
+            } else if new_aura < old_aura && !entity_name.contains("chat") {
+                crate::audio::play_sound("assets/defeat.wav");
+            }
+
             let _ = std::mem::replace(&mut world.player, temp_player);
             let _ = std::mem::replace(&mut world.entities[entity_idx], entity);
 
@@ -303,7 +316,6 @@ fn travel_to_connected_zone(world: &mut WorldManager, zone_idx: usize) -> Flow {
 
 fn main() {
     clear_screen();
-    audio::play_music_loop("assets/music.wav");
     println!("{}", colore!(JauneGras, "=== Aura Farming Simulator ==="));
 
     let save_exists = std::path::Path::new("data/save.json").exists();
@@ -371,13 +383,35 @@ fn main() {
         wait_for_enter();
     }
 
+    let mut current_music_file = "".to_string();
+    let mut _music_handle: Option<crate::audio::MusicHandle> = None;
+
     loop {
+        // Musique de fond dynamique selon la description de la zone
+        let zone_desc = &world.zones[world.player.zone].description;
+        let mut expected_music = "assets/Tranquilou.wav";
+        if zone_desc.contains("Le Village") || zone_desc.contains("Le Château") || zone_desc.contains("La Salle") {
+            expected_music = "assets/aura'sKing.wav";
+        } else if zone_desc.contains("La Forêt") {
+            expected_music = "assets/foret.wav";
+        } else if zone_desc.contains("modeste demeure") {
+            expected_music = "assets/maison.wav";
+        }
+
+        if current_music_file != expected_music {
+            _music_handle = None; // Stop previous
+            _music_handle = Some(crate::audio::play_music_loop(expected_music));
+            current_music_file = expected_music.to_string();
+        }
+
         // fin de partie déclenchée par le Roi lors de l'évaluation finale
         if let Some(gagne) = world.fin_partie {
             clear_screen();
             if gagne {
+                crate::audio::play_sound("assets/FInVictoire.wav");
                 println!("\n{}", colore!(JauneGras, "Vous avez été adoubé CHEVALIER. Votre légende ne fait que commencer."));
             } else {
+                crate::audio::play_sound("assets/FinPerdu.wav");
                 println!("\n{}", colore!(RougeGras, "Votre rêve de chevalerie s'arrête ici. Retournez à vos navets."));
             }
             println!("\n{}", colore!(MagentaGras, "=== FIN ==="));
@@ -386,6 +420,7 @@ fn main() {
 
         if world.current_tick >= world.max_ticks {
             clear_screen();
+            crate::audio::play_sound("assets/FinPerdu.wav");
             println!("\n{}", colore!(RougeGras, "20h00 - L'HEURE DE LA DÉFAITE !"));
             println!("Les portes du château se ferment. Le bal commence sans vous.");
             println!(

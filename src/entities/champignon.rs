@@ -21,15 +21,14 @@ impl Useable for Champignon {
         player: &mut Player,
         world: &mut WorldManager,
     ) -> Result<(), &'static str> {
+        crate::audio::play_sound("assets/manger.wav");
         if jet_reussite(world.current_tick, 50) {
             world.current_tick += 10;
             player.aura += 100000.0;
-            crate::audio::play_sound("assets/victory.wav");
             println!("{} Vision mystique ! Vous percevez les secrets de l'univers (et le vrai sens du mot 'navet').", colore!(Vert, "[+100 000 Aura]"));
         } else {
             world.current_tick += 90;
             player.aura -= 50000.0;
-            crate::audio::play_sound("assets/defeat.wav");
             println!("{} Intoxication. Vous parlez aux arbres. Ils ne répondent pas. Vous vomissez votre chou et reprenez vos esprits dans une mare.", colore!(Rouge, "[-50 000 Aura]"));
         }
         // consommé quel que soit le résultat

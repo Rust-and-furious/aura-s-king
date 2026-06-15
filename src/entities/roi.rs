@@ -53,17 +53,17 @@ impl Interactable for Roi {
                     0 => {
                         world.current_tick += 5;
                         if player.aura >= 1_000_000.0 {
-                            crate::audio::play_sound("assets/victory.wav");
+                            crate::audio::play_sound("assets/FInVictoire.wav");
                             println!("{}", colore!(JauneGras, "Le Roi se lève, ébloui, et vous adoube sur-le-champ : « Relevez-vous, CHEVALIER ! » La foule applaudit, les poules et l'épouvantail aussi."));
                             println!("{}", colore!(VertGras, "=== VICTOIRE ABSOLUE ==="));
                             world.fin_partie = Some(true);
                         } else if jet_reussite(world.current_tick, 20) {
-                            crate::audio::play_sound("assets/victory.wav");
+                            crate::audio::play_sound("assets/FInVictoire.wav");
                             println!("Le roi hésite... mais votre culot légendaire lui plaît. Il vous adoube sur un coup de tête !");
                             println!("{}", colore!(VertGras, "=== VICTOIRE DE JUSTESSE ==="));
                             world.fin_partie = Some(true);
                         } else {
-                            crate::audio::play_sound("assets/defeat.wav");
+                            crate::audio::play_sound("assets/FinPerdu.wav");
                             println!("Le roi éclate de rire et vous fait jeter dehors. « Retourne sarcler tes navets, manant ! »");
                             println!("{}", colore!(RougeGras, "=== GAME OVER ==="));
                             world.fin_partie = Some(false);
@@ -74,27 +74,22 @@ impl Interactable for Roi {
                         if player.inventory.contains(&self.oeuf_id) {
                             player.inventory.retain(|&x| x != self.oeuf_id);
                             player.aura += 250000.0;
-                            crate::audio::play_sound("assets/victory.wav");
                             println!("{} Le roi adore l'œuf doré ! Il l'installe aussitôt sur son trône.", colore!(Vert, "[+250 000 Aura]"));
                         } else if player.inventory.contains(&self.talisman_id) {
                             player.inventory.retain(|&x| x != self.talisman_id);
                             player.aura += 100000.0;
-                            crate::audio::play_sound("assets/victory.wav");
                             println!("{} « Un talisman ! Mystique, j'adore. »", colore!(Vert, "[+100 000 Aura]"));
                         } else if player.inventory.contains(&self.bidule_id) {
                             player.inventory.retain(|&x| x != self.bidule_id);
                             player.aura += 50000.0;
-                            crate::audio::play_sound("assets/victory.wav");
                             println!("{} « C'est moche... j'adore ! » dit le roi.", colore!(Vert, "[+50 000 Aura]"));
                         } else if player.inventory.contains(&self.marmite_id) {
                             player.inventory.retain(|&x| x != self.marmite_id);
                             player.aura -= 80000.0;
-                            crate::audio::play_sound("assets/defeat.wav");
                             println!("{} « Des gardes ! Pourquoi m'offre-t-on un récipient à soupe ?! »", colore!(Rouge, "[-80 000 Aura]"));
                         } else if player.inventory.contains(&self.seau_id) {
                             player.inventory.retain(|&x| x != self.seau_id);
                             player.aura -= 200000.0;
-                            crate::audio::play_sound("assets/defeat.wav");
                             println!("{} Le roi prend le seau vide pour une insulte royale. Très mauvaise idée.", colore!(Rouge, "[-200 000 Aura]"));
                         } else {
                             println!("Le roi attend manifestement quelque chose de plus impressionnant.");

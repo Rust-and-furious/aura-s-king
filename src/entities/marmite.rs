@@ -51,6 +51,7 @@ impl Interactable for Marmite {
     }
 
     fn execute_action(&mut self, action: &Action, player: &mut Player, world: &mut WorldManager) {
+        crate::audio::play_sound("assets/bong.wav");
         match action {
             Action::Observer => {
                 println!("Vous observez la marmite. {}", self.description);
