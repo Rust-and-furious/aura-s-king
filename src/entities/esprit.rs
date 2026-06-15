@@ -83,9 +83,9 @@ impl Interactable for Esprit {
                             crate::audio::play_sound("assets/victory.wav");
                             println!("{} Le fantôme bégaie, impressionné par votre prestance, et s'évapore en vous laissant son Manuel du Parfait Petit Chevalier !", colore!(Vert, "[+300 000 Aura]"));
                         } else {
-                            player.aura -= 100000.0;
+                            player.aura -= 50000.0;
                             crate::audio::play_sound("assets/defeat.wav");
-                            println!("{} Il se moque de vous avec un rire d'outre-tombe. Votre ego est pulvérisé.", colore!(Rouge, "[-100 000 Aura]"));
+                            println!("{} Il se moque de vous avec un rire d'outre-tombe. Votre ego est pulvérisé.", colore!(Rouge, "[-50 000 Aura]"));
                         }
                     }
                     _ => {}

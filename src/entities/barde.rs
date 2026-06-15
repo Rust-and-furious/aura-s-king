@@ -76,13 +76,13 @@ impl Interactable for Barde {
                             println!("Le barde a déjà fait votre chanson. Il refuse de se répéter, « par respect pour l'art ».");
                         } else if jet_reussite(world.current_tick, 40) {
                             self.chanson_faite = true;
-                            player.aura += 200000.0;
+                            player.aura += 100000.0;
                             crate::audio::play_sound("assets/victory.wav");
-                            println!("{} La chanson est atroce mais entraînante : les gens scandent votre nom !", colore!(Vert, "[+200 000 Aura]"));
+                            println!("{} La chanson est atroce mais entraînante : les gens scandent votre nom !", colore!(Vert, "[+100 000 Aura]"));
                         } else {
-                            player.aura -= 80000.0;
+                            player.aura -= 70000.0;
                             crate::audio::play_sound("assets/defeat.wav");
-                            println!("{} Le barde improvise sur « Le paysan qui pue le chou ». Humiliation publique.", colore!(Rouge, "[-80 000 Aura]"));
+                            println!("{} Le barde improvise sur « Le paysan qui pue le chou ». Humiliation publique.", colore!(Rouge, "[-70 000 Aura]"));
                         }
                     }
                     2 => {
