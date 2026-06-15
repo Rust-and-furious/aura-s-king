@@ -9,15 +9,109 @@
     {
       "id": "zone_maison",
       "description": "Votre modeste demeure. Il y fait sombre et l'air est lourd de regrets et d'odeur de chou.",
-      "connected_zones": ["zone_plaine"],
+      "connected_zones": [],
       "interactables": ["lit_joueur", "marmite_cuisine", "balai_maison", "fenetre_maison", "porte_maison"],
       "interest_points": []
     },
     {
       "id": "zone_plaine",
-      "description": "La Plaine. L'air frais vous frappe le visage. Vous y êtes enfin !",
-      "connected_zones": [],
-      "interactables": [],
+      "description": "La Plaine. L'air frais vous frappe le visage. Devant vous, une plaine s'étend, parsemée de trucs plus ou moins intéressants. Au loin, un moulin tourne. Ou pas.",
+      "connected_zones": ["zone_maison", "zone_foret", "zone_lac", "zone_village"],
+      "interactables": ["puits_plaine", "epouvantail_plaine"],
+      "interest_points": [
+        {
+          "id": "moulin_plaine",
+          "description": "Le moulin (le meunier, large et couvert de farine, vous observe avec méfiance)",
+          "interactables": ["meunier_pnj", "meule_moulin", "sacs_farine"]
+        },
+        {
+          "id": "maison_michu_plaine",
+          "description": "La maison de Michu (votre voisine de 847 ans, reine des ragots et des biscuits)",
+          "interactables": ["porte_michu"]
+        }
+      ]
+    },
+    {
+      "id": "zone_foret",
+      "description": "La Forêt de Brâme. Les arbres se referment autour de vous comme les bras d'une belle-mère insistante. Il fait sombre, ça craque de partout, et vous êtes à peu près sûr que quelque chose vous observe. C'est un écureuil.",
+      "connected_zones": ["zone_plaine", "zone_cimetiere", "zone_lac"],
+      "interactables": ["panneau_foret", "champignon_foret"],
+      "interest_points": [
+        {
+          "id": "vieux_chene_foret",
+          "description": "Le Vieux Chêne (un chêne titanesque, si vieux qu'il a sûrement vu le premier roi se prendre les pieds dans sa cape)",
+          "interactables": ["vieux_chene", "ermite_pnj"]
+        },
+        {
+          "id": "clairiere_foret",
+          "description": "La Clairière (un cercle d'herbe parfaitement tondu, donc suspect ; au centre, une souche avec quelque chose dessus)",
+          "interactables": ["souche_epee", "renard_clairiere"]
+        }
+      ]
+    },
+    {
+      "id": "zone_cimetiere",
+      "description": "Le Cimetière des Chevaliers Ratés. Un lieu brumeux et sinistre où reposent ceux qui ont cru qu'un peu d'aura et une épée rouillée suffisaient à impressionner le roi. L'herbe est morte, et votre moral s'apprête à faire de même.",
+      "connected_zones": ["zone_foret"],
+      "interactables": ["tombe_fraiche", "fossoyeur_pnj"],
+      "interest_points": [
+        {
+          "id": "mausolee_godefroy",
+          "description": "Le Mausolée de Sire Godefroy (un grand bâtiment de pierre couvert de statues qui ont l'air de vous juger ; la porte entrouverte laisse échapper un courant d'air glacial)",
+          "interactables": ["gargouille_statue", "esprit_godefroy"]
+        }
+      ]
+    },
+    {
+      "id": "zone_lac",
+      "description": "Le Lac. Un lac d'un bleu étrangement parfait s'étale devant vous. La surface est lisse comme un miroir. Vous vous y voyez. Vous détournez le regard.",
+      "connected_zones": ["zone_plaine", "zone_foret", "zone_village"],
+      "interactables": ["eau_lac", "barque_lac"],
+      "interest_points": [
+        {
+          "id": "ponton_lac",
+          "description": "Le Ponton de pêche (un ponton branlant, un seau, une canne cassée et une odeur de poisson d'un autre siècle)",
+          "interactables": ["canne_peche", "seau_ponton"]
+        }
+      ]
+    },
+    {
+      "id": "zone_ile",
+      "description": "L'Île au milieu du lac. Une minuscule île avec un unique arbre tordu et un coffre recouvert de mousse. On dirait la planque d'un pirate au très petit budget.",
+      "connected_zones": ["zone_lac"],
+      "interactables": ["coffre_ile", "arbre_tordu_ile"],
+      "interest_points": []
+    },
+    {
+      "id": "zone_village",
+      "description": "Le Village de Bourg-les-Navets. Trois maisons, une taverne, une forge et un château qui essaie très fort d'être impressionnant. Des poules se promènent avec plus d'assurance que vous.",
+      "connected_zones": ["zone_plaine", "zone_lac", "zone_chateau"],
+      "interactables": ["poules_village", "fontaine_village", "marchand_pnj"],
+      "interest_points": [
+        {
+          "id": "taverne_village",
+          "description": "La taverne « Au Cochon Pendu » (ça sent la bière renversée et les décisions regrettables ; un barde chante faux dans un coin)",
+          "interactables": ["tavernier_pnj", "barde_pnj", "tonneau_taverne"]
+        },
+        {
+          "id": "forge_village",
+          "description": "La Forge (la chaleur vous gifle ; le forgeron, un colosse tatoué, tape sur son enclume avec la passion d'un règlement de comptes)",
+          "interactables": ["forgeron_pnj", "enclume_forge"]
+        }
+      ]
+    },
+    {
+      "id": "zone_chateau",
+      "description": "Le Château du Roi. Il se dresse devant vous, majestueux et... légèrement de travers ? Le pont-levis grince. Les gardes ont l'air de s'ennuyer profondément.",
+      "connected_zones": ["zone_village"],
+      "interactables": ["gardes_chateau", "pont_levis"],
+      "interest_points": []
+    },
+    {
+      "id": "zone_salle_trone",
+      "description": "La Salle du Trône. Tapis rouge usé, courtisans hypocrites, et au bout, le Roi Anthony sur un trône légèrement bancal. C'est l'heure de vérité.",
+      "connected_zones": ["zone_chateau"],
+      "interactables": ["roi_anthony"],
       "interest_points": []
     }
   ],
@@ -68,6 +162,450 @@
       "is_locked": true,
       "key_entity_id": "cle_maison",
       "target_zone": "zone_plaine"
+    },
+
+    {
+      "id": "puits_plaine",
+      "type": "Puits",
+      "name": "Puits",
+      "description": "Un vieux puits de pierre. C'est profond et sombre.",
+      "corde_entity_id": "corde_puits"
+    },
+    {
+      "id": "epouvantail_plaine",
+      "type": "Epouvantail",
+      "name": "Épouvantail",
+      "description": "Un épouvantail planté au milieu du champ, coiffé d'un chapeau étonnamment classe.",
+      "chapeau_entity_id": "chapeau_epouvantail"
+    },
+    {
+      "id": "meunier_pnj",
+      "type": "Meunier",
+      "name": "Le Meunier",
+      "description": "Un homme large, couvert de farine, qui vous regarde avec la méfiance de quelqu'un qui a déjà été volé par un paysan. Peut-être même vous.",
+      "marmite_entity_id": "marmite_cuisine",
+      "farine_entity_id": "farine_enchantee"
+    },
+    {
+      "id": "meule_moulin",
+      "type": "Meule",
+      "name": "Meule de pierre",
+      "description": "Une grande meule de pierre qui tourne lentement."
+    },
+    {
+      "id": "sacs_farine",
+      "type": "SacsFarine",
+      "name": "Sacs de farine",
+      "description": "Des dizaines de sacs empilés. Ça sent le pain et le labeur.",
+      "piece_entity_id": "piece_monnaie"
+    },
+    {
+      "id": "porte_michu",
+      "type": "PorteMichu",
+      "name": "Porte de Michu",
+      "description": "Une porte rustique ornée d'un heurtoir en forme de poule.",
+      "est_ouverte": false,
+      "michu_entity_id": "michu_pnj",
+      "chat_entity_id": "chat_michu"
+    },
+    {
+      "id": "michu_pnj",
+      "type": "Michu",
+      "name": "Michu",
+      "description": "Votre voisine de 847 ans, la plus grande commère du royaume.",
+      "biscuit_entity_id": "biscuit_michu",
+      "broche_entity_id": "broche_michu",
+      "chapeau_entity_id": "chapeau_epouvantail"
+    },
+    {
+      "id": "chat_michu",
+      "type": "Chat",
+      "name": "Pataud (le chat)",
+      "description": "Un gros chat roux au regard méprisant."
+    },
+
+    {
+      "id": "corde_puits",
+      "type": "Objet",
+      "name": "Corde solide",
+      "description": "Une corde robuste récupérée au fond du puits. Pourrait servir à réparer pas mal de choses."
+    },
+    {
+      "id": "chapeau_epouvantail",
+      "type": "Objet",
+      "name": "Chapeau de l'épouvantail",
+      "description": "Un chapeau de paille étonnamment élégant, volé à un épouvantail."
+    },
+    {
+      "id": "farine_enchantee",
+      "type": "Objet",
+      "name": "Farine enchantée",
+      "description": "Un sac de farine qui scintille légèrement. Le meunier jure qu'elle est magique."
+    },
+    {
+      "id": "piece_monnaie",
+      "type": "Objet",
+      "name": "Pièce de monnaie",
+      "description": "Une petite pièce de cuivre. Pas grand-chose, mais c'est un début de fortune."
+    },
+    {
+      "id": "biscuit_michu",
+      "type": "Objet",
+      "name": "Biscuit de Michu",
+      "description": "Un biscuit encore tiède. Il donne du courage rien qu'à le regarder.",
+      "aura_ramassage": 0.0
+    },
+    {
+      "id": "broche_michu",
+      "type": "Objet",
+      "name": "Broche de Michu",
+      "description": "Une jolie broche ancienne offerte par Michu. Ça en jette."
+    },
+
+    {
+      "id": "panneau_foret",
+      "type": "Panneau",
+      "name": "Panneau en bois",
+      "description": "Un panneau de bois planté à l'entrée de la forêt, couvert d'interdictions absurdes.",
+      "planche_entity_id": "planche_bois"
+    },
+    {
+      "id": "champignon_foret",
+      "type": "Champignon",
+      "name": "Champignon suspect",
+      "description": "Un champignon violet, brillant, qui vibre légèrement. Tout va bien.",
+      "champignon_objet_id": "champignon_suspect"
+    },
+    {
+      "id": "vieux_chene",
+      "type": "Chene",
+      "name": "Le Vieux Chêne",
+      "description": "Un chêne titanesque dont le tronc fait dix fois votre tour de taille.",
+      "oeuf_entity_id": "oeuf_dore"
+    },
+    {
+      "id": "ermite_pnj",
+      "type": "Ermite",
+      "name": "L'Ermite",
+      "description": "Un vieil homme installé dans les branches du chêne. Il jure être un ancien chevalier.",
+      "medaille_entity_id": "medaille_ermite",
+      "talisman_entity_id": "talisman_ermite",
+      "champignon_entity_id": "champignon_suspect",
+      "marmite_entity_id": "marmite_cuisine"
+    },
+    {
+      "id": "souche_epee",
+      "type": "Souche",
+      "name": "Souche mystérieuse",
+      "description": "Une souche au milieu de la clairière, avec une épée rouillée plantée dedans.",
+      "epee_entity_id": "epee_rouillee"
+    },
+    {
+      "id": "renard_clairiere",
+      "type": "Renard",
+      "name": "Le Renard",
+      "description": "Un renard roux qui vous fixe avec une intelligence dérangeante.",
+      "baie_entity_id": "baie_mysterieuse",
+      "target_zone": "zone_foret"
+    },
+
+    {
+      "id": "planche_bois",
+      "type": "Objet",
+      "name": "Planche de bois",
+      "description": "Une solide planche arrachée à un panneau forestier. Idéale pour réparer une coque trouée."
+    },
+    {
+      "id": "champignon_suspect",
+      "type": "Objet",
+      "name": "Champignon suspect",
+      "description": "Un champignon violet qui vibre encore un peu. Quelqu'un, quelque part, le cherche peut-être."
+    },
+    {
+      "id": "oeuf_dore",
+      "type": "Objet",
+      "name": "Œuf doré",
+      "description": "Un œuf entièrement doré, trouvé dans un nid au sommet du vieux chêne. Anormalement lourd."
+    },
+    {
+      "id": "medaille_ermite",
+      "type": "Objet",
+      "name": "Médaille de l'ermite",
+      "description": "Une vieille médaille de chevalerie, donnée par l'ermite en échange de son champignon perdu."
+    },
+    {
+      "id": "talisman_ermite",
+      "type": "Objet",
+      "name": "Talisman de l'ermite",
+      "description": "Un petit talisman protecteur en bois sculpté, offert par l'ermite."
+    },
+    {
+      "id": "epee_rouillee",
+      "type": "Objet",
+      "name": "Épée rouillée",
+      "description": "Une épée tirée d'une souche. Rouillée, tordue, mais c'est une épée. Prévoyez un vaccin contre le tétanos."
+    },
+    {
+      "id": "baie_mysterieuse",
+      "type": "Objet",
+      "name": "Baie mystérieuse",
+      "description": "Une petite baie offerte par un renard. Vous n'osez pas la manger. Pour l'instant."
+    },
+
+    {
+      "id": "tombe_fraiche",
+      "type": "Tombe",
+      "name": "Tombe fraîchement creusée",
+      "description": "Une tombe sans nom, fraîchement creusée, aux dimensions étrangement familières.",
+      "ver_entity_id": "ver_de_terre"
+    },
+    {
+      "id": "fossoyeur_pnj",
+      "type": "Fossoyeur",
+      "name": "Le Fossoyeur",
+      "description": "Un homme maigre et voûté, appuyé sur sa pelle, qui vous regarde comme un futur pensionnaire."
+    },
+    {
+      "id": "gargouille_statue",
+      "type": "Gargouille",
+      "name": "Statue de Gargouille",
+      "description": "Une gargouille de pierre, très laide, perchée à l'entrée du mausolée.",
+      "rubis_entity_id": "rubis_rutilant",
+      "bidule_entity_id": "bidule_metal",
+      "balai_entity_id": "balai_maison"
+    },
+    {
+      "id": "esprit_godefroy",
+      "type": "Esprit",
+      "name": "Esprit de Sire Godefroy",
+      "description": "Le fantôme grincheux d'un ancien chevalier mort de façon ridicule.",
+      "manuel_entity_id": "manuel_chevalier"
+    },
+
+    {
+      "id": "ver_de_terre",
+      "type": "Objet",
+      "name": "Ver de terre",
+      "description": "Un gros ver de terre bien gras, déterré d'une tombe. Étonnamment vigoureux."
+    },
+    {
+      "id": "rubis_rutilant",
+      "type": "Objet",
+      "name": "Rubis rutilant",
+      "description": "Un rubis énorme et rutilant, niché au cœur d'une gargouille brisée. Ça vaut une fortune."
+    },
+    {
+      "id": "manuel_chevalier",
+      "type": "Objet",
+      "name": "Manuel du Parfait Petit Chevalier",
+      "description": "Un vieux manuel laissé par un fantôme. Plein de conseils douteux mais terriblement classe à exhiber."
+    },
+    {
+      "id": "bidule_metal",
+      "type": "Objet",
+      "name": "Bidule en métal",
+      "description": "Un objet métallique informe sorti d'une forge. Personne ne sait à quoi ça sert, mais c'est solide."
+    },
+
+    {
+      "id": "eau_lac",
+      "type": "Lac",
+      "name": "Le Lac",
+      "description": "Une étendue d'eau d'un bleu étrangement parfait, lisse comme un miroir.",
+      "piece_entity_id": "piece_monnaie"
+    },
+    {
+      "id": "barque_lac",
+      "type": "Barque",
+      "name": "Vieille barque",
+      "description": "Une barque échouée sur la berge, avec un trou béant dans la coque.",
+      "planche_entity_id": "planche_bois",
+      "corde_entity_id": "corde_puits",
+      "target_zone": "zone_ile"
+    },
+    {
+      "id": "canne_peche",
+      "type": "Canne",
+      "name": "Canne à pêche",
+      "description": "Une canne à pêche cassée en deux qui traîne sur le ponton.",
+      "corde_entity_id": "corde_puits",
+      "poisson_entity_id": "poisson_frais",
+      "botte_entity_id": "vieille_botte"
+    },
+    {
+      "id": "seau_ponton",
+      "type": "Seau",
+      "name": "Seau",
+      "description": "Un vieux seau vide posé au bout du ponton.",
+      "seau_vide_entity_id": "seau_vide"
+    },
+    {
+      "id": "coffre_ile",
+      "type": "Coffre",
+      "name": "Coffre moussu",
+      "description": "Un coffre en bois solide, recouvert de mousse, fermé par un cadenas rouillé.",
+      "cape_entity_id": "cape_brodee",
+      "epee_entity_id": "epee_rouillee",
+      "marmite_entity_id": "marmite_cuisine"
+    },
+    {
+      "id": "arbre_tordu_ile",
+      "type": "ArbreTordu",
+      "name": "Arbre tordu",
+      "description": "L'unique arbre de l'île, tordu et solitaire. Quelque chose pend à ses branches.",
+      "noix_entity_id": "noix_de_coco"
+    },
+
+    {
+      "id": "noix_de_coco",
+      "type": "Objet",
+      "name": "Noix de coco",
+      "description": "Une noix de coco tombée d'un arbre qui n'a rien à faire dans la région. Ne cherchez pas."
+    },
+    {
+      "id": "poisson_frais",
+      "type": "Objet",
+      "name": "Poisson frais",
+      "description": "Un beau poisson frais, fraîchement pêché. Ça change du ragoût éternel."
+    },
+    {
+      "id": "vieille_botte",
+      "type": "Objet",
+      "name": "Vieille botte",
+      "description": "Une vieille botte taille 47 repêchée dans le lac. Inutile mais étrangement amusante."
+    },
+    {
+      "id": "seau_vide",
+      "type": "Objet",
+      "name": "Seau vide",
+      "description": "Un seau parfaitement vide. Son utilité reste à prouver."
+    },
+    {
+      "id": "cape_brodee",
+      "type": "Objet",
+      "name": "Cape brodée",
+      "description": "Une magnifique cape brodée trouvée dans un coffre sur une île. Enfin un vêtement digne d'un futur chevalier."
+    },
+
+    {
+      "id": "poules_village",
+      "type": "Poules",
+      "name": "Poules",
+      "description": "Des poules de village qui se baladent avec une assurance déconcertante.",
+      "target_zone": "zone_village"
+    },
+    {
+      "id": "fontaine_village",
+      "type": "Fontaine",
+      "name": "Fontaine",
+      "description": "Une fontaine de pierre au centre du village.",
+      "piece_entity_id": "piece_monnaie"
+    },
+    {
+      "id": "marchand_pnj",
+      "type": "Marchand",
+      "name": "Le Marchand",
+      "description": "Un marchand au sourire trop large, entouré d'objets aussi douteux que coûteux.",
+      "armure_entity_id": "armure_rutilante",
+      "rubis_entity_id": "rubis_rutilant",
+      "piece_entity_id": "piece_monnaie"
+    },
+    {
+      "id": "tavernier_pnj",
+      "type": "Tavernier",
+      "name": "Le Tavernier",
+      "description": "Le tavernier essuie un verre qui n'a jamais été propre de sa vie.",
+      "poisson_entity_id": "poisson_frais",
+      "noix_entity_id": "noix_de_coco"
+    },
+    {
+      "id": "barde_pnj",
+      "type": "Barde",
+      "name": "Le Barde",
+      "description": "Un barde qui chante faux dans un coin de la taverne.",
+      "oeuf_entity_id": "oeuf_dore",
+      "botte_entity_id": "vieille_botte"
+    },
+    {
+      "id": "tonneau_taverne",
+      "type": "Tonneau",
+      "name": "Tonneau de la taverne",
+      "description": "Un tonneau entrouvert. Ça sent fort le fermenté."
+    },
+    {
+      "id": "forgeron_pnj",
+      "type": "Forgeron",
+      "name": "Le Forgeron",
+      "description": "Un colosse tatoué qui tape sur son enclume avec la passion de quelqu'un qui règle des comptes personnels avec le métal.",
+      "epee_entity_id": "epee_rouillee",
+      "reforgee_entity_id": "epee_reforgee",
+      "medaille_entity_id": "medaille_ermite",
+      "bouclier_entity_id": "bouclier_fer"
+    },
+    {
+      "id": "enclume_forge",
+      "type": "Enclume",
+      "name": "Enclume",
+      "description": "Une enclume massive. Lourde. Très lourde.",
+      "bidule_entity_id": "bidule_metal",
+      "marmite_entity_id": "marmite_cuisine"
+    },
+
+    {
+      "id": "armure_rutilante",
+      "type": "Objet",
+      "name": "Armure rutilante",
+      "description": "Une armure étincelante échangée contre un rubis. Vous en jetez enfin, digne d'un vrai chevalier."
+    },
+    {
+      "id": "epee_reforgee",
+      "type": "Objet",
+      "name": "Épée reforgée",
+      "description": "Une épée reforgée à neuf par le forgeron. Plus de rouille, plus de tétanos."
+    },
+    {
+      "id": "bouclier_fer",
+      "type": "Objet",
+      "name": "Bouclier de fer",
+      "description": "Un solide bouclier de fer forgé à partir d'un bon métal ancien."
+    },
+
+    {
+      "id": "gardes_chateau",
+      "type": "Gardes",
+      "name": "Les Gardes",
+      "description": "Deux gardes en armure devant le pont-levis. Ils s'ennuient, mais ils sont costauds.",
+      "cape_entity_id": "cape_brodee",
+      "armure_entity_id": "armure_rutilante",
+      "piece_entity_id": "piece_monnaie",
+      "rubis_entity_id": "rubis_rutilant",
+      "laissez_passer_entity_id": "laissez_passer"
+    },
+    {
+      "id": "pont_levis",
+      "type": "PontLevis",
+      "name": "Pont-levis",
+      "description": "Le pont-levis du château. Il mène à la salle du trône.",
+      "target_zone": "zone_salle_trone",
+      "laissez_passer_entity_id": "laissez_passer"
+    },
+    {
+      "id": "roi_anthony",
+      "type": "Roi",
+      "name": "Le Roi Anthony",
+      "description": "Le souverain du royaume, dont la bonté n'a d'égale que son besoin viscéral d'être impressionné.",
+      "oeuf_entity_id": "oeuf_dore",
+      "talisman_entity_id": "talisman_ermite",
+      "bidule_entity_id": "bidule_metal",
+      "marmite_entity_id": "marmite_cuisine",
+      "seau_entity_id": "seau_vide"
+    },
+
+    {
+      "id": "laissez_passer",
+      "type": "Objet",
+      "name": "Laissez-passer",
+      "description": "L'accord (tacite ou monnayé) des gardes pour entrer au château. Votre sésame vers le trône."
     }
   ]
 }

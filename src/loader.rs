@@ -15,7 +15,13 @@ use std::fmt;
 
 use serde::Deserialize;
 
-use crate::entities::{Balai, CleMaison, Fenetre, Interactable, Lit, Marmite, Porte};
+use crate::entities::{
+    ArbreTordu, Balai, Barde, Barque, Canne, Champignon, Chat, Chene, CleMaison, Coffre, Enclume,
+    Epouvantail, Ermite, Esprit, Fenetre, Fontaine, Forgeron, Fossoyeur, Gardes, Gargouille,
+    Interactable, Lac, Lit, Marchand, Marmite, Meule, Meunier, Michu, Objet, Panneau, PontLevis,
+    Porte, PorteMichu, Poules, Puits, Renard, Roi, SacsFarine, Seau, Souche, Tavernier, Tombe,
+    Tonneau,
+};
 use crate::player::Player;
 use crate::world::{InterestPoint, WorldManager, Zone};
 
@@ -142,6 +148,260 @@ enum EntityDto {
         key_entity_id: String,
         target_zone: String,
     },
+    // ── Entités de la Plaine ──────────────────────────────────
+    Objet {
+        id: String,
+        name: String,
+        description: String,
+        #[serde(default)]
+        aura_ramassage: f64,
+    },
+    Puits {
+        id: String,
+        name: String,
+        description: String,
+        corde_entity_id: String,
+    },
+    Epouvantail {
+        id: String,
+        name: String,
+        description: String,
+        chapeau_entity_id: String,
+    },
+    Meunier {
+        id: String,
+        name: String,
+        description: String,
+        marmite_entity_id: String,
+        farine_entity_id: String,
+    },
+    Meule {
+        id: String,
+        name: String,
+        description: String,
+    },
+    SacsFarine {
+        id: String,
+        name: String,
+        description: String,
+        piece_entity_id: String,
+    },
+    PorteMichu {
+        id: String,
+        name: String,
+        description: String,
+        #[serde(default)]
+        est_ouverte: bool,
+        michu_entity_id: String,
+        chat_entity_id: String,
+    },
+    Michu {
+        id: String,
+        name: String,
+        description: String,
+        biscuit_entity_id: String,
+        broche_entity_id: String,
+        chapeau_entity_id: String,
+    },
+    Chat {
+        id: String,
+        name: String,
+        description: String,
+    },
+    // ── Entités de la Forêt ───────────────────────────────────
+    Panneau {
+        id: String,
+        name: String,
+        description: String,
+        planche_entity_id: String,
+    },
+    Champignon {
+        id: String,
+        name: String,
+        description: String,
+        champignon_objet_id: String,
+    },
+    Chene {
+        id: String,
+        name: String,
+        description: String,
+        oeuf_entity_id: String,
+    },
+    Ermite {
+        id: String,
+        name: String,
+        description: String,
+        medaille_entity_id: String,
+        talisman_entity_id: String,
+        champignon_entity_id: String,
+        marmite_entity_id: String,
+    },
+    Souche {
+        id: String,
+        name: String,
+        description: String,
+        epee_entity_id: String,
+    },
+    Renard {
+        id: String,
+        name: String,
+        description: String,
+        baie_entity_id: String,
+        target_zone: String,
+    },
+    // ── Entités du Cimetière ──────────────────────────────────
+    Tombe {
+        id: String,
+        name: String,
+        description: String,
+        ver_entity_id: String,
+    },
+    Fossoyeur {
+        id: String,
+        name: String,
+        description: String,
+    },
+    Gargouille {
+        id: String,
+        name: String,
+        description: String,
+        rubis_entity_id: String,
+        bidule_entity_id: String,
+        balai_entity_id: String,
+    },
+    Esprit {
+        id: String,
+        name: String,
+        description: String,
+        manuel_entity_id: String,
+    },
+    // ── Entités du Lac ────────────────────────────────────────
+    Lac {
+        id: String,
+        name: String,
+        description: String,
+        piece_entity_id: String,
+    },
+    Barque {
+        id: String,
+        name: String,
+        description: String,
+        planche_entity_id: String,
+        corde_entity_id: String,
+        target_zone: String,
+    },
+    Coffre {
+        id: String,
+        name: String,
+        description: String,
+        cape_entity_id: String,
+        epee_entity_id: String,
+        marmite_entity_id: String,
+    },
+    ArbreTordu {
+        id: String,
+        name: String,
+        description: String,
+        noix_entity_id: String,
+    },
+    Canne {
+        id: String,
+        name: String,
+        description: String,
+        corde_entity_id: String,
+        poisson_entity_id: String,
+        botte_entity_id: String,
+    },
+    Seau {
+        id: String,
+        name: String,
+        description: String,
+        seau_vide_entity_id: String,
+    },
+    // ── Entités du Village ────────────────────────────────────
+    Poules {
+        id: String,
+        name: String,
+        description: String,
+        target_zone: String,
+    },
+    Fontaine {
+        id: String,
+        name: String,
+        description: String,
+        piece_entity_id: String,
+    },
+    Marchand {
+        id: String,
+        name: String,
+        description: String,
+        armure_entity_id: String,
+        rubis_entity_id: String,
+        piece_entity_id: String,
+    },
+    Tavernier {
+        id: String,
+        name: String,
+        description: String,
+        poisson_entity_id: String,
+        noix_entity_id: String,
+    },
+    Barde {
+        id: String,
+        name: String,
+        description: String,
+        oeuf_entity_id: String,
+        botte_entity_id: String,
+    },
+    Tonneau {
+        id: String,
+        name: String,
+        description: String,
+    },
+    Forgeron {
+        id: String,
+        name: String,
+        description: String,
+        epee_entity_id: String,
+        reforgee_entity_id: String,
+        medaille_entity_id: String,
+        bouclier_entity_id: String,
+    },
+    Enclume {
+        id: String,
+        name: String,
+        description: String,
+        bidule_entity_id: String,
+        marmite_entity_id: String,
+    },
+    // ── Entités du Château et de la Salle du trône ────────────
+    Gardes {
+        id: String,
+        name: String,
+        description: String,
+        cape_entity_id: String,
+        armure_entity_id: String,
+        piece_entity_id: String,
+        rubis_entity_id: String,
+        laissez_passer_entity_id: String,
+    },
+    PontLevis {
+        id: String,
+        name: String,
+        description: String,
+        target_zone: String,
+        laissez_passer_entity_id: String,
+    },
+    Roi {
+        id: String,
+        name: String,
+        description: String,
+        oeuf_entity_id: String,
+        talisman_entity_id: String,
+        bidule_entity_id: String,
+        marmite_entity_id: String,
+        seau_entity_id: String,
+    },
 }
 
 impl EntityDto {
@@ -153,6 +413,42 @@ impl EntityDto {
             EntityDto::Balai { id, .. } => id,
             EntityDto::Fenetre { id, .. } => id,
             EntityDto::Porte { id, .. } => id,
+            EntityDto::Objet { id, .. } => id,
+            EntityDto::Puits { id, .. } => id,
+            EntityDto::Epouvantail { id, .. } => id,
+            EntityDto::Meunier { id, .. } => id,
+            EntityDto::Meule { id, .. } => id,
+            EntityDto::SacsFarine { id, .. } => id,
+            EntityDto::PorteMichu { id, .. } => id,
+            EntityDto::Michu { id, .. } => id,
+            EntityDto::Chat { id, .. } => id,
+            EntityDto::Panneau { id, .. } => id,
+            EntityDto::Champignon { id, .. } => id,
+            EntityDto::Chene { id, .. } => id,
+            EntityDto::Ermite { id, .. } => id,
+            EntityDto::Souche { id, .. } => id,
+            EntityDto::Renard { id, .. } => id,
+            EntityDto::Tombe { id, .. } => id,
+            EntityDto::Fossoyeur { id, .. } => id,
+            EntityDto::Gargouille { id, .. } => id,
+            EntityDto::Esprit { id, .. } => id,
+            EntityDto::Lac { id, .. } => id,
+            EntityDto::Barque { id, .. } => id,
+            EntityDto::Coffre { id, .. } => id,
+            EntityDto::ArbreTordu { id, .. } => id,
+            EntityDto::Canne { id, .. } => id,
+            EntityDto::Seau { id, .. } => id,
+            EntityDto::Poules { id, .. } => id,
+            EntityDto::Fontaine { id, .. } => id,
+            EntityDto::Marchand { id, .. } => id,
+            EntityDto::Tavernier { id, .. } => id,
+            EntityDto::Barde { id, .. } => id,
+            EntityDto::Tonneau { id, .. } => id,
+            EntityDto::Forgeron { id, .. } => id,
+            EntityDto::Enclume { id, .. } => id,
+            EntityDto::Gardes { id, .. } => id,
+            EntityDto::PontLevis { id, .. } => id,
+            EntityDto::Roi { id, .. } => id,
         }
     }
 }
@@ -179,9 +475,18 @@ pub struct LoadedWorld {
 /// (zones, entités). Cette fonction les résout en indices `usize` via
 /// deux passes, avant d'instancier les structs concrets.
 pub fn load_from_json(path: &str) -> Result<LoadedWorld, LoadError> {
-    // ── Lecture et désérialisation ────────────────────────────
     let content = std::fs::read_to_string(path)?;
-    let dto: WorldDto = serde_json::from_str(&content)?;
+    load_from_str(&content)
+}
+
+/// Variante de [`load_from_json`] qui prend le contenu JSON directement en
+/// mémoire plutôt qu'un chemin de fichier.
+///
+/// Utile pour les tests unitaires : on peut charger un mini-monde décrit dans
+/// une chaîne, sans dépendre d'un fichier sur le disque.
+pub fn load_from_str(content: &str) -> Result<LoadedWorld, LoadError> {
+    // ── Désérialisation ───────────────────────────────────────
+    let dto: WorldDto = serde_json::from_str(content)?;
 
     // ── Passe 1 : construction des index String → usize ──────
     let entity_index: HashMap<String, usize> = dto
@@ -221,49 +526,48 @@ pub fn load_from_json(path: &str) -> Result<LoadedWorld, LoadError> {
         .collect::<Result<_, _>>()?;
 
     // ── Construction des zones ────────────────────────────────
-    let zones: Vec<Zone> = dto
-        .zones
-        .into_iter()
-        .enumerate()
-        .map(|(i, z)| {
-            let connected_zones = z
-                .connected_zones
-                .iter()
-                .map(|id| resolve_zone(id))
-                .collect::<Result<Vec<_>, _>>()?;
+    // Chaque point d'intérêt reçoit un ID unique (compteur global), et non plus
+    // l'index de sa zone parente : deux points d'intérêt distincts ne doivent
+    // jamais partager le même ID.
+    let mut zones: Vec<Zone> = Vec::with_capacity(dto.zones.len());
+    let mut next_ip_id: usize = 0;
 
-            let interactables = z
+    for (i, z) in dto.zones.into_iter().enumerate() {
+        let connected_zones = z
+            .connected_zones
+            .iter()
+            .map(|id| resolve_zone(id))
+            .collect::<Result<Vec<_>, _>>()?;
+
+        let interactables = z
+            .interactables
+            .iter()
+            .map(|id| resolve_entity(id))
+            .collect::<Result<Vec<_>, _>>()?;
+
+        let mut interest_points = Vec::with_capacity(z.interest_points.len());
+        for ip in z.interest_points {
+            let ip_interactables = ip
                 .interactables
                 .iter()
                 .map(|id| resolve_entity(id))
                 .collect::<Result<Vec<_>, _>>()?;
+            interest_points.push(InterestPoint {
+                id: next_ip_id,
+                description: ip.description,
+                interactables: ip_interactables,
+            });
+            next_ip_id += 1;
+        }
 
-            let interest_points = z
-                .interest_points
-                .into_iter()
-                .map(|ip| {
-                    let ip_interactables = ip
-                        .interactables
-                        .iter()
-                        .map(|id| resolve_entity(id))
-                        .collect::<Result<Vec<_>, _>>()?;
-                    Ok::<InterestPoint, LoadError>(InterestPoint {
-                        id: i, // l'ID numérique est l'index de la zone parente
-                        description: ip.description,
-                        interactables: ip_interactables,
-                    })
-                })
-                .collect::<Result<Vec<_>, _>>()?;
-
-            Ok(Zone {
-                id: i,
-                description: z.description,
-                interest_points,
-                interactables,
-                connected_zones,
-            })
-        })
-        .collect::<Result<_, LoadError>>()?;
+        zones.push(Zone {
+            id: i,
+            description: z.description,
+            interest_points,
+            interactables,
+            connected_zones,
+        });
+    }
 
     // ── Joueur ────────────────────────────────────────────────
     let player = Player {
@@ -279,6 +583,7 @@ pub fn load_from_json(path: &str) -> Result<LoadedWorld, LoadError> {
         player,
         zones,
         entities,
+        fin_partie: None,
     };
 
     Ok(LoadedWorld {
@@ -354,6 +659,514 @@ fn build_entity(
             is_locked,
             key_entity_id: resolve_entity(&key_entity_id)?,
             target_zone: resolve_zone(&target_zone)?,
+        })),
+
+        // ── Entités de la Plaine ──────────────────────────────
+        EntityDto::Objet {
+            name,
+            description,
+            aura_ramassage,
+            ..
+        } => Ok(Box::new(Objet {
+            id,
+            name,
+            description,
+            aura_ramassage,
+        })),
+
+        EntityDto::Puits {
+            name,
+            description,
+            corde_entity_id,
+            ..
+        } => Ok(Box::new(Puits {
+            id,
+            name,
+            description,
+            corde_id: resolve_entity(&corde_entity_id)?,
+            deja_crie: false,
+        })),
+
+        EntityDto::Epouvantail {
+            name,
+            description,
+            chapeau_entity_id,
+            ..
+        } => Ok(Box::new(Epouvantail {
+            id,
+            name,
+            description,
+            chapeau_id: resolve_entity(&chapeau_entity_id)?,
+            chapeau_pris: false,
+            deja_attaque: false,
+        })),
+
+        EntityDto::Meunier {
+            name,
+            description,
+            marmite_entity_id,
+            farine_entity_id,
+            ..
+        } => Ok(Box::new(Meunier {
+            id,
+            name,
+            description,
+            marmite_id: resolve_entity(&marmite_entity_id)?,
+            farine_id: resolve_entity(&farine_entity_id)?,
+            travail_donne: false,
+        })),
+
+        EntityDto::Meule { name, description, .. } => {
+            Ok(Box::new(Meule { id, name, description }))
+        }
+
+        EntityDto::SacsFarine {
+            name,
+            description,
+            piece_entity_id,
+            ..
+        } => Ok(Box::new(SacsFarine {
+            id,
+            name,
+            description,
+            piece_id: resolve_entity(&piece_entity_id)?,
+            piece_trouvee: false,
+        })),
+
+        EntityDto::PorteMichu {
+            name,
+            description,
+            est_ouverte,
+            michu_entity_id,
+            chat_entity_id,
+            ..
+        } => Ok(Box::new(PorteMichu {
+            id,
+            name,
+            description,
+            est_ouverte,
+            michu_id: resolve_entity(&michu_entity_id)?,
+            chat_id: resolve_entity(&chat_entity_id)?,
+        })),
+
+        EntityDto::Michu {
+            name,
+            description,
+            biscuit_entity_id,
+            broche_entity_id,
+            chapeau_entity_id,
+            ..
+        } => Ok(Box::new(Michu {
+            id,
+            name,
+            description,
+            biscuit_id: resolve_entity(&biscuit_entity_id)?,
+            broche_id: resolve_entity(&broche_entity_id)?,
+            chapeau_id: resolve_entity(&chapeau_entity_id)?,
+            biscuit_donne: false,
+        })),
+
+        EntityDto::Chat { name, description, .. } => {
+            Ok(Box::new(Chat { id, name, description }))
+        }
+
+        // ── Entités de la Forêt ────────────────────────────────
+        EntityDto::Panneau {
+            name,
+            description,
+            planche_entity_id,
+            ..
+        } => Ok(Box::new(Panneau {
+            id,
+            name,
+            description,
+            planche_id: resolve_entity(&planche_entity_id)?,
+        })),
+
+        EntityDto::Champignon {
+            name,
+            description,
+            champignon_objet_id,
+            ..
+        } => Ok(Box::new(Champignon {
+            id,
+            name,
+            description,
+            champignon_objet_id: resolve_entity(&champignon_objet_id)?,
+        })),
+
+        EntityDto::Chene {
+            name,
+            description,
+            oeuf_entity_id,
+            ..
+        } => Ok(Box::new(Chene {
+            id,
+            name,
+            description,
+            oeuf_id: resolve_entity(&oeuf_entity_id)?,
+            deja_grimpe: false,
+            deja_enlace: false,
+            deja_grave: false,
+        })),
+
+        EntityDto::Ermite {
+            name,
+            description,
+            medaille_entity_id,
+            talisman_entity_id,
+            champignon_entity_id,
+            marmite_entity_id,
+            ..
+        } => Ok(Box::new(Ermite {
+            id,
+            name,
+            description,
+            medaille_id: resolve_entity(&medaille_entity_id)?,
+            talisman_id: resolve_entity(&talisman_entity_id)?,
+            champignon_id: resolve_entity(&champignon_entity_id)?,
+            marmite_id: resolve_entity(&marmite_entity_id)?,
+            conseil_donne: false,
+        })),
+
+        EntityDto::Souche {
+            name,
+            description,
+            epee_entity_id,
+            ..
+        } => Ok(Box::new(Souche {
+            id,
+            name,
+            description,
+            epee_id: resolve_entity(&epee_entity_id)?,
+            epee_prise: false,
+            deja_assis: false,
+        })),
+
+        EntityDto::Renard {
+            name,
+            description,
+            baie_entity_id,
+            target_zone,
+            ..
+        } => Ok(Box::new(Renard {
+            id,
+            name,
+            description,
+            baie_id: resolve_entity(&baie_entity_id)?,
+            target_zone: resolve_zone(&target_zone)?,
+            baie_donnee: false,
+        })),
+
+        // ── Entités du Cimetière ───────────────────────────────
+        EntityDto::Tombe {
+            name,
+            description,
+            ver_entity_id,
+            ..
+        } => Ok(Box::new(Tombe {
+            id,
+            name,
+            description,
+            ver_id: resolve_entity(&ver_entity_id)?,
+            ver_trouve: false,
+        })),
+
+        EntityDto::Fossoyeur { name, description, .. } => {
+            Ok(Box::new(Fossoyeur { id, name, description }))
+        }
+
+        EntityDto::Gargouille {
+            name,
+            description,
+            rubis_entity_id,
+            bidule_entity_id,
+            balai_entity_id,
+            ..
+        } => Ok(Box::new(Gargouille {
+            id,
+            name,
+            description,
+            rubis_id: resolve_entity(&rubis_entity_id)?,
+            bidule_id: resolve_entity(&bidule_entity_id)?,
+            balai_id: resolve_entity(&balai_entity_id)?,
+            deja_insulte: false,
+            gargouille_brisee: false,
+        })),
+
+        EntityDto::Esprit {
+            name,
+            description,
+            manuel_entity_id,
+            ..
+        } => Ok(Box::new(Esprit {
+            id,
+            name,
+            description,
+            manuel_id: resolve_entity(&manuel_entity_id)?,
+            duel_gagne: false,
+        })),
+
+        // ── Entités du Lac ─────────────────────────────────────
+        EntityDto::Lac {
+            name,
+            description,
+            piece_entity_id,
+            ..
+        } => Ok(Box::new(Lac {
+            id,
+            name,
+            description,
+            piece_id: resolve_entity(&piece_entity_id)?,
+            deja_baigne: false,
+            deja_bu: false,
+        })),
+
+        EntityDto::Barque {
+            name,
+            description,
+            planche_entity_id,
+            corde_entity_id,
+            target_zone,
+            ..
+        } => Ok(Box::new(Barque {
+            id,
+            name,
+            description,
+            planche_id: resolve_entity(&planche_entity_id)?,
+            corde_id: resolve_entity(&corde_entity_id)?,
+            target_zone: resolve_zone(&target_zone)?,
+            reparee: false,
+        })),
+
+        EntityDto::Coffre {
+            name,
+            description,
+            cape_entity_id,
+            epee_entity_id,
+            marmite_entity_id,
+            ..
+        } => Ok(Box::new(Coffre {
+            id,
+            name,
+            description,
+            cape_id: resolve_entity(&cape_entity_id)?,
+            epee_id: resolve_entity(&epee_entity_id)?,
+            marmite_id: resolve_entity(&marmite_entity_id)?,
+            est_ouverte: false,
+        })),
+
+        EntityDto::ArbreTordu {
+            name,
+            description,
+            noix_entity_id,
+            ..
+        } => Ok(Box::new(ArbreTordu {
+            id,
+            name,
+            description,
+            noix_id: resolve_entity(&noix_entity_id)?,
+            deja_grimpe: false,
+            deja_secoue: false,
+        })),
+
+        EntityDto::Canne {
+            name,
+            description,
+            corde_entity_id,
+            poisson_entity_id,
+            botte_entity_id,
+            ..
+        } => Ok(Box::new(Canne {
+            id,
+            name,
+            description,
+            corde_id: resolve_entity(&corde_entity_id)?,
+            poisson_id: resolve_entity(&poisson_entity_id)?,
+            botte_id: resolve_entity(&botte_entity_id)?,
+            reparee: false,
+            poisson_pris: false,
+            botte_prise: false,
+        })),
+
+        EntityDto::Seau {
+            name,
+            description,
+            seau_vide_entity_id,
+            ..
+        } => Ok(Box::new(Seau {
+            id,
+            name,
+            description,
+            seau_vide_id: resolve_entity(&seau_vide_entity_id)?,
+        })),
+
+        // ── Entités du Village ─────────────────────────────────
+        EntityDto::Poules {
+            name,
+            description,
+            target_zone,
+            ..
+        } => Ok(Box::new(Poules {
+            id,
+            name,
+            description,
+            target_zone: resolve_zone(&target_zone)?,
+            deja_caresse: false,
+        })),
+
+        EntityDto::Fontaine {
+            name,
+            description,
+            piece_entity_id,
+            ..
+        } => Ok(Box::new(Fontaine {
+            id,
+            name,
+            description,
+            piece_id: resolve_entity(&piece_entity_id)?,
+            deja_bu: false,
+            deja_lave: false,
+        })),
+
+        EntityDto::Marchand {
+            name,
+            description,
+            armure_entity_id,
+            rubis_entity_id,
+            piece_entity_id,
+            ..
+        } => Ok(Box::new(Marchand {
+            id,
+            name,
+            description,
+            armure_id: resolve_entity(&armure_entity_id)?,
+            rubis_id: resolve_entity(&rubis_entity_id)?,
+            piece_id: resolve_entity(&piece_entity_id)?,
+        })),
+
+        EntityDto::Tavernier {
+            name,
+            description,
+            poisson_entity_id,
+            noix_entity_id,
+            ..
+        } => Ok(Box::new(Tavernier {
+            id,
+            name,
+            description,
+            poisson_id: resolve_entity(&poisson_entity_id)?,
+            noix_id: resolve_entity(&noix_entity_id)?,
+        })),
+
+        EntityDto::Barde {
+            name,
+            description,
+            oeuf_entity_id,
+            botte_entity_id,
+            ..
+        } => Ok(Box::new(Barde {
+            id,
+            name,
+            description,
+            oeuf_id: resolve_entity(&oeuf_entity_id)?,
+            botte_id: resolve_entity(&botte_entity_id)?,
+            chanson_faite: false,
+        })),
+
+        EntityDto::Tonneau { name, description, .. } => Ok(Box::new(Tonneau {
+            id,
+            name,
+            description,
+            deja_cache: false,
+        })),
+
+        EntityDto::Forgeron {
+            name,
+            description,
+            epee_entity_id,
+            reforgee_entity_id,
+            medaille_entity_id,
+            bouclier_entity_id,
+            ..
+        } => Ok(Box::new(Forgeron {
+            id,
+            name,
+            description,
+            epee_id: resolve_entity(&epee_entity_id)?,
+            reforgee_id: resolve_entity(&reforgee_entity_id)?,
+            medaille_id: resolve_entity(&medaille_entity_id)?,
+            bouclier_id: resolve_entity(&bouclier_entity_id)?,
+        })),
+
+        EntityDto::Enclume {
+            name,
+            description,
+            bidule_entity_id,
+            marmite_entity_id,
+            ..
+        } => Ok(Box::new(Enclume {
+            id,
+            name,
+            description,
+            bidule_id: resolve_entity(&bidule_entity_id)?,
+            marmite_id: resolve_entity(&marmite_entity_id)?,
+            bidule_pris: false,
+        })),
+
+        // ── Entités du Château et de la Salle du trône ─────────
+        EntityDto::Gardes {
+            name,
+            description,
+            cape_entity_id,
+            armure_entity_id,
+            piece_entity_id,
+            rubis_entity_id,
+            laissez_passer_entity_id,
+            ..
+        } => Ok(Box::new(Gardes {
+            id,
+            name,
+            description,
+            cape_id: resolve_entity(&cape_entity_id)?,
+            armure_id: resolve_entity(&armure_entity_id)?,
+            piece_id: resolve_entity(&piece_entity_id)?,
+            rubis_id: resolve_entity(&rubis_entity_id)?,
+            laissez_passer_id: resolve_entity(&laissez_passer_entity_id)?,
+        })),
+
+        EntityDto::PontLevis {
+            name,
+            description,
+            target_zone,
+            laissez_passer_entity_id,
+            ..
+        } => Ok(Box::new(PontLevis {
+            id,
+            name,
+            description,
+            target_zone: resolve_zone(&target_zone)?,
+            laissez_passer_id: resolve_entity(&laissez_passer_entity_id)?,
+        })),
+
+        EntityDto::Roi {
+            name,
+            description,
+            oeuf_entity_id,
+            talisman_entity_id,
+            bidule_entity_id,
+            marmite_entity_id,
+            seau_entity_id,
+            ..
+        } => Ok(Box::new(Roi {
+            id,
+            name,
+            description,
+            oeuf_id: resolve_entity(&oeuf_entity_id)?,
+            talisman_id: resolve_entity(&talisman_entity_id)?,
+            bidule_id: resolve_entity(&bidule_entity_id)?,
+            marmite_id: resolve_entity(&marmite_entity_id)?,
+            seau_id: resolve_entity(&seau_entity_id)?,
         })),
     }
 }

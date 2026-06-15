@@ -7,6 +7,9 @@ pub struct WorldManager {
     pub player: Player,
     pub zones: Vec<Zone>,
     pub entities: Vec<Box<dyn Interactable>>,
+    /// Fin de partie : None = en cours, Some(true) = victoire, Some(false) = défaite.
+    /// Renseigné par le Roi lors de l'évaluation finale ; lu par la boucle de jeu.
+    pub fin_partie: Option<bool>,
 }
 
 impl WorldManager {
@@ -16,6 +19,15 @@ impl WorldManager {
         let hours = total_minutes / 60;
         let minutes = total_minutes % 60;
         format!("{:02}h{:02}", hours, minutes)
+    }
+
+    // retire un objet ramassé de la zone : de la liste directe ET des points d'intérêt
+    pub fn remove_interactable_from_zone(&mut self, zone_id: usize, entity_id: usize) {
+        let zone = &mut self.zones[zone_id];
+        zone.interactables.retain(|&x| x != entity_id);
+        for ip in &mut zone.interest_points {
+            ip.interactables.retain(|&x| x != entity_id);
+        }
     }
 }
 

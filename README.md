@@ -19,24 +19,19 @@ cargo check
 
 ### Architecture du code
 
-Le projet est divisé en plusieurs modules logiques :
-- `src/main.rs` : Le point d'entrée de l'application.
-- `src/world.rs` : Contient tout ce qui a trait au monde (`WorldManager`, `Zone`, `InterestPoint`).
-- `src/player.rs` : Représente le joueur et ses attributs.
-- `src/entities.rs` : Définit le trait `Interactable` ainsi que les entités physiques avec lesquelles on peut interagir (`Npc`, `Furniture`, `Objet`).
+Le projet respecte une séparation stricte entre le **moteur** (code Rust) et les **données** (`data/world.json`). Modules :
+- `src/main.rs` : point d'entrée + boucle de jeu (navigation entre zones, points d'intérêt, déplacement).
+- `src/actions.rs` : `enum Action` (Command Pattern — tous les verbes).
+- `src/traits.rs` : traits de capacité `Openable`, `Fightable`, `Useable`.
+- `src/loader.rs` : chargement du monde depuis `data/world.json` (DTOs serde + factory `build_entity`).
+- `src/world.rs` : `WorldManager`, `Zone`, `InterestPoint`.
+- `src/player.rs` : le joueur et ses attributs.
+- `src/menu.rs` : menus clavier interactifs (crossterm).
+- `src/couleur.rs` : macro `colore!` (couleurs ANSI).
+- `src/audio.rs` : lecture des sons.
+- `src/save.rs` : sauvegarde / chargement de l'état en JSON (trait `Saveable`).
+- `src/entities/` : une entité concrète par fichier ; `mod.rs` définit les traits `Interactable` et `Saveable`.
 
+### Contenu du jeu
 
-### Activer le son (Linux)
-
-Le jeu utilise la bibliothèque **`rodio`** pour la musique et les bruitages, qui s'appuie sur le système audio **ALSA / PulseAudio**. Sous Linux, il faut installer les paquets correspondants avant de lancer le jeu :
-
-```bash
-sudo apt update
-sudo apt install pulseaudio-utils alsa-utils
-```
-
-> **Note :** si la compilation échoue avec une erreur liée à ALSA, installez également la bibliothèque de développement nécessaire à `rodio` :
->
-> ```bash
-> sudo apt install libasound2-dev
-> ```
+Zones jouables : **Maison, Plaine, Forêt, Cimetière, Lac, Île, Village, Château, Salle du trône** — **le jeu est complet**. Le but : impressionner le Roi Anthony (atteindre **1 000 000 d'aura** avant 20h00) pour être adoubé chevalier. On se déplace entre zones reliées via l'option **« Se déplacer »**, ou par des entités-passages (porte, fenêtre, barque). Le scénario complet est décrit dans `histoire.md`.

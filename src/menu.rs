@@ -102,13 +102,13 @@ fn draw_menu(header: &str, options: &[MenuOption], selected: usize) -> io::Resul
         };
 
         if is_selected {
-            println!("{} \x1B[1;36m{}\x1B[0m {}", highlight, index_str, option.label);
+            println!("{} {} {}", highlight, colore!(CyanGras, "{}", index_str), option.label);
         } else {
-            println!("{} \x1B[32m{}\x1B[0m {}", highlight, index_str, option.label);
+            println!("{} {} {}", highlight, colore!(Vert, "{}", index_str), option.label);
         }
     }
 
-    println!("\n\x1B[90m(↑/↓ pour naviguer, Entrée pour confirmer, S=Sauvegarder, Q=Quitter)\x1B[0m");
+    println!("\n{}", colore!(Gris, "(↑/↓ pour naviguer, Entrée pour confirmer, S=Sauvegarder, Q=Quitter)"));
 
     Ok(())
 }

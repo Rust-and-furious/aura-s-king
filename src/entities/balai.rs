@@ -1,5 +1,5 @@
 use crate::actions::Action;
-use crate::entities::Interactable;
+use crate::entities::{Interactable, Saveable};
 use crate::player::Player;
 use crate::world::WorldManager;
 
@@ -8,6 +8,8 @@ pub struct Balai {
     pub name: String,
     pub description: String,
 }
+
+impl Saveable for Balai {}
 
 impl Interactable for Balai {
     fn id(&self) -> usize {
@@ -25,6 +27,7 @@ impl Interactable for Balai {
     }
 
     fn execute_action(&mut self, action: &Action, player: &mut Player, world: &mut WorldManager) {
+        crate::audio::play_sound("assets/balai.wav");
         match action {
             Action::Observer => {
                 println!("Vous observez le balai. {}", self.description);
@@ -33,8 +36,7 @@ impl Interactable for Balai {
                 );
             }
             Action::Ramasser => {
-                let current_zone = player.zone;
-                world.zones[current_zone].interactables.retain(|&x| x != self.id);
+                world.remove_interactable_from_zone(player.zone, self.id);
                 player.inventory.push(self.id);
                 println!("Vous ramassez le balai. Il est ajouté à votre inventaire.");
             }

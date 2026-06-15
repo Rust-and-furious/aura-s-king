@@ -61,6 +61,7 @@ classDiagram
         +player: Player
         +zones: array~Zone~
         +entities: array~Interactable~
+        +fin_partie: Option~Boolean~
     }
 
     class Zone {
@@ -92,6 +93,7 @@ classDiagram
         Fouiller
         Ramasser
         Ouvrir
+        Fermer
         Utiliser
         Attaquer(degats: Integer)
         Dialoguer
@@ -107,6 +109,7 @@ classDiagram
     class Fightable {
         <<Trait>>
         +recevoir_degats(degats: Integer) void
+        +est_vivant() Boolean
     }
 
     class Useable {
@@ -153,6 +156,8 @@ classDiagram
 ```
 
 > **Note :** Toute entité concrète implémentant `Interactable` stocke un champ `id: usize` égal à son index dans `WorldManager.entities`, renseigné au chargement JSON. Ce champ permet à l'entité de se localiser elle-même (p. ex. pour le ramassage) sans dépendre d'une recherche par pointeur, même lorsque le moteur l'a temporairement swappée hors du `Vec`.
+
+> **Note (persistance) :** `Interactable` a pour super-trait `Saveable` (`save_state()` / `load_state()`), ce qui permet de sérialiser l'état mutable de chaque entité pour la sauvegarde (cf. §10).
 
 ## 7. Exemples d'Implémentation en Rust
 
@@ -234,6 +239,42 @@ impl Interactable for Fenetre {
 
 ---
 
-## 8. Conclusion
+## 8. Le Système de Points d'Intérêt (navigation à deux niveaux)
+
+Une `Zone` regroupe ses entités sur **deux niveaux** : des **interactables directs** (posés dans la zone) et des **points d'intérêt** (`InterestPoint`), qui sont des sous-lieux regroupant eux-mêmes des interactables. Exemple dans la Plaine : le point d'intérêt « Moulin » regroupe le meunier, la meule et les sacs de farine.
+
+Côté moteur, la boucle de jeu construit le menu d'une zone à partir de deux sources : `Zone.interactables` (objets directs) et `Zone.interest_points` (sous-lieux dans lesquels on peut « entrer »). Entrer dans un point d'intérêt ouvre un second menu listant ses propres interactables ; la **même fonction d'interaction** (`interact_with_entity`) est réutilisée, qu'une entité soit directe ou regroupée.
+
+- **Découverte dynamique :** le contenu d'un point d'intérêt peut évoluer en jeu. Tant que la porte de Michu est fermée, le sous-lieu ne contient que la porte ; une fois ouverte, Michu et son chat y sont ajoutés — par simple ajout de leur `usize` dans la liste du point d'intérêt, sans réallocation d'entité.
+- **Cohérence du ramassage :** ramasser un objet le retire à la fois de la liste directe de la zone **et** de tous ses points d'intérêt (`WorldManager::remove_interactable_from_zone`), pour qu'un objet pris dans un sous-lieu en disparaisse réellement.
+- **Identifiant propre :** chaque `InterestPoint` reçoit un `id` unique au chargement (compteur global), distinct de l'index de sa zone.
+
+## 9. Gestion de Plusieurs Actions sous un Même Verbe (sous-menus)
+
+Le moteur identifie une interaction par le couple **(entité, verbe `Action`)** : c'est la struct concrète qui reçoit l'appel (`Porte::execute_action` ≠ `Lit::execute_action`). Tant qu'une entité n'expose chaque verbe qu'une seule fois, ce couple est unique et `execute_action` sait quoi faire.
+
+Or certains PNJ proposent **plusieurs variantes du même verbe** : le Meunier a trois `Dialoguer` (parler, demander du travail, offrir un objet), la Meule a trois `Utiliser`. Avec un `Action::Dialoguer` sans donnée, ces variantes seraient indistinguables.
+
+**Décision retenue :** ne pas alourdir l'énumération `Action` (et donc **ne pas modifier le diagramme de classe**). L'entité n'expose qu'**un seul** verbe ; lorsqu'il est choisi, c'est l'entité elle-même qui ouvre un **sous-menu** de variantes depuis son `execute_action` (via `select_from_menu`). C'est le pattern classique des arbres de dialogue.
+
+**Compromis assumé :** cela introduit une dépendance entité → interface (une entité lit un choix clavier pour ses sous-choix). Cela **nuance le découplage total** décrit en section 3 : en plus de leur sortie console, les entités à sous-menu effectuent une lecture d'entrée. Ce compromis a été préféré à une modification de l'`Action`, qui est un contrat partagé par toute l'équipe.
+
+---
+
+## 10. Navigation entre Zones, Persistance et Équilibrage
+
+Trois mécanismes complètent l'architecture à mesure que le monde s'est étoffé.
+
+**Navigation entre zones (`connected_zones`).** Chaque `Zone` déclare ses voisines via une liste d'identifiants `connected_zones`. La boucle de jeu en dérive une option « Se déplacer » qui présente les zones reliées et y transfère le joueur (le temps de jeu avance d'une marche). Les transitions *conditionnelles* — franchir une porte, sauter par une fenêtre, traverser le lac en barque — n'empruntent pas ce mécanisme générique : elles sont portées par l'entité concernée via l'action `Deplacer`, qui ne s'exécute que si l'état le permet (porte ouverte, barque réparée). Une zone dépourvue de voisines praticables (la maison de départ) ne se quitte donc que par ses entités-sorties, ce qui préserve l'énigme d'introduction.
+
+**Persistance (`Saveable`).** Le trait `Saveable`, super-trait de `Interactable`, expose `save_state()` / `load_state()` sous la forme d'une table associative sérialisable. La sauvegarde collecte l'état mutable de chaque entité (ses booléens d'état), l'état du joueur et la composition des zones, puis l'écrit en JSON ; le chargement reconstruit un monde neuf depuis `world.json` avant d'y réinjecter cet état. Le modèle par identifiants (§1) rend l'opération triviale : on ne sérialise que des nombres et quelques booléens, jamais un graphe d'objets.
+
+**Équilibrage de l'aura (anti-farm).** L'aura étant l'unique ressource de progression, toute source de gain *positive et répétable* doit être plafonnée, sous peine de permettre une accumulation infinie. Deux techniques sont employées : un booléen d'état qui « consomme » un gain ponctuel dès sa première obtention, ou un jet de probabilité calibré pour une espérance mathématique négative. Les pertes, elles, demeurent répétables : ce sont des pièges assumés du game design.
+
+**Fin de partie.** La condition de victoire est portée par un champ `fin_partie: Option<bool>` du `WorldManager`. Lors de l'évaluation finale dans la salle du trône, le Roi y inscrit le verdict (`Some(true)` si l'aura atteint le seuil d'adoubement, sinon un tirage de chance) ; la boucle de jeu lit ce champ à chaque tour et termine la partie en conséquence. Ce mécanisme évite qu'une entité ait à piloter directement la boucle principale.
+
+---
+
+## 11. Conclusion
 
 Cette architecture répond intégralement aux exigences du cahier des charges. L'association d'un gestionnaire central par identifiants (`WorldManager` + `usize`) et d'un système d'événements découplés (Enum `Action`) confère au jeu des performances optimales et une sécurité mémoire garantie par le compilateur. La modélisation par traits de capacité offre une souplesse exceptionnelle, favorisant un gameplay riche et extensible. L'équipe dispose ainsi d'une fondation idiomatique en Rust, saine, maintenable et prête pour la phase de production.

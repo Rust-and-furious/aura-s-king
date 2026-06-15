@@ -1,5 +1,5 @@
 use crate::actions::Action;
-use crate::entities::Interactable;
+use crate::entities::{Interactable, Saveable};
 use crate::player::Player;
 use crate::world::WorldManager;
 
@@ -8,6 +8,8 @@ pub struct CleMaison {
     pub name: String,
     pub description: String,
 }
+
+impl Saveable for CleMaison {}
 
 impl Interactable for CleMaison {
     fn id(&self) -> usize {
@@ -30,8 +32,7 @@ impl Interactable for CleMaison {
                 println!("Vous observez la clé. {}", self.description);
             }
             Action::Ramasser => {
-                let current_zone = player.zone;
-                world.zones[current_zone].interactables.retain(|&x| x != self.id);
+                world.remove_interactable_from_zone(player.zone, self.id);
                 player.inventory.push(self.id);
                 println!(
                     "Vous mettez la clé dans votre poche. Elle est ajoutée à votre inventaire."

@@ -1,9 +1,12 @@
 pub mod actions;
 pub mod audio;
+#[macro_use]
+pub mod couleur;
 pub mod entities;
 pub mod loader;
 pub mod menu;
 pub mod player;
+pub mod save;
 pub mod traits;
 pub mod world;
 
@@ -14,7 +17,16 @@ use player::Player;
 use std::io::{self, Write};
 use world::WorldManager;
 
+// séparateur des en-têtes de menu
+const SEP_RAW: &str = "--------------------------------------------------";
+/// Renvoie le séparateur coloré en magenta.
+fn sep() -> String {
+    colore!(Magenta, "{}", SEP_RAW)
+}
+
+// entité bidon pour le tour de mem::replace (voir interact_with_entity)
 struct DummyEntity;
+impl entities::Saveable for DummyEntity {}
 impl entities::Interactable for DummyEntity {
     fn id(&self) -> usize {
         usize::MAX
@@ -35,6 +47,26 @@ impl entities::Interactable for DummyEntity {
         _world: &mut WorldManager,
     ) {
     }
+}
+
+// faut-il continuer la boucle de jeu, ou quitter ?
+enum Flow {
+    Continue,
+    Quit,
+}
+
+// une ligne du menu d'une zone : un objet, un point d'intérêt, un déplacement, ou "Attendre"
+#[derive(Clone, Copy)]
+enum ZoneEntry {
+    Interactable(usize),  // index dans world.entities
+    InterestPoint(usize), // index dans world.zones[zone].interest_points
+    Move,                 // ouvre le menu de déplacement vers une zone connectée
+    Wait,
+}
+
+// libellé court d'une zone pour les menus : on garde la première phrase de sa description
+fn zone_short_name(description: &str) -> &str {
+    description.split('.').next().unwrap_or(description).trim()
 }
 
 fn clear_screen() {
@@ -58,81 +90,362 @@ fn wait_for_enter() {
     let _ = io::stdin().read_line(&mut dummy);
 }
 
+// Sauvegarde l'état du jeu dans data/save.json
+fn handle_save(world: &WorldManager) {
+    clear_screen();
+    match save::save_game(world, "data/save.json") {
+        Ok(_) => println!("{}", colore!(Vert, "✓ Jeu sauvegardé avec succès dans 'data/save.json'.")),
+        Err(e) => println!("{}", colore!(RougeGras, "✗ Erreur lors de la sauvegarde : {}", e)),
+    }
+    wait_for_enter();
+}
+
+fn confirm_quit(world: &WorldManager) {
+    clear_screen();
+    print!("{}", colore!(Cyan, "Voulez-vous sauvegarder avant de quitter? (o/n) : "));
+    io::stdout().flush().unwrap();
+    let mut response = String::new();
+    let _ = io::stdin().read_line(&mut response);
+    if response.trim().to_lowercase() == "o" {
+        match save::save_game(world, "data/save.json") {
+            Ok(_) => println!("{}", colore!(Vert, "✓ Jeu sauvegardé avec succès.")),
+            Err(e) => println!("{}", colore!(RougeGras, "✗ Erreur lors de la sauvegarde : {}", e)),
+        }
+    }
+    println!("{}", colore!(Jaune, "Au revoir !"));
+}
+
+fn action_label(action: &Action) -> String {
+    match action {
+        Action::Observer => "Observer".to_string(),
+        Action::Utiliser => "Utiliser (Dormir / Bricoler / etc.)".to_string(),
+        Action::Ramasser => "Ramasser (Prendre)".to_string(),
+        Action::Ouvrir => "Ouvrir".to_string(),
+        Action::Fermer => "Fermer".to_string(),
+        Action::Attaquer { degats } => format!("Attaquer (Enfoncer / Casser, dégâts: {})", degats),
+        Action::Deplacer { target_zone: _ } => "Passer / Traverser / Sauter".to_string(),
+        _ => format!("{:?}", action),
+    }
+}
+
+// affiche les actions d'une entité et exécute le choix (appelée depuis une zone ou un point d'intérêt)
+fn interact_with_entity(world: &mut WorldManager, entity_idx: usize) -> Flow {
+    let actions = world.entities[entity_idx].get_actions(&world.player, world);
+    let name = world.entities[entity_idx].name().to_string();
+
+    let mut action_header = String::new();
+    action_header.push_str(&sep());
+    action_header.push('\n');
+    action_header.push_str(&format!(
+        "{} | {}\n",
+        colore!(Cyan, "[Heure : {}]", world.format_time()),
+        colore!(Jaune, "[Aura : {:.1}]", world.player.aura),
+    ));
+    action_header.push_str(&format!("Interaction avec : {}\n", colore!(CyanGras, "{}", name)));
+    action_header.push_str(&sep());
+
+    let mut menu_options = Vec::new();
+    for action in actions.iter() {
+        menu_options.push(MenuOption::new(action_label(action)));
+    }
+    menu_options.push(MenuOption::special("Retour"));
+
+    let action_result = match select_from_menu(menu_options, &action_header) {
+        Ok(res) => res,
+        Err(_) => return Flow::Continue,
+    };
+
+    match action_result {
+        MenuResult::Cancelled => Flow::Continue,
+        MenuResult::Save => {
+            handle_save(world);
+            Flow::Continue
+        }
+        MenuResult::Quit => Flow::Quit,
+        MenuResult::Selected(action_idx) => {
+            if action_idx == actions.len() {
+                return Flow::Continue; // « Retour »
+            }
+            let chosen_action = &actions[action_idx];
+
+            // on sort l'entité (et le joueur) du world pour pouvoir prêter world entier
+            // à execute_action, puis on les remet à leur place juste après
+            let mut entity =
+                std::mem::replace(&mut world.entities[entity_idx], Box::new(DummyEntity));
+            let mut temp_player = std::mem::replace(
+                &mut world.player,
+                Player {
+                    aura: 0.0,
+                    zone: 0,
+                    inventory: vec![],
+                },
+            );
+            
+            let old_aura = temp_player.aura;
+            
+            entity.execute_action(chosen_action, &mut temp_player, world);
+            
+            let new_aura = temp_player.aura;
+            let entity_name = entity.name().to_lowercase();
+            
+            if new_aura > old_aura && !entity_name.contains("chat") {
+                crate::audio::play_sound("assets/victory.wav");
+            } else if new_aura < old_aura && !entity_name.contains("chat") {
+                crate::audio::play_sound("assets/defeat.wav");
+            }
+
+            let _ = std::mem::replace(&mut world.player, temp_player);
+            let _ = std::mem::replace(&mut world.entities[entity_idx], entity);
+
+            wait_for_enter();
+            Flow::Continue
+        }
+    }
+}
+
+// boucle dans un point d'intérêt (liste ses objets) jusqu'au choix "Retour"
+fn enter_interest_point(world: &mut WorldManager, zone_idx: usize, ip_idx: usize) -> Flow {
+    loop {
+        let mut header = String::new();
+        header.push_str(&sep());
+        header.push('\n');
+        header.push_str(&format!(
+            "{} | {}\n",
+            colore!(Cyan, "[Heure : {}]", world.format_time()),
+            colore!(Jaune, "[Aura : {:.1}]", world.player.aura),
+        ));
+        header.push_str(&format!(
+            "Lieu : {}\n",
+            colore!(CyanGras, "{}", world.zones[zone_idx].interest_points[ip_idx].description),
+        ));
+        header.push_str(&sep());
+
+        // on clone la liste (évite un emprunt de world pendant le menu, et reflète les objets ramassés)
+        let entity_ids: Vec<usize> = world.zones[zone_idx].interest_points[ip_idx]
+            .interactables
+            .clone();
+
+        if entity_ids.is_empty() {
+            clear_screen();
+            println!("{}", header);
+            println!("\nIl n'y a plus rien d'intéressant ici.");
+            wait_for_enter();
+            return Flow::Continue;
+        }
+
+        let mut menu_options = Vec::new();
+        for &eidx in &entity_ids {
+            menu_options.push(MenuOption::new(world.entities[eidx].name()));
+        }
+        menu_options.push(MenuOption::special("Retour"));
+
+        let result = match select_from_menu(menu_options, &header) {
+            Ok(res) => res,
+            Err(_) => return Flow::Continue,
+        };
+
+        match result {
+            MenuResult::Cancelled => return Flow::Continue,
+            MenuResult::Save => handle_save(world),
+            MenuResult::Quit => return Flow::Quit,
+            MenuResult::Selected(sel) => {
+                if sel == entity_ids.len() {
+                    return Flow::Continue; // « Retour »
+                }
+                // On reste dans le point d'intérêt après l'interaction.
+                if let Flow::Quit = interact_with_entity(world, entity_ids[sel]) {
+                    return Flow::Quit;
+                }
+            }
+        }
+    }
+}
+
+// menu de déplacement : liste les zones connectées et y déplace le joueur.
+// C'est ici qu'on consomme Zone.connected_zones (la marche entre zones extérieures).
+fn travel_to_connected_zone(world: &mut WorldManager, zone_idx: usize) -> Flow {
+    let targets: Vec<usize> = world.zones[zone_idx].connected_zones.clone();
+    if targets.is_empty() {
+        clear_screen();
+        println!("Il n'y a aucun chemin praticable depuis ici.");
+        wait_for_enter();
+        return Flow::Continue;
+    }
+
+    let mut header = String::new();
+    header.push_str(&sep());
+    header.push('\n');
+    header.push_str(&format!(
+        "{} | {}\n",
+        colore!(Cyan, "[Heure : {}]", world.format_time()),
+        colore!(Jaune, "[Aura : {:.1}]", world.player.aura),
+    ));
+    header.push_str("Où voulez-vous aller ?\n");
+    header.push_str(&sep());
+
+    let mut menu_options = Vec::new();
+    for &z in &targets {
+        menu_options.push(MenuOption::new(zone_short_name(&world.zones[z].description)));
+    }
+    menu_options.push(MenuOption::special("Rester ici"));
+
+    match select_from_menu(menu_options, &header) {
+        Ok(MenuResult::Selected(sel)) => {
+            if sel == targets.len() {
+                return Flow::Continue; // « Rester ici »
+            }
+            let dest = targets[sel];
+            world.current_tick += 15; // une marche dure environ 15 minutes
+            world.player.zone = dest;
+            clear_screen();
+            println!(
+                "Vous marchez un moment... Vous arrivez : {}",
+                colore!(CyanGras, "{}", zone_short_name(&world.zones[dest].description)),
+            );
+            wait_for_enter();
+            Flow::Continue
+        }
+        Ok(MenuResult::Save) => {
+            handle_save(world);
+            Flow::Continue
+        }
+        Ok(MenuResult::Quit) => Flow::Quit,
+        _ => Flow::Continue,
+    }
+}
+
 fn main() {
     clear_screen();
-    audio::play_music_loop("assets/music.wav");
-    println!("\x1B[1;33m=== Aura Farming Simulator ===\x1B[0m");
-    print!("\x1B[36mEntrez votre nom (par défaut: Jean-Michel) : \x1B[0m");
-    io::stdout().flush().unwrap();
+    println!("{}", colore!(JauneGras, "=== Aura Farming Simulator ==="));
 
-    let mut player_name = String::new();
-    io::stdin().read_line(&mut player_name).unwrap();
-    let player_name = player_name.trim();
-    let player_name = if player_name.is_empty() {
-        "Jean-Michel"
-    } else {
-        player_name
-    };
+    let save_exists = std::path::Path::new("data/save.json").exists();
+    let mut use_save = false;
+
+    if save_exists {
+        let menu_opts = vec![
+            MenuOption::new("Continuer la partie sauvegardée"),
+            MenuOption::new("Nouvelle partie (efface la sauvegarde précédente)"),
+        ];
+        if let Ok(MenuResult::Selected(0)) = select_from_menu(menu_opts, "Une sauvegarde existante a été trouvée. Que voulez-vous faire ?") {
+            use_save = true;
+        }
+    }
 
     let loaded = match load_from_json("data/world.json") {
         Ok(l) => l,
         Err(e) => {
-            eprintln!("\x1B[1;31mErreur : impossible de charger le monde : {e}\x1B[0m");
+            eprintln!("{}", colore!(RougeGras, "Erreur : impossible de charger le monde : {}", e));
             return;
         }
     };
 
-    clear_screen();
-    println!(
-        "\x1B[1;35m================================================================================\x1B[0m"
-    );
-    println!("{}", loaded.intro_text.replace("{player_name}", player_name));
-    println!(
-        "\x1B[1;35m================================================================================\x1B[0m\n"
-    );
-    wait_for_enter();
-
     let mut world = loaded.world;
 
+    if use_save {
+        match save::load_game(&mut world, "data/save.json") {
+            Ok(_) => {
+                // Chargé avec succès
+            }
+            Err(e) => {
+                println!("{}", colore!(RougeGras, "✗ Erreur lors du chargement de la sauvegarde : {}", e));
+                println!("Démarrage d'une nouvelle partie.");
+                wait_for_enter();
+                use_save = false;
+            }
+        }
+    }
+
+    if !use_save {
+        clear_screen();
+        println!("{}", colore!(JauneGras, "=== Aura Farming Simulator ==="));
+        print!("{}", colore!(Cyan, "Entrez votre nom (par défaut: Jean-Michel) : "));
+        io::stdout().flush().unwrap();
+
+        let mut player_name = String::new();
+        io::stdin().read_line(&mut player_name).unwrap();
+        let player_name = player_name.trim();
+        let player_name = if player_name.is_empty() {
+            "Jean-Michel"
+        } else {
+            player_name
+        };
+
+        clear_screen();
+        println!(
+            "{}",
+            colore!(MagentaGras, "================================================================================"),
+        );
+        println!("{}", loaded.intro_text.replace("{player_name}", player_name));
+        println!(
+            "{}\n",
+            colore!(MagentaGras, "================================================================================"),
+        );
+        wait_for_enter();
+    }
+
+    let mut current_music_file = "".to_string();
+    let mut _music_handle: Option<crate::audio::MusicHandle> = None;
+
     loop {
+        // Musique de fond dynamique selon la description de la zone
+        let zone_desc = &world.zones[world.player.zone].description;
+        let mut expected_music = "assets/Tranquilou.wav";
+        if zone_desc.contains("Le Village") || zone_desc.contains("Le Château") || zone_desc.contains("La Salle") {
+            expected_music = "assets/aura'sKing.wav";
+        } else if zone_desc.contains("La Forêt") {
+            expected_music = "assets/foret.wav";
+        } else if zone_desc.contains("modeste demeure") {
+            expected_music = "assets/maison.wav";
+        }
+
+        if current_music_file != expected_music {
+            _music_handle = None; // Stop previous
+            _music_handle = Some(crate::audio::play_music_loop(expected_music));
+            current_music_file = expected_music.to_string();
+        }
+
+        // fin de partie déclenchée par le Roi lors de l'évaluation finale
+        if let Some(gagne) = world.fin_partie {
+            clear_screen();
+            if gagne {
+                crate::audio::play_sound("assets/FInVictoire.wav");
+                println!("\n{}", colore!(JauneGras, "Vous avez été adoubé CHEVALIER. Votre légende ne fait que commencer."));
+            } else {
+                crate::audio::play_sound("assets/FinPerdu.wav");
+                println!("\n{}", colore!(RougeGras, "Votre rêve de chevalerie s'arrête ici. Retournez à vos navets."));
+            }
+            println!("\n{}", colore!(MagentaGras, "=== FIN ==="));
+            break;
+        }
+
         if world.current_tick >= world.max_ticks {
             clear_screen();
-            println!("\n\x1B[1;31m20h00 - L'HEURE DE LA DÉFAITE !\x1B[0m");
+            crate::audio::play_sound("assets/FinPerdu.wav");
+            println!("\n{}", colore!(RougeGras, "20h00 - L'HEURE DE LA DÉFAITE !"));
             println!("Les portes du château se ferment. Le bal commence sans vous.");
             println!(
                 "Vous entendez les trompettes au loin alors que vous êtes encore dans la boue."
             );
             println!("Vous passerez le reste de votre vie à sarcler des navets sous la pluie.");
-            println!("\n\x1B[1;31m=== GAME OVER ===\x1B[0m");
+            println!("\n{}", colore!(RougeGras, "=== GAME OVER ==="));
             break;
         }
 
-        // pour le moment, fin du jeu = sortie zone 0, mais aprés, la fin sera la présence dans la salle du roi pour l'adoubemment
-        if world.player.zone != 0 {
-            clear_screen();
-            println!("\n\x1B[1;32m==================================================\x1B[0m");
-            println!("{}", world.zones[world.player.zone].description);
-            println!(
-                "Votre Aura finale : \x1B[33m{:.1}\x1B[0m",
-                world.player.aura
-            );
-            println!("Heure de fin : \x1B[36m{}\x1B[0m", world.format_time());
-            println!("Félicitations, vous avez réussi à sortir de chez vous !");
-            println!("(Fin du prototype de la première zone en mémoire)");
-            println!("\x1B[1;32m==================================================\x1B[0m");
-            break;
-        }
+        // sortir de la maison ne termine plus la partie : on peut explorer la Plaine
+        // (la vraie victoire viendra avec la salle du trône)
 
+        // en-tête de la zone
         let mut header = String::new();
-        header.push_str("\x1B[35m--------------------------------------------------\x1B[0m\n");
+        header.push_str(&sep());
+        header.push('\n');
         header.push_str(&format!(
-            "\x1B[36m[Heure : {}]\x1B[0m | \x1B[33m[Aura : {:.1}]\x1B[0m\n",
-            world.format_time(),
-            world.player.aura
+            "{} | {}\n",
+            colore!(Cyan, "[Heure : {}]", world.format_time()),
+            colore!(Jaune, "[Aura : {:.1}]", world.player.aura),
         ));
         header.push_str(&format!(
-            "Lieu : \x1B[1;36m{}\x1B[0m\n",
-            world.zones[world.player.zone].description
+            "Lieu : {}\n",
+            colore!(CyanGras, "{}", world.zones[world.player.zone].description),
         ));
 
         if !world.player.inventory.is_empty() {
@@ -142,23 +455,43 @@ fn main() {
                 .iter()
                 .map(|&id| world.entities[id].name().to_string())
                 .collect();
-            header.push_str(&format!("Inventaire : \x1B[35m{}\x1B[0m\n", inv_names.join(", ")));
+            header.push_str(&format!("Inventaire : {}\n", colore!(Magenta, "{}", inv_names.join(", "))));
         } else {
             header.push_str("Inventaire : Vide\n");
         }
-        header.push_str("\x1B[35m--------------------------------------------------\x1B[0m");
+        header.push_str(&sep());
 
-        let zone_interactables = &world.zones[world.player.zone].interactables;
-        if zone_interactables.is_empty() {
+        // menu de la zone : objets directs + points d'intérêt + "Attendre"
+        let zone_idx = world.player.zone;
+        let interactable_ids: Vec<usize> = world.zones[zone_idx].interactables.clone();
+        let ip_count = world.zones[zone_idx].interest_points.len();
+
+        if interactable_ids.is_empty() && ip_count == 0 {
             println!("Il n'y a rien d'intéressant ici.");
             break;
         }
 
-        let mut menu_options = Vec::new();
-        for &entity_idx in zone_interactables.iter() {
-            menu_options.push(MenuOption::new(world.entities[entity_idx].name()));
+        let mut entries: Vec<ZoneEntry> = Vec::new();
+        let mut menu_options: Vec<MenuOption> = Vec::new();
+
+        for &eidx in &interactable_ids {
+            menu_options.push(MenuOption::new(world.entities[eidx].name()));
+            entries.push(ZoneEntry::Interactable(eidx));
+        }
+        for ip_idx in 0..ip_count {
+            let label = format!(
+                "» {}",
+                world.zones[zone_idx].interest_points[ip_idx].description
+            );
+            menu_options.push(MenuOption::new(label));
+            entries.push(ZoneEntry::InterestPoint(ip_idx));
+        }
+        if !world.zones[zone_idx].connected_zones.is_empty() {
+            menu_options.push(MenuOption::new("Se déplacer vers une autre zone"));
+            entries.push(ZoneEntry::Move);
         }
         menu_options.push(MenuOption::special("Attendre (consomme 15 minutes)"));
+        entries.push(ZoneEntry::Wait);
 
         let result = match select_from_menu(menu_options, &header) {
             Ok(res) => res,
@@ -167,118 +500,36 @@ fn main() {
 
         match result {
             MenuResult::Cancelled => continue,
-            MenuResult::Save => {
-                clear_screen();
-                println!("\x1B[32m✓ Jeu en cours de sauvegarde...\x1B[0m");
-                wait_for_enter();
-                continue;
-            }
+            MenuResult::Save => handle_save(&world),
             MenuResult::Quit => {
-                clear_screen();
-                print!("\x1B[36mVoulez-vous sauvegarder avant de quitter? (o/n) : \x1B[0m");
-                io::stdout().flush().unwrap();
-                let mut response = String::new();
-                let _ = io::stdin().read_line(&mut response);
-                if response.trim().to_lowercase() == "o" {
-                    println!("\x1B[32m✓ Jeu sauvegardé.\x1B[0m");
-                }
-                println!("\x1B[33mAu revoir !\x1B[0m");
+                confirm_quit(&world);
                 return;
             }
-            MenuResult::Selected(choix_idx) => {
-                if choix_idx == zone_interactables.len() {
+            MenuResult::Selected(sel) => match entries[sel] {
+                ZoneEntry::Wait => {
                     world.current_tick += 15;
                     println!("Vous attendez en regardant le plafond. 15 minutes s'écoulent...");
                     wait_for_enter();
-                    continue;
                 }
-
-                let chosen_entity_idx = zone_interactables[choix_idx];
-                let actions = world.entities[chosen_entity_idx].get_actions(&world.player, &world);
-
-                let mut action_header = String::new();
-                action_header.push_str("\x1B[35m--------------------------------------------------\x1B[0m\n");
-                action_header.push_str(&format!(
-                    "\x1B[36m[Heure : {}]\x1B[0m | \x1B[33m[Aura : {:.1}]\x1B[0m\n",
-                    world.format_time(),
-                    world.player.aura
-                ));
-                action_header.push_str(&format!(
-                    "Interaction avec : \x1B[1;36m{}\x1B[0m\n",
-                    world.entities[chosen_entity_idx].name()
-                ));
-                action_header.push_str("\x1B[35m--------------------------------------------------\x1B[0m");
-
-                let mut menu_options = Vec::new();
-                for action in actions.iter() {
-                    let label = match action {
-                        Action::Observer => "Observer".to_string(),
-                        Action::Utiliser => "Utiliser (Dormir / Bricoler / etc.)".to_string(),
-                        Action::Ramasser => "Ramasser (Prendre)".to_string(),
-                        Action::Ouvrir => "Ouvrir".to_string(),
-                        Action::Fermer => "Fermer".to_string(),
-                        Action::Attaquer { degats } => {
-                            format!("Attaquer (Enfoncer / Casser, dégâts: {})", degats)
-                        }
-                        Action::Deplacer { target_zone: _ } => "Passer / Traverser / Sauter".to_string(),
-                        _ => format!("{:?}", action),
-                    };
-                    menu_options.push(MenuOption::new(label));
-                }
-                menu_options.push(MenuOption::special("Retour"));
-
-                let action_result = match select_from_menu(menu_options, &action_header) {
-                    Ok(res) => res,
-                    Err(_) => continue,
-                };
-
-                match action_result {
-                    MenuResult::Cancelled => continue,
-                    MenuResult::Save => {
-                        clear_screen();
-                        println!("\x1B[32m✓ Jeu en cours de sauvegarde...\x1B[0m");
-                        wait_for_enter();
-                        continue;
-                    }
-                    MenuResult::Quit => {
-                        clear_screen();
-                        print!("\x1B[36mVoulez-vous sauvegarder avant de quitter? (o/n) : \x1B[0m");
-                        io::stdout().flush().unwrap();
-                        let mut response = String::new();
-                        let _ = io::stdin().read_line(&mut response);
-                        if response.trim().to_lowercase() == "o" {
-                            println!("\x1B[32m✓ Jeu sauvegardé.\x1B[0m");
-                        }
-                        println!("\x1B[33mAu revoir !\x1B[0m");
+                ZoneEntry::Interactable(eidx) => {
+                    if let Flow::Quit = interact_with_entity(&mut world, eidx) {
+                        confirm_quit(&world);
                         return;
                     }
-                    MenuResult::Selected(action_idx) => {
-                        if action_idx == actions.len() {
-                            continue;
-                        }
-
-                        let chosen_action = &actions[action_idx];
-
-                        let mut entity = std::mem::replace(
-                            &mut world.entities[chosen_entity_idx],
-                            Box::new(DummyEntity),
-                        );
-                        let mut temp_player = std::mem::replace(
-                            &mut world.player,
-                            Player {
-                                aura: 0.0,
-                                zone: 0,
-                                inventory: vec![],
-                            },
-                        );
-                        entity.execute_action(chosen_action, &mut temp_player, &mut world);
-                        let _ = std::mem::replace(&mut world.player, temp_player);
-                        let _ = std::mem::replace(&mut world.entities[chosen_entity_idx], entity);
-
-                        wait_for_enter();
+                }
+                ZoneEntry::InterestPoint(ip_idx) => {
+                    if let Flow::Quit = enter_interest_point(&mut world, zone_idx, ip_idx) {
+                        confirm_quit(&world);
+                        return;
                     }
                 }
-            }
+                ZoneEntry::Move => {
+                    if let Flow::Quit = travel_to_connected_zone(&mut world, zone_idx) {
+                        confirm_quit(&world);
+                        return;
+                    }
+                }
+            },
         }
     }
 }
@@ -321,5 +572,55 @@ mod tests {
 
         assert!(world.current_tick >= 60 && world.current_tick <= 120);
         assert!(temp_player.aura == 10000.0 || temp_player.aura == -30000.0);
+    }
+
+    #[test]
+    fn test_save_and_load_game() {
+        let mut world = load_test_world();
+
+        // Modifie l'état général
+        world.current_tick = 120;
+        world.player.aura = 15000.0;
+        world.player.zone = 1;
+        world.player.inventory = vec![2, 7];
+
+        // Modifie les interactables d'une zone
+        world.zones[0].interactables = vec![0, 1, 3];
+
+        // Modifie l'état interne d'une entité (Fenetre en index 4) en essayant de traverser la fenêtre fermée
+        let mut temp_player = Player {
+            aura: 0.0,
+            zone: 0,
+            inventory: vec![],
+        };
+        let mut fenetre = std::mem::replace(&mut world.entities[4], Box::new(DummyEntity));
+        fenetre.execute_action(&Action::Deplacer { target_zone: 1 }, &mut temp_player, &mut world);
+        let _ = std::mem::replace(&mut world.entities[4], fenetre);
+
+        let test_save_path = "data/test_save.json";
+
+        // Sauvegarde
+        save::save_game(&world, test_save_path).expect("Sauvegarde échouée");
+
+        // Crée un monde propre
+        let mut new_world = load_test_world();
+
+        // Charge l'état
+        save::load_game(&mut new_world, test_save_path).expect("Chargement échoué");
+
+        // Nettoie le fichier de test
+        let _ = std::fs::remove_file(test_save_path);
+
+        // Vérifications
+        assert_eq!(new_world.current_tick, 130);
+        assert_eq!(new_world.player.aura, 15000.0);
+        assert_eq!(new_world.player.zone, 1);
+        assert_eq!(new_world.player.inventory, vec![2, 7]);
+        assert_eq!(new_world.zones[0].interactables, vec![0, 1, 3]);
+
+        // Vérifie que l'état interne de l'entité Fenetre a bien été restauré
+        let saved_state = new_world.entities[4].save_state();
+        assert_eq!(saved_state.get("est_cassee").unwrap().as_bool(), Some(true));
+        assert_eq!(saved_state.get("est_ouverte").unwrap().as_bool(), Some(true));
     }
 }

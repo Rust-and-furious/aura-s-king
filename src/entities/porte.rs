@@ -1,8 +1,9 @@
 use crate::actions::Action;
-use crate::entities::{Interactable, pseudo_rand};
+use crate::entities::{Interactable, Saveable, pseudo_rand};
 use crate::player::Player;
 use crate::traits::{Fightable, Openable};
 use crate::world::WorldManager;
+use std::collections::HashMap;
 
 pub struct Porte {
     pub id: usize,
@@ -12,6 +13,28 @@ pub struct Porte {
     pub is_locked: bool,
     pub key_entity_id: usize,
     pub target_zone: usize,
+}
+
+impl Saveable for Porte {
+    fn save_state(&self) -> HashMap<String, serde_json::Value> {
+        let mut state = HashMap::new();
+        state.insert("est_ouverte".to_string(), serde_json::json!(self.est_ouverte));
+        state.insert("is_locked".to_string(), serde_json::json!(self.is_locked));
+        state
+    }
+
+    fn load_state(&mut self, state: &HashMap<String, serde_json::Value>) {
+        if let Some(val) = state.get("est_ouverte") {
+            if let Some(b) = val.as_bool() {
+                self.est_ouverte = b;
+            }
+        }
+        if let Some(val) = state.get("is_locked") {
+            if let Some(b) = val.as_bool() {
+                self.is_locked = b;
+            }
+        }
+    }
 }
 
 impl Openable for Porte {
@@ -80,7 +103,9 @@ impl Interactable for Porte {
                     println!("Elle est grande ouverte.");
                 } else if self.is_locked {
                     println!("Elle est fermée et solidement verrouillée.");
+                    crate::audio::play_sound("assets/porteverouiller.wav");
                 } else {
+                    crate::audio::play_sound("assets/porteverouiller.wav");
                     println!("Elle est fermée mais non verrouillée.");
                 }
             }
@@ -91,21 +116,23 @@ impl Interactable for Porte {
                         self.is_locked = false;
                         self.est_ouverte = true;
                         world.current_tick += 1;
-                        crate::audio::play_sound("assets/victory.wav");
+                        crate::audio::play_sound("assets/ouvrePorte.wav");
                         println!(
                             "Vous insérez la clé de la maison dans la serrure. Le loquet cède avec un clic satisfaisant. La porte s'ouvre !"
                         );
                     } else {
                         player.aura -= 5000.0;
-                        crate::audio::play_sound("assets/defeat.wav");
+                        crate::audio::play_sound("assets/porteverouiller.wav");
                         println!(
-                            "\n\x1B[31m[-5 000 Aura]\x1B[0m Vous poussez. Rien. Vous repoussez. Toujours rien. Humiliant. Même un âne mourant aurait fait mieux."
+                            "\n{} Vous poussez. Rien. Vous repoussez. Toujours rien. Humiliant. Même un âne mourant aurait fait mieux.",
+                            colore!(Rouge, "[-5 000 Aura]"),
                         );
                     }
                 } else {
                     match self.ouvrir() {
                         Ok(_) => {
                             world.current_tick += 1;
+                            crate::audio::play_sound("assets/ouvrePorte.wav");
                             println!("Vous ouvrez la porte.");
                         }
                         Err(e) => println!("{}", e),
@@ -129,23 +156,26 @@ impl Interactable for Porte {
                         self.is_locked = false;
                         self.est_ouverte = true;
                         player.aura += 25000.0;
-                        crate::audio::play_sound("assets/victory.wav");
+                        crate::audio::play_sound("assets/ouvrePorte.wav");
                         println!(
-                            "\n\x1B[32m[+25 000 Aura]\x1B[0m HÉROÏQUE ! D'un coup d'épaule phénoménal, vous enfoncez la porte ! Le chambranle vole en éclats !"
+                            "\n{} HÉROÏQUE ! D'un coup d'épaule phénoménal, vous enfoncez la porte ! Le chambranle vole en éclats !",
+                            colore!(Vert, "[+25 000 Aura]"),
                         );
                     } else {
                         player.aura -= 15000.0;
-                        crate::audio::play_sound("assets/defeat.wav");
+                        crate::audio::play_sound("assets/porteverouiller.wav");
                         println!(
-                            "\n\x1B[31m[-15 000 Aura]\x1B[0m AÏE ! Vous vous jetez sur la porte en bois massif. La porte ne bouge pas d'un millimètre, votre épaule si. Elle est légèrement démise."
+                            "\n{} AÏE ! Vous vous jetez sur la porte en bois massif. La porte ne bouge pas d'un millimètre, votre épaule si. Elle est légèrement démise.",
+                            colore!(Rouge, "[-15 000 Aura]"),
                         );
                     }
                 } else {
                     self.est_ouverte = true;
                     player.aura -= 20000.0;
-                    crate::audio::play_sound("assets/defeat.wav");
+                    crate::audio::play_sound("assets/ouvrePorte.wav");
                     println!(
-                        "\n\x1B[31m[-20 000 Aura]\x1B[0m Vous enfoncez une porte ouverte. Littéralement. Vous trébuchez et tombez à plat ventre dans la poussière. Tout le monde vous regarde bizarrement."
+                        "\n{} Vous enfoncez une porte ouverte. Littéralement. Vous trébuchez et tombez à plat ventre dans la poussière. Tout le monde vous regarde bizarrement.",
+                        colore!(Rouge, "[-20 000 Aura]"),
                     );
                 }
             }
