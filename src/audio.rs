@@ -6,6 +6,7 @@ pub fn play_sound(file_path: &str) {
     if cfg!(target_os = "windows") {
         if let Ok(abs_path) = std::fs::canonicalize(file_path) {
             let path_str = abs_path.to_string_lossy().replace("\\\\?\\", "");
+            let path_escaped = path_str.replace("'", "''");
             let cmd = format!(
                 "Add-Type -AssemblyName PresentationCore; \
                  $player = New-Object System.Windows.Media.MediaPlayer; \
@@ -13,10 +14,11 @@ pub fn play_sound(file_path: &str) {
                  $player.Volume = 0.5; \
                  $player.Play(); \
                  Start-Sleep -Seconds 4",
-                path_str
+                path_escaped
             );
             let _ = Command::new("powershell").args(["-c", &cmd]).spawn();
         } else {
+            let file_path_escaped = file_path.replace("'", "''");
             let cmd = format!(
                 "Add-Type -AssemblyName PresentationCore; \
                  $player = New-Object System.Windows.Media.MediaPlayer; \
@@ -24,7 +26,7 @@ pub fn play_sound(file_path: &str) {
                  $player.Volume = 0.5; \
                  $player.Play(); \
                  Start-Sleep -Seconds 4",
-                file_path
+                file_path_escaped
             );
             let _ = Command::new("powershell").args(["-c", &cmd]).spawn();
         }
@@ -62,6 +64,7 @@ pub fn play_music_loop(file_path: &str) -> MusicHandle {
     if cfg!(target_os = "windows") {
         if let Ok(abs_path) = std::fs::canonicalize(file_path) {
             let path_str = abs_path.to_string_lossy().replace("\\\\?\\", "");
+            let path_escaped = path_str.replace("'", "''");
             // On utilise MediaPlayer au lieu de SoundPlayer pour pouvoir gérer le volume (0.2 = 20%)
             let cmd = format!(
                 "Add-Type -AssemblyName PresentationCore; \
@@ -76,10 +79,11 @@ pub fn play_music_loop(file_path: &str) -> MusicHandle {
                          $player.Play(); \
                      }} \
                  }}",
-                path_str
+                path_escaped
             );
             child_opt = Command::new("powershell").args(["-c", &cmd]).spawn().ok();
         } else {
+            let file_path_escaped = file_path.replace("'", "''");
             let cmd = format!(
                 "Add-Type -AssemblyName PresentationCore; \
                  $player = New-Object System.Windows.Media.MediaPlayer; \
@@ -93,7 +97,7 @@ pub fn play_music_loop(file_path: &str) -> MusicHandle {
                          $player.Play(); \
                      }} \
                  }}",
-                file_path
+                file_path_escaped
             );
             child_opt = Command::new("powershell").args(["-c", &cmd]).spawn().ok();
         }
