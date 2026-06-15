@@ -54,10 +54,10 @@ impl Interactable for Marchand {
                         if player.inventory.contains(&self.piece_id) {
                             player.inventory.retain(|&x| x != self.piece_id);
                             // pas d'inventaire « actif » dans le moteur : on boit le philtre à l'achat (c'est un piège)
-                            player.aura -= 100000.0;
+                            player.aura -= 50000.0;
                             world.current_tick += 60;
                             crate::audio::play_sound("assets/defeat.wav");
-                            println!("{} « Un Philtre de Charisme Absolu ! » Vous le buvez cul sec... C'était de l'eau du lac et du jus de chou. Vous êtes malade comme un chien pendant une heure.", colore!(Rouge, "[-100 000 Aura]"));
+                            println!("{} « Un Philtre de Charisme Absolu ! » Vous le buvez cul sec... C'était de l'eau du lac et du jus de chou. Vous êtes malade comme un chien pendant une heure.", colore!(Rouge, "[-50 000 Aura]"));
                         } else {
                             println!("« Pas de pièce, pas de philtre. Reviens quand tu seras solvable. »");
                         }

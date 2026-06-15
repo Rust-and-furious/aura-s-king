@@ -89,8 +89,8 @@ impl Interactable for Roi {
                             println!("{} « Des gardes ! Pourquoi m'offre-t-on un récipient à soupe ?! »", colore!(Rouge, "[-80 000 Aura]"));
                         } else if player.inventory.contains(&self.seau_id) {
                             player.inventory.retain(|&x| x != self.seau_id);
-                            player.aura -= 200000.0;
-                            println!("{} Le roi prend le seau vide pour une insulte royale. Très mauvaise idée.", colore!(Rouge, "[-200 000 Aura]"));
+                            player.aura -= 100000.0;
+                            println!("{} Le roi prend le seau vide pour une insulte royale. Très mauvaise idée.", colore!(Rouge, "[-100 000 Aura]"));
                         } else {
                             println!("Le roi attend manifestement quelque chose de plus impressionnant.");
                         }

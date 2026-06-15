@@ -79,11 +79,11 @@ impl Useable for Enclume {
             }
             1 => {
                 world.current_tick += 5;
-                // 3 % seulement : au-delà, vu le jackpot (+900 000), l'espérance redevient positive et farmable
+                // 3 % seulement : au-delà, vu le jackpot (+250 000), l'espérance redevient positive et farmable
                 if jet_reussite(world.current_tick, 3) {
-                    player.aura += 900000.0;
+                    player.aura += 250000.0;
                     crate::audio::play_sound("assets/victory.wav");
-                    println!("{} L'EXPLOIT ! Vous soulevez l'enclume au-dessus de votre tête. Le village entier vous acclame en héros !", colore!(Vert, "[+900 000 Aura]"));
+                    println!("{} L'EXPLOIT ! Vous soulevez l'enclume au-dessus de votre tête. Le village entier vous acclame en héros !", colore!(Vert, "[+250 000 Aura]"));
                 } else {
                     player.aura -= 30000.0;
                     crate::audio::play_sound("assets/defeat.wav");

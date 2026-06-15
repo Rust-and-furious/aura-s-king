@@ -106,9 +106,9 @@ impl Interactable for Fenetre {
                 } else {
                     self.est_cassee = true;
                     self.est_ouverte = true;
-                    player.aura -= 100000.0;
+                    player.aura -= 40000.0;
                     crate::audio::play_sound("assets/defeat.wav");
-                    println!("\n{} BAM ! Vous traversez la vitre fermée tête la première.", colore!(Rouge, "[-100 000 Aura]"));
+                    println!("\n{} BAM ! Vous traversez la vitre fermée tête la première.", colore!(Rouge, "[-40 000 Aura]"));
                     println!("Votre dignité ne s'en remet pas, votre peau non plus. Des éclats de verre s'enfoncent à chacun de vos pas.");
                 }
             }

@@ -123,9 +123,9 @@ impl Interactable for Gardes {
                     println!("{} Dans un éclair de bravoure, vous forcez le passage ! Les gardes, sonnés, vous laissent entrer.", colore!(Vert, "[+150 000 Aura]"));
                 } else {
                     world.current_tick += 60;
-                    player.aura -= 100000.0;
+                    player.aura -= 50000.0;
                     crate::audio::play_sound("assets/defeat.wav");
-                    println!("{} Les gardes vous plaquent au sol en 0,3 seconde. Votre visage goûte la poussière pendant votre garde à vue.", colore!(Rouge, "[-100 000 Aura]"));
+                    println!("{} Les gardes vous plaquent au sol en 0,3 seconde. Votre visage goûte la poussière pendant votre garde à vue.", colore!(Rouge, "[-50 000 Aura]"));
                 }
             }
             _ => println!("Action impossible sur les gardes."),

@@ -112,8 +112,8 @@ impl Interactable for PorteMichu {
             Action::Attaquer { degats } => {
                 self.recevoir_degats(*degats);
                 world.current_tick += 120;
-                player.aura -= 150000.0;
-                println!("{} Michu vous assomme d'un coup de poêle. Sacrés réflexes pour 847 ans. Vous vous réveillez deux heures plus tard.", colore!(Rouge, "[-150 000 Aura]"));
+                player.aura -= 50000.0;
+                println!("{} Michu vous assomme d'un coup de poêle. Sacrés réflexes pour 847 ans. Vous vous réveillez deux heures plus tard.", colore!(Rouge, "[-50 000 Aura]"));
             }
             _ => println!("Action impossible sur la porte de Michu."),
         }
