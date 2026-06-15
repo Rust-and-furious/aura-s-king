@@ -104,7 +104,7 @@ impl Interactable for PorteMichu {
                 Ok(_) => {
                     world.current_tick += 2;
                     self.reveler_occupants(world, player.zone);
-                    crate::audio::play_sound("assets/victory.wav");
+                    crate::audio::play_sound("assets/ouvrePorte.wav");
                     println!("« Oh, c'est toi gamin ! Entre donc ! » Michu vous ouvre la porte.");
                 }
                 Err(e) => println!("{}", e),
@@ -113,7 +113,6 @@ impl Interactable for PorteMichu {
                 self.recevoir_degats(*degats);
                 world.current_tick += 120;
                 player.aura -= 150000.0;
-                crate::audio::play_sound("assets/defeat.wav");
                 println!("{} Michu vous assomme d'un coup de poêle. Sacrés réflexes pour 847 ans. Vous vous réveillez deux heures plus tard.", colore!(Rouge, "[-150 000 Aura]"));
             }
             _ => println!("Action impossible sur la porte de Michu."),

@@ -36,7 +36,13 @@ impl Interactable for Objet {
                 player.inventory.push(self.id);
                 if self.aura_ramassage != 0.0 {
                     player.aura += self.aura_ramassage;
-                    crate::audio::play_sound("assets/victory.wav");
+                }
+                
+                let name_lower = self.name.to_lowercase();
+                if name_lower.contains("biscuit") || name_lower.contains("baie") || name_lower.contains("champignon") || name_lower.contains("noix") || name_lower.contains("pain") || name_lower.contains("poisson") {
+                    crate::audio::play_sound("assets/manger.wav");
+                } else if name_lower.contains("elixir") || name_lower.contains("eau") || name_lower.contains("bière") {
+                    crate::audio::play_sound("assets/boire.wav");
                 }
                 println!("Vous ramassez {}. Ajouté à l'inventaire.", self.name);
             }

@@ -62,7 +62,7 @@ impl Useable for Fontaine {
                 } else {
                     self.deja_bu = true;
                     player.aura += 5000.0;
-                    crate::audio::play_sound("assets/victory.wav");
+                    crate::audio::play_sound("assets/boire.wav");
                     println!("{} L'eau est tiède et a un goût de calcaire. C'est la meilleure eau que vous ayez bue.", colore!(Vert, "[+5 000 Aura]"));
                 }
             }
@@ -71,7 +71,6 @@ impl Useable for Fontaine {
                 if player.inventory.contains(&self.piece_id) {
                     player.inventory.retain(|&x| x != self.piece_id);
                     player.aura += 40000.0;
-                    crate::audio::play_sound("assets/victory.wav");
                     println!("{} Vous jetez la pièce et faites le vœu d'avoir de l'aura. Méta.", colore!(Vert, "[+40 000 Aura]"));
                 } else {
                     println!("Vous n'avez pas de pièce à jeter. Faire un vœu gratuit ne marche pas, ici.");
@@ -84,7 +83,6 @@ impl Useable for Fontaine {
                 } else {
                     self.deja_lave = true;
                     player.aura += 15000.0;
-                    crate::audio::play_sound("assets/victory.wav");
                     println!("{} Vous sentez moins le chou. Les villageois vous regardent avec un dégoût modéré.", colore!(Vert, "[+15 000 Aura]"));
                 }
             }

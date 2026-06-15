@@ -35,18 +35,18 @@ impl Useable for Chat {
                 // gain volontairement faible : même à 70% de réussite, l'espérance reste négative
                 if jet_reussite(world.current_tick, 70) {
                     player.aura += 5000.0;
-                    crate::audio::play_sound("assets/victory.wav");
+                    crate::audio::play_sound("assets/ronron.wav");
                     println!("{} Pataud ronronne bruyamment. Vous vous sentez validé.", colore!(Vert, "[+5 000 Aura]"));
                 } else {
                     player.aura -= 15000.0;
-                    crate::audio::play_sound("assets/defeat.wav");
+                    crate::audio::play_sound("assets/chatPasContent.wav");
                     println!("{} Pataud n'est pas d'humeur et vous griffe méchamment le nez.", colore!(Rouge, "[-15 000 Aura]"));
                 }
             }
             1 => {
                 world.current_tick += 5;
                 player.aura -= 40000.0;
-                crate::audio::play_sound("assets/defeat.wav");
+                crate::audio::play_sound("assets/chatPasContent.wav");
                 println!("{} Le chat se transforme en tornade de griffes. Michu vous gronde. Double peine.", colore!(Rouge, "[-40 000 Aura]"));
             }
             _ => {}

@@ -78,7 +78,7 @@ impl Interactable for Michu {
                             self.biscuit_donne = true;
                             player.inventory.push(self.biscuit_id);
                             player.aura += 10000.0;
-                            crate::audio::play_sound("assets/victory.wav");
+                            crate::audio::play_sound("assets/manger.wav");
                             println!("{} « Tiens, mon grand. » Les biscuits de Michu donnent du courage.", colore!(Vert, "[+10 000 Aura]"));
                         }
                     }
@@ -88,7 +88,6 @@ impl Interactable for Michu {
                             player.inventory.retain(|&x| x != self.chapeau_id);
                             player.inventory.push(self.broche_id);
                             player.aura += 50000.0;
-                            crate::audio::play_sound("assets/victory.wav");
                             println!("{} « Oh ! Je cherchais ce chapeau pour mes poules depuis des années ! Tiens, prends cette broche. »", colore!(Vert, "[+50 000 Aura]"));
                         } else {
                             println!("« C'est gentil mais non merci. Je ne suis pas Emmaüs. »");

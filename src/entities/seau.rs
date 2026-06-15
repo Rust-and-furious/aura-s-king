@@ -22,7 +22,6 @@ impl Useable for Seau {
     ) -> Result<(), &'static str> {
         world.current_tick += 5;
         player.aura -= 50000.0;
-        crate::audio::play_sound("assets/defeat.wav");
         println!("{} Vous ne voyez plus rien, trébuchez et tombez dans le lac. Bravo.", colore!(Rouge, "[-50 000 Aura]"));
         Ok(())
     }
@@ -44,6 +43,7 @@ impl Interactable for Seau {
     }
 
     fn execute_action(&mut self, action: &Action, player: &mut Player, world: &mut WorldManager) {
+        crate::audio::play_sound("assets/sceau.wav");
         match action {
             Action::Observer => {
                 world.current_tick += 1;
